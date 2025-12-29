@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Course Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1><i class="fas fa-laptop-code"></i> IT Course Management System</h1>
+                <p>Student Portal for Modules, Tests, and Lecturer Contact</p>
+            </div>
+            
+            <!-- User Profile Header (shown when logged in) -->
+            <div class="user-profile-header hidden" id="user-profile-header">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-details-popup" id="user-details-popup">
+                    <div class="user-detail-item">
+                        <span class="user-detail-label">Full Name:</span>
+                        <span class="user-detail-value" id="popup-name">John Doe</span>
+                    </div>
+                    <div class="user-detail-item">
+                        <span class="user-detail-label">Student ID:</span>
+                        <span class="user-detail-value" id="popup-student-id">IT2023001</span>
+                    </div>
+                    <div class="user-detail-item">
+                        <span class="user-detail-label">Email:</span>
+                        <span class="user-detail-value" id="popup-email">john@student.edu</span>
+                    </div>
+                    <div class="user-detail-item">
+                        <span class="user-detail-label">Account Type:</span>
+                        <span class="user-detail-value" id="popup-account-type">Student</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="login">Login</button>
+            <button class="tab-btn" data-tab="register">Register</button>
+            <button class="tab-btn" data-tab="about">About</button>
+            <button class="tab-btn" data-tab="contact">Contact</button>
+            <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
+            <button class="tab-btn hidden" data-tab="devadmin" id="devadmin-tab">Dev & Admin</button>
+        </div>
+        
+        <!-- About Page -->
+        <div class="tab-content" id="about">
+            <div class="page-container">
+                <h2 class="page-title"><i class="fas fa-info-circle"></i> About This System</h2>
+                
+                <div class="about-section">
+                    <div class="about-card">
+                        <h3><i class="fas fa-user-circle"></i> Website Owner</h3>
+                        <div class="about-content">
+                            <p><strong>Name:</strong> Chrispin Golden</p>
+                            <p><strong>Email:</strong> <a href="mailto:chrispingolden@gmail.com">chrispingolden@gmail.com</a></p>
+                            <p><strong>Role:</strong> System Developer & Administrator</p>
+                            <p>Chrispin Golden is the primary developer and owner of the IT Course Management System. With expertise in full-stack web development, Chrispin has designed this system to streamline educational course management and improve communication between students, lecturers, and administrators.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-card">
+                        <h3><i class="fas fa-lightbulb"></i> System Overview</h3>
+                        <div class="about-content">
+                            <p>The <strong>IT Course Management System</strong> is a comprehensive platform designed to:</p>
+                            <ul>
+                                <li>Manage course modules and academic schedules</li>
+                                <li>Track student progress and test timetables</li>
+                                <li>Facilitate communication between students and lecturers</li>
+                                <li>Provide administrative tools for system management</li>
+                                <li>Maintain centralized database for academic records</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="about-card">
+                        <h3><i class="fas fa-star"></i> Key Features</h3>
+                        <div class="about-content">
+                            <ul>
+                                <li><strong>Student Dashboard:</strong> View modules, test schedules, and lecturer information</li>
+                                <li><strong>Admin Panel:</strong> Manage users, modules, timetables, and system settings</li>
+                                <li><strong>Developer Tools:</strong> System monitoring, API testing, and database management</li>
+                                <li><strong>User Authentication:</strong> Secure login and registration system</li>
+                                <li><strong>Real-time Updates:</strong> Instant access to academic information</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="about-card">
+                        <h3><i class="fas fa-chart-line"></i> Future Proposals & Improvements</h3>
+                        <div class="about-content">
+                            <h4>Planned Features:</h4>
+                            <ul>
+                                <li><strong>Mobile Application:</strong> Native iOS and Android apps for better accessibility</li>
+                                <li><strong>WhatsApp Integration:</strong> Direct messaging and notifications via WhatsApp</li>
+                                <li><strong>Video Conferencing:</strong> Built-in video classes and virtual lectures</li>
+                                <li><strong>Assignment Submission:</strong> Online assignment portal with deadline tracking</li>
+                                <li><strong>Grading System:</strong> Automated grading and result calculation</li>
+                                <li><strong>Analytics Dashboard:</strong> Detailed student performance analytics and reporting</li>
+                                <li><strong>Email Notifications:</strong> Automated email alerts for important updates</li>
+                                <li><strong>Resource Library:</strong> Centralized storage for course materials and documents</li>
+                                <li><strong>Payment Gateway:</strong> Integration for course fees and tuition payments</li>
+                                <li><strong>Multi-language Support:</strong> Support for multiple languages and localization</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="about-card">
+                        <h3><i class="fas fa-cog"></i> Technology Stack</h3>
+                        <div class="about-content">
+                            <p><strong>Frontend:</strong> HTML, CSS, JavaScript</p>
+                            <p><strong>Backend:</strong> Node.js, Express.js</p>
+                            <p><strong>Database:</strong> MySQL</p>
+                            <p><strong>Server:</strong> Apache with XAMPP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Page -->
+        <div class="tab-content" id="contact">
+            <div class="page-container">
+                <h2 class="page-title"><i class="fas fa-envelope"></i> Contact Us</h2>
+                
+                <div class="contact-container">
+                    <div class="contact-form-section">
+                        <h3>Send us a Message</h3>
+                        <p>If you have any issues, questions, or suggestions, please fill out the form below and we'll get back to you shortly.</p>
+                        
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <label for="contact-name">Full Name</label>
+                                <input type="text" id="contact-name" required placeholder="Enter your full name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact-email">Email Address</label>
+                                <input type="email" id="contact-email" required placeholder="Enter your email address">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact-phone">Phone Number</label>
+                                <input type="tel" id="contact-phone" placeholder="Enter your phone number (optional)">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact-subject">Subject</label>
+                                <select id="contact-subject" required>
+                                    <option value="">Select a subject</option>
+                                    <option value="technical_issue">Technical Issue</option>
+                                    <option value="course_inquiry">Course Inquiry</option>
+                                    <option value="general_feedback">General Feedback</option>
+                                    <option value="feature_request">Feature Request</option>
+                                    <option value="bug_report">Bug Report</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact-message">Message</label>
+                                <textarea id="contact-message" required placeholder="Please describe your issue or message..." rows="6"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-submit">Send Message</button>
+                            <div class="message" id="contact-message-status"></div>
+                        </form>
+                    </div>
+                    
+                    <div class="contact-info-section">
+                        <h3>Contact Information</h3>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Email</h4>
+                                <p><a href="mailto:chrispingolden@gmail.com">chrispingolden@gmail.com</a></p>
+                                <p class="contact-note">Response time: 24-48 hours</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Phone Support</h4>
+                                <p>Available for urgent issues</p>
+                                <p class="contact-note">Business hours: Monday - Friday, 9:00 AM - 5:00 PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>Support Hours</h4>
+                                <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
+                                <p>Saturday - Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login Tab -->
+        <div class="tab-content active" id="login">
+            <div class="form-container">
+                <h2 class="form-title">Student Login</h2>
+                <div class="message" id="login-message"></div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Student ID / Email</label>
+                        <input type="text" id="login-email" required placeholder="Enter your student ID or email">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                
+                <div class="test-credentials">
+                    <h4><i class="fas fa-key"></i> Test Credentials:</h4>
+                    <p><strong>Student Account:</strong><br>
+                    Email: john@student.edu<br>
+                    Student ID: IT2023001<br>
+                    Password: password123</p>
+                </div>
+
+                <div class="admin-access-box">
+                    <p class="admin-access-title"><strong>Administrator?</strong></p>
+                    <a href="http://localhost:4000/admin" class="btn btn-admin-access" rel="noopener">Access Admin Panel</a>
+                    <p class="admin-access-note"><i class="fas fa-lock"></i> Admin authentication required</p>
+                </div>
+                
+                <p class="login-footer">Don't have an account? <a href="#" id="go-to-register">Register here</a></p>
+            </div>
+        </div>
+        
+        <!-- Register Tab -->
+        <div class="tab-content" id="register">
+            <div class="form-container">
+                <h2 class="form-title">Student Registration</h2>
+                <div class="message" id="register-message"></div>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-student-id">Student ID</label>
+                        <input type="text" id="reg-student-id" required placeholder="e.g., NIT/CICT/2024/1434" pattern="[A-Z]+/[A-Z]+/[0-9]{4}/[0-9]{4}">
+                        <small class="format-hint"><i class="fas fa-info-circle"></i> Format: NIT/CICT/YEAR/FOUR-DIGITS (e.g., NIT/CICT/2024/1434)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required placeholder="Create a password">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-confirm-password">Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" required placeholder="Confirm your password">
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <p class="login-footer">Already have an account? <a href="#" id="go-to-login">Login here</a></p>
+            </div>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div class="tab-content" id="dashboard">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    Welcome, <span class="user-name" id="dashboard-username">Student Name</span>
+                    <span id="admin-badge" class="admin-badge hidden">Admin</span>
+                </div>
+                <button class="logout-btn" id="logout-btn">Logout <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Modules Card -->
+                <div class="card card-modules">
+                    <h3><i class="fas fa-book"></i> Course Modules</h3>
+                    <div class="modules-wrapper">
+                        <table class="modules-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Module Name</th>
+                                    <th>Credits</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modules-list">
+                                <!-- Modules will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Lecturers Card -->
+                <div class="card card-lecturers">
+                    <h3><i class="fas fa-chalkboard-teacher"></i> Course Lecturers</h3>
+                    <div class="lecturers-wrapper">
+                        <table class="lecturers-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Module</th>
+                                    <th>Phone</th>
+                                    <th id="admin-lecturer-action-header" class="hidden">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lecturers-list">
+                                <!-- Lecturers will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Admin Controls for Lecturers (Only visible to admins) -->
+                    <div class="admin-controls" id="lecturer-admin-controls">
+                        <h4><i class="fas fa-user-shield"></i> Admin: Manage Lecturers</h4>
+                        <form id="add-lecturer-form">
+                            <div class="form-group">
+                                <label for="lecturer-name">Lecturer Name</label>
+                                <input type="text" id="lecturer-name" placeholder="Enter lecturer's full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="lecturer-module">Module</label>
+                                <select id="lecturer-module">
+                                    <option value="">Select Module</option>
+                                    <option value="IT101 - Introduction to Programming">IT101 - Introduction to Programming</option>
+                                    <option value="IT102 - Web Development Fundamentals">IT102 - Web Development Fundamentals</option>
+                                    <option value="IT103 - Database Management Systems">IT103 - Database Management Systems</option>
+                                    <option value="IT104 - Data Structures & Algorithms">IT104 - Data Structures & Algorithms</option>
+                                    <option value="IT105 - Computer Networks">IT105 - Computer Networks</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lecturer-phone">Phone Number</label>
+                                <input type="text" id="lecturer-phone" placeholder="Enter phone number with country code">
+                            </div>
+                            <button type="submit" class="btn btn-admin">Add Lecturer</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Test Timetable Card -->
+                <div class="card card-timetable">
+                    <h3><i class="fas fa-calendar-alt"></i> Test Timetable</h3>
+                    <div class="timetable-wrapper">
+                        <table class="test-timetable">
+                            <thead>
+                                <tr>
+                                    <th>Test</th>
+                                    <th>Module</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Venue</th>
+                                    <th id="admin-action-header" class="hidden">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timetable-body">
+                                <!-- Timetable will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Admin Controls for Timetable (Only visible to admins) -->
+                    <div class="admin-controls" id="timetable-admin-controls">
+                        <h4><i class="fas fa-user-shield"></i> Admin: Manage Timetable</h4>
+                        <form id="add-timetable-form">
+                            <div class="form-group">
+                                <label for="timetable-test">Test Name</label>
+                                <input type="text" id="timetable-test" placeholder="e.g., Test 01, Midterm, Final">
+                            </div>
+                            <div class="form-group">
+                                <label for="timetable-module">Module</label>
+                                <select id="timetable-module">
+                                    <option value="">Select Module</option>
+                                    <option value="IT101">IT101 - Introduction to Programming</option>
+                                    <option value="IT102">IT102 - Web Development Fundamentals</option>
+                                    <option value="IT103">IT103 - Database Management Systems</option>
+                                    <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                                    <option value="IT105">IT105 - Computer Networks</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="timetable-date">Date</label>
+                                <input type="date" id="timetable-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="timetable-time">Time</label>
+                                <input type="time" id="timetable-time">
+                            </div>
+                            <div class="form-group">
+                                <label for="timetable-venue">Venue</label>
+                                <input type="text" id="timetable-venue" placeholder="e.g., Room 101, Lab 3">
+                            </div>
+                            <button type="submit" class="btn btn-admin">Add Test</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Developer & Admin Page -->
+        <div class="tab-content" id="devadmin">
+            <div class="devadmin-header">
+                <h2><i class="fas fa-cogs"></i> Developer & Admin Control Center</h2>
+                <p>System administration and developer tools</p>
+            </div>
+            
+            <div class="devadmin-grid">
+                <!-- System Status Card -->
+                <div class="card">
+                    <h3><i class="fas fa-heartbeat"></i> System Status</h3>
+                    <div class="status-item">
+                        <span class="status-label">Server Status:</span>
+                        <span class="status-value online"><i class="fas fa-circle"></i> Online</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Database:</span>
+                        <span class="status-value online"><i class="fas fa-circle"></i> Connected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">API Status:</span>
+                        <span class="status-value online"><i class="fas fa-circle"></i> Operational</span>
+                    </div>
+                    <button class="btn" id="check-status-btn">Refresh Status</button>
+                </div>
+                
+                <!-- Quick Links Card -->
+                <div class="card">
+                    <h3><i class="fas fa-link"></i> Quick Links</h3>
+                    <div class="link-list">
+                        <a href="http://localhost:4000/admin" target="_blank" rel="noopener" class="link-item">
+                            <i class="fas fa-user-shield"></i> Admin Panel
+                        </a>
+                        <a href="http://localhost:3000/api/users" target="_blank" rel="noopener" class="link-item">
+                            <i class="fas fa-database"></i> Users API
+                        </a>
+                        <a href="http://localhost:3000/api/modules" target="_blank" rel="noopener" class="link-item">
+                            <i class="fas fa-cube"></i> Modules API
+                        </a>
+                        <a href="http://localhost:3000/api/settings" target="_blank" rel="noopener" class="link-item">
+                            <i class="fas fa-sliders-h"></i> Settings API
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- System Logs Card -->
+                <div class="card">
+                    <h3><i class="fas fa-file-alt"></i> System Logs</h3>
+                    <div class="logs-container">
+                        <div class="log-entry">
+                            <span class="log-time">10:30 AM</span>
+                            <span class="log-message">User registration successful</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">10:25 AM</span>
+                            <span class="log-message">Module added: IT205</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">10:20 AM</span>
+                            <span class="log-message">Settings updated</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">10:15 AM</span>
+                            <span class="log-message">Database backup completed</span>
+                        </div>
+                    </div>
+                    <button class="btn" id="clear-logs-btn">Clear Logs</button>
+                </div>
+                
+                <!-- Database Management Card -->
+                <div class="card">
+                    <h3><i class="fas fa-database"></i> Database Management</h3>
+                    <div class="db-stats">
+                        <div class="stat">
+                            <span class="stat-label">Total Users:</span>
+                            <span class="stat-value" id="stat-users">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Total Modules:</span>
+                            <span class="stat-value" id="stat-modules">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Total Lecturers:</span>
+                            <span class="stat-value" id="stat-lecturers">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Database Size:</span>
+                            <span class="stat-value" id="stat-size">--</span>
+                        </div>
+                    </div>
+                    <div class="db-actions">
+                        <button class="btn btn-info" id="backup-db-btn"><i class="fas fa-download"></i> Backup Database</button>
+                        <button class="btn btn-warning" id="optimize-db-btn"><i class="fas fa-wrench"></i> Optimize Database</button>
+                    </div>
+                </div>
+                
+                <!-- API Tester Card -->
+                <div class="card">
+                    <h3><i class="fas fa-flask"></i> API Tester</h3>
+                    <div class="form-group">
+                        <label>Endpoint</label>
+                        <input type="text" id="api-endpoint" placeholder="/api/users" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="api-method">Method</label>
+                        <select id="api-method" class="form-control" title="Select HTTP method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="test-api-btn">Test API</button>
+                    <div id="api-response" class="api-response hidden"></div>
+                </div>
+                
+                <!-- Configuration Card -->
+                <div class="card">
+                    <h3><i class="fas fa-wrench"></i> Configuration</h3>
+                    <div class="config-item">
+                        <label>Application Version:</label>
+                        <span>v1.0.0</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Node.js Version:</label>
+                        <span id="node-version">--</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Database Type:</label>
+                        <span>MySQL</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Environment:</label>
+                        <span id="environment">Development</span>
+                    </div>
+                    <button class="btn" id="reload-config-btn">Reload Configuration</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+   <script src="script.js"></script>
+</body>
+</html>
+```

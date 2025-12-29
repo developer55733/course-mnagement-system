@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container py-4">
+      <h1 class="mb-4">Admin Panel</h1>
+
+      <div id="loginCard" class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Admin Login</h5>
+          <div class="mb-3">
+            <label for="adminSecret" class="form-label">Admin Secret</label>
+            <input type="password" id="adminSecret" class="form-control" placeholder="Enter admin secret">
+          </div>
+          <button id="btnLogin" class="btn btn-primary">Login</button>
+          <div id="loginMsg" class="form-text text-danger mt-2"></div>
+        </div>
+      </div>
+
+      <div id="panel" style="display:none;">
+        <div class="mb-4">
+          <button id="btnInfo" class="btn btn-outline-secondary">Fetch System Summary</button>
+          <button id="btnUsers" class="btn btn-outline-secondary">List Users</button>
+          <button id="btnModules" class="btn btn-outline-secondary">List Modules</button>
+          <button id="btnAdminAction" class="btn btn-outline-warning">Perform Admin Action</button>
+          <a href="http://localhost:4000/admin" target="_blank" class="btn btn-outline-info">Go to Admin Dashboard</a>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Add Module</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Module Code</label>
+                  <input id="moduleCode" class="form-control" placeholder="e.g. CS101">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Module Name</label>
+                  <input id="moduleName" class="form-control" placeholder="e.g. Introduction to Computer Science">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Lecturer (optional)</label>
+                  <input id="moduleLecturer" class="form-control" placeholder="Lecturer name">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Phone Number (optional)</label>
+                  <input id="modulePhone" class="form-control" placeholder="e.g. +1-234-567-8900">
+                </div>
+                <button id="btnAddModule" class="btn btn-success w-100">Add Module</button>
+                <div id="moduleMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">System Settings</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Academic Year</label>
+                  <input id="settingYear" class="form-control" placeholder="e.g. 2025/2026">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Semester</label>
+                  <input id="settingSemester" class="form-control" placeholder="e.g. Semester 1">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Institution Name</label>
+                  <input id="settingInstitution" class="form-control" placeholder="e.g. Example University">
+                </div>
+                <button id="btnSaveSettings" class="btn btn-primary w-100">Save Settings</button>
+                <div id="settingsMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Add Test Timetable</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Test Name</label>
+                  <input id="timetableTest" class="form-control" placeholder="e.g. Test 01, Midterm, Final">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Module</label>
+                  <select id="timetableModule" class="form-control">
+                    <option value="">Select Module</option>
+                    <option value="IT101">IT101 - Introduction to Programming</option>
+                    <option value="IT102">IT102 - Web Development Fundamentals</option>
+                    <option value="IT103">IT103 - Database Management Systems</option>
+                    <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                    <option value="IT105">IT105 - Computer Networks</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Date</label>
+                  <input id="timetableDate" type="date" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Time</label>
+                  <input id="timetableTime" type="time" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Venue</label>
+                  <input id="timetableVenue" class="form-control" placeholder="e.g. Room 101, Lab 3">
+                </div>
+                <button id="btnAddTimetable" class="btn btn-info w-100">Add Test Timetable</button>
+                <div id="timetableMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Manage Test Timetables</h5>
+              </div>
+              <div class="card-body">
+                <div id="timetableList" style="max-height: 400px; overflow-y: auto;">
+                  <p class="text-muted">No timetables added yet. Add one using the form on the left.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Admin Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Action Type</label>
+              <select id="actionType" class="form-control">
+                <option value="">Select an action</option>
+                <option value="clearCache">Clear System Cache</option>
+                <option value="resetPassword">Reset User Password</option>
+                <option value="deleteModule">Delete Module</option>
+                <option value="archiveUser">Archive User</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Action Parameter (if required)</label>
+              <input id="actionParam" class="form-control" placeholder="e.g. user ID, module code">
+            </div>
+            <button id="btnExecuteAction" class="btn btn-warning w-100">Execute Action</button>
+            <div id="actionMsg" class="alert alert-info mt-3" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Output</h5>
+          </div>
+          <div class="card-body">
+            <pre id="outPre">Use buttons above to perform admin actions.</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

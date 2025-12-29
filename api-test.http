@@ -1,0 +1,80 @@
+### Variables
+@baseUrl = http://localhost:4000
+@contentType = application/json
+
+### ============================================
+### HEALTH CHECK - Verify DB Connection
+### ============================================
+
+GET {{baseUrl}}/api/users/health
+
+### ============================================
+### GET ALL USERS
+### ============================================
+
+GET {{baseUrl}}/api/users
+
+### ============================================
+### GET USER BY ID
+### ============================================
+
+GET {{baseUrl}}/api/users/1
+
+### ============================================
+### CREATE NEW USER
+### ============================================
+
+POST {{baseUrl}}/api/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Alice Johnson",
+  "email": "alice.johnson@example.com"
+}
+
+### ============================================
+### CREATE ANOTHER USER
+### ============================================
+
+POST {{baseUrl}}/api/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Bob Smith",
+  "email": "bob.smith@example.com"
+}
+
+### ============================================
+### UPDATE USER (Replace ID with actual user ID)
+### ============================================
+
+PUT {{baseUrl}}/api/users/1
+Content-Type: {{contentType}}
+
+{
+  "name": "Alice Updated",
+  "email": "alice.updated@example.com"
+}
+
+### ============================================
+### DELETE USER (Replace ID with actual user ID)
+### ============================================
+
+DELETE {{baseUrl}}/api/users/1
+
+### ============================================
+### ERROR TEST - Missing Required Field
+### ============================================
+
+POST {{baseUrl}}/api/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Charlie"
+}
+
+### ============================================
+### ERROR TEST - Non-existent User
+### ============================================
+
+GET {{baseUrl}}/api/users/999
