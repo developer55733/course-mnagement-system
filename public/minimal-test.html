@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Test</title>
+    <style>
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; }
+        .tab-btn { padding: 10px; margin: 5px; cursor: pointer; }
+        .tab-btn.active { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="login">Login</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+    </div>
+    
+    <div class="tab-content active" id="login">
+        <form id="login-form">
+            <h3>Login</h3>
+            <input type="text" id="login-email" placeholder="Email/Student ID" required><br><br>
+            <input type="password" id="login-password" placeholder="Password" required><br><br>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    
+    <div class="tab-content" id="register">
+        <form id="register-form">
+            <h3>Register</h3>
+            <input type="text" id="reg-name" placeholder="Full Name" required><br><br>
+            <input type="email" id="reg-email" placeholder="Email" required><br><br>
+            <input type="text" id="reg-student-id" placeholder="Student ID" required><br><br>
+            <input type="password" id="reg-password" placeholder="Password" required><br><br>
+            <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required><br><br>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        console.log('=== MINIMAL TEST START ===');
+        
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                console.log('Switching to tab:', tabId);
+                
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Form handlers
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        console.log('Login form found:', !!loginForm);
+        console.log('Register form found:', !!registerForm);
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('=== LOGIN SUBMITTED ===');
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                console.log('Login data:', { email, password: '***' });
+                
+                try {
+                    const response = await fetch('http://localhost:4000/api/users/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Login response:', result);
+                    document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+                } catch (error) {
+                    console.error('Login error:', error);
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                }
+            });
+        }
+        
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('=== REGISTER SUBMITTED ===');
+                
+                const name = document.getElementById('reg-name').value;
+                const email = document.getElementById('reg-email').value;
+                const studentId = document.getElementById('reg-student-id').value;
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value;
+                
+                console.log('Register data:', { name, email, studentId, password: '***', confirmPassword: '***' });
+                
+                try {
+                    const response = await fetch('http://localhost:4000/api/users/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, studentId, password, confirmPassword })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Register response:', result);
+                    document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+                } catch (error) {
+                    console.error('Register error:', error);
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                }
+            });
+        }
+        
+        console.log('=== MINIMAL TEST SETUP COMPLETE ===');
+    </script>
+</body>
+</html>

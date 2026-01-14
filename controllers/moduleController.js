@@ -43,7 +43,7 @@ exports.getModuleByCode = async (req, res) => {
 
 exports.createModule = async (req, res) => {
   try {
-    const { code, name, lecturer } = req.body;
+    const { code, name, lecturer, phone } = req.body;
 
     if (!code || !name) {
       return res.status(400).json({ success: false, error: 'code and name are required' });
@@ -60,7 +60,7 @@ exports.createModule = async (req, res) => {
     // If lecturer provided, create a lecturer entry linked to this module code
     if (lecturer && lecturer.trim()) {
       try {
-        await Lecturer.create(lecturer.trim(), code, '');
+        await Lecturer.create(lecturer.trim(), code, phone || '');
       } catch (err) {
         // non-fatal: log but continue
         console.warn('Could not create lecturer while creating module:', err.message);

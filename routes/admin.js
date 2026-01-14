@@ -35,4 +35,40 @@ router.get('/info', adminAuth, async (req, res) => {
   }
 });
 
+// Admin action endpoint
+router.post('/action', adminAuth, async (req, res) => {
+  try {
+    const { actionType, actionParam } = req.body;
+    
+    if (!actionType) {
+      return res.status(400).json({ success: false, error: 'Action type required' });
+    }
+
+    let result;
+    switch (actionType) {
+      case 'clearUsers':
+        await pool.query('DELETE FROM users WHERE role != "admin"');
+        result = { message: 'Non-admin users cleared successfully' };
+        break;
+      case 'clearModules':
+        await pool.query('DELETE FROM modules');
+        result = { message: 'Modules cleared successfully' };
+        break;
+      case 'clearTimetable':
+        await pool.query('DELETE FROM timetable');
+        result = { message: 'Timetable cleared successfully' };
+        break;
+      case 'backup':
+        result = { message: 'Backup functionality not implemented yet' };
+        break;
+      default:
+        return res.status(400).json({ success: false, error: 'Invalid action type' });
+    }
+
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

@@ -86,7 +86,7 @@ course/
 All data goes through REST API (no localStorage):
 
 ```
-Base: http://localhost:4000/api
+Base: http://localhost:4000/api/users
 
 Users:     /users, /users/:id, /users/register, /users/login
 Lecturers: /lecturers, /lecturers/:id, /lecturers/module/:module

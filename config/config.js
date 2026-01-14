@@ -6,7 +6,7 @@ module.exports = {
     port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'testdb',
+    database: process.env.DB_NAME || 'it_management_system',
   },
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
