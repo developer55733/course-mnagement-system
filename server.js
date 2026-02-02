@@ -87,14 +87,18 @@ app.use(errorHandler);
 // Start server
 const PORT = config.port;
 app.listen(PORT, () => {
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? `https://course-management-system.up.railway.app` 
+    : `http://localhost:${PORT}`;
+    
   console.log(`
 ╔════════════════════════════════════════╗
 ║  Backend Server Started Successfully   ║
 ╠════════════════════════════════════════╣
 ║ Port: ${PORT}                              
 ║ Environment: ${config.env}
-║ Database: ${config.db.database}@${config.db.host}:${config.db.port}
-║ API: http://localhost:${PORT}
+║ Database: ${config.db.database || 'N/A'}@${config.db.host || 'N/A'}:${config.db.port || 'N/A'}
+║ API: ${baseUrl}
 ╚════════════════════════════════════════╝
   `);
 });

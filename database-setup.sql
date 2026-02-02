@@ -1,9 +1,8 @@
 -- IT Management System Database Setup
--- Run this script in phpMyAdmin to set up the database
+-- Run this script in Railway MySQL phpMyAdmin to set up the database
 
--- Create database
-CREATE DATABASE IF NOT EXISTS `it_management_system`;
-USE `it_management_system`;
+-- Note: Railway MySQL automatically provides the database, no need to create one
+-- USE your_railway_database_name;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS `users` (

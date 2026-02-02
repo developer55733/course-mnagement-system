@@ -1,28 +1,22 @@
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'railway',
+  host: process.env.DB_HOST,
   port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'railway',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  acquireTimeout: 60000,
-  timeout: 60000,
   // Railway MySQL SSL configuration
   ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false,
-    require: true
+    rejectUnauthorized: false
   } : false,
-  // Connection retry settings
-  reconnect: true,
-  idleTimeout: 300000,
 });
 
 // Test connection with retry logic
-const testConnection = async (retries = 3) => {
+const testConnection = async (retries = 5) => {
   for (let i = 0; i < retries; i++) {
     try {
       const conn = await pool.getConnection();
@@ -35,8 +29,8 @@ const testConnection = async (retries = 3) => {
         console.warn('Continuing without DB connection — API routes will still start. Fix DB and restart server.');
         return false;
       }
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+      // Wait before retry with exponential backoff
+      await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
     }
   }
 };
