@@ -1,7 +1,7 @@
 {
-  "name": "cpp-db-backend-example",
+  "name": "it-management-system",
   "version": "1.0.0",
-  "description": "Simple Node.js server connecting to MySQL (for use with XAMPP)",
+  "description": "IT Management System - Node.js server connecting to Railway MySQL database",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,12 +14,16 @@
     "dotenv": "^16.6.1",
     "express": "^4.22.1",
     "hbs": "^4.2.0",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.16.0",
+    "mysql2": "^3.16.0"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.11"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["nodejs", "express", "mysql", "railway", "it-management", "education"],
+  "author": "Chrispin Golden",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

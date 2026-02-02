@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 // API documentation
 app.get('/api', (req, res) => {
   res.json({
-    message: 'XAMPP MySQL Backend API',
+    message: 'IT Management System API',
     version: '1.0.0',
     endpoints: {
       health: 'GET /api/users/health',

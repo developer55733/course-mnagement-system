@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:4000
+@baseUrl = {{RAILWAY_PUBLIC_URL}} || http://localhost:4000
 @contentType = application/json
 
 ### ============================================

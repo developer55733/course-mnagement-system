@@ -1,10 +1,17 @@
 {
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install",
+    "watchPatterns": [
+      "**/*"
+    ]
   },
   "deploy": {
     "startCommand": "npm start",
     "restartPolicyType": "ON_FAILURE",
-    "healthcheckPath": "/api"
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/api",
+    "healthcheckTimeout": 100,
+    "port": 8080
   }
 }
