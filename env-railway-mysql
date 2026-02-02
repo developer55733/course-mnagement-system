@@ -1,0 +1,18 @@
+# Railway MySQL Environment Variables
+
+# Database Configuration (Railway MySQL)
+DB_HOST=tramway.proxy.rlwy.net
+DB_PORT=13023
+DB_USER=root
+DB_PASSWORD=IdrpXrLjiqhSvhxumRfcVooPyKkSGKXF
+DB_NAME=railway
+
+# Server Configuration
+PORT=8080
+NODE_ENV=production
+
+# Admin Configuration
+ADMIN_SECRET=your_secure_admin_secret_here
+
+# CORS Configuration
+CORS_ORIGIN=*
