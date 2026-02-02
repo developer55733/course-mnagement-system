@@ -530,3 +530,5 @@ npm run dev
 
 MIT
 
+#   c o u r s e - m n a g e m e n t - s y s t e m  
+ 
