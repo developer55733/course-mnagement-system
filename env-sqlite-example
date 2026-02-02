@@ -1,0 +1,15 @@
+# SQLite Environment Variables Template
+
+# Database Configuration
+DB_TYPE=sqlite
+DB_PATH=./database.sqlite
+
+# Server Configuration
+PORT=8080
+NODE_ENV=production
+
+# Admin Configuration
+ADMIN_SECRET=your_secure_admin_secret_here
+
+# CORS Configuration
+CORS_ORIGIN=*

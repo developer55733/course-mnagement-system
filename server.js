@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const config = require('./config/config');
-const database = require('./config/database');
+const database = require('./config/database-dynamic'); // Use dynamic database
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/users');
 
