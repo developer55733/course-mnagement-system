@@ -9,7 +9,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  // Railway MySQL SSL configuration
+  // MySQL SSL configuration for production
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false,
@@ -26,7 +26,7 @@ const testConnection = async (retries = 5) => {
     } catch (err) {
       console.error(`✗ MySQL connection attempt ${i + 1} failed:`, err.message);
       if (i === retries - 1) {
-        console.warn('Continuing without DB connection — API routes will still start. Fix DB and restart server.');
+        console.error('❌ MySQL connection failed. Please check your database configuration.');
         return false;
       }
       // Wait before retry with exponential backoff

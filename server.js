@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const config = require('./config/config');
-const database = require('./config/database-dynamic'); // Use dynamic database
+const database = require('./config/database'); // Use MySQL only
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/users');
 

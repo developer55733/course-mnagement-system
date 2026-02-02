@@ -1,0 +1,18 @@
+# MySQL Environment Variables Template
+
+# Database Configuration (MySQL Only)
+DB_HOST=your_mysql_host
+DB_PORT=3306
+DB_USER=your_mysql_user
+DB_PASSWORD=your_mysql_password
+DB_NAME=your_database_name
+
+# Server Configuration
+PORT=8080
+NODE_ENV=production
+
+# Admin Configuration
+ADMIN_SECRET=your_secure_admin_secret_here
+
+# CORS Configuration
+CORS_ORIGIN=*
