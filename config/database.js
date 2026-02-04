@@ -152,15 +152,6 @@ let pool = mysql.createPool(dbConfig);
 setTimeout(async () => {
   console.log('🔄 Startup database connection test...');
   await testConnectionWithFallback();
-  
-  // Force database initialization to fix table structure issues
-  console.log('🔄 Forcing database initialization to fix table structure...');
-  try {
-    await initializeDatabase();
-    console.log('✅ Database initialization completed on startup');
-  } catch (error) {
-    console.log('⚠️  Database initialization warning:', error.message);
-  }
 }, 2000); // Wait 2 seconds for server to fully start
 
 // Simple connection test with automatic fallback
