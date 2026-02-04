@@ -1,10 +1,31 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Try Railway public URL first, then fallback to private host
+// Try Railway internal host first (more reliable), then fallback to proxy
 const getDatabaseConfig = () => {
-  // For Railway, we need to use the proxy host and port
-  // Railway provides these specific values for MySQL connections
+  // Try Railway internal host first - more reliable within Railway environment
+  if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('railway.internal')) {
+    console.log('🔗 Using Railway internal host for database connection');
+    return {
+      host: process.env.MYSQLHOST,
+      port: process.env.MYSQLPORT || 3306,
+      user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+      password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+      database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      ssl: {
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
+      },
+      connectTimeout: 10000,
+      idleTimeout: 300000,
+      maxIdle: 10
+    };
+  }
+  
+  // Railway proxy configuration as fallback
   const railwayProxyHost = 'tramway.proxy.rlwy.net';
   const railwayProxyPort = '13023';
   
@@ -88,8 +109,7 @@ async function testConnection(retries = 3, delay = 1000) {
         password: dbConfig.password,
         database: dbConfig.database,
         ssl: dbConfig.ssl,
-        connectTimeout: 10000,
-        timeout: 60000
+        connectTimeout: 10000
       });
       
       console.log('✅ Database connected successfully!');
