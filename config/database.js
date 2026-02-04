@@ -135,8 +135,15 @@ async function testConnectionWithFallback() {
   }
 }
 
-// Enhanced query function with error logging
+// Enhanced query function with error logging and automatic connection test
 async function query(sql, params = []) {
+  // Test connection on first query if not already tested
+  if (!global.dbConnectionTested) {
+    global.dbConnectionTested = true;
+    console.log('🔄 First database operation - testing connection...');
+    await testConnectionWithFallback();
+  }
+  
   try {
     console.log('🔍 Executing query:', sql);
     if (params.length > 0) {
