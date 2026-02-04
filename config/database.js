@@ -28,7 +28,16 @@ const getDatabaseConfig = () => {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
-        ssl: { rejectUnauthorized: false }
+        ssl: {
+          rejectUnauthorized: false,
+          minVersion: 'TLSv1.2'
+        },
+        connectTimeout: 10000,
+        acquireTimeout: 10000,
+        timeout: 60000,
+        reconnect: true,
+        idleTimeout: 300000,
+        maxIdle: 10
       };
     } catch (error) {
       console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL, falling back to Railway proxy');
@@ -46,7 +55,16 @@ const getDatabaseConfig = () => {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: { rejectUnauthorized: false }
+    ssl: {
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2'
+    },
+    connectTimeout: 10000,
+    acquireTimeout: 10000,
+    timeout: 60000,
+    reconnect: true,
+    idleTimeout: 300000,
+    maxIdle: 10
   };
 };
 
