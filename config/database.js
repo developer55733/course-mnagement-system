@@ -66,7 +66,7 @@ console.log('   SSL:', 'disabled');
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Test both private domain and TCP proxy with fallback
+// Test both private domain and TCP proxy with fallback and enhanced debugging
 async function testConnectionWithFallback(retries = 3, delay = 1000) {
   // Use standard Railway MySQL variables
   const user = process.env.MYSQLUSER || 'root';
@@ -74,6 +74,9 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
   const database = process.env.MYSQLDATABASE || 'railway';
   const host = process.env.MYSQLHOST;
   const port = parseInt(process.env.MYSQLPORT) || 3306;
+  
+  console.log('🔍 Enhanced connection debugging:');
+  console.log('   Full connection string: mysql://' + user + ':***@' + (host || 'NO-HOST') + ':' + port + '/' + database);
   
   const connectionMethods = [];
   
@@ -90,9 +93,21 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
         connectTimeout: 10000
       }
     });
+    
+    // Also try without database name
+    connectionMethods.push({
+      name: 'Railway MySQL (no DB)',
+      config: {
+        host: host,
+        port: port,
+        user: user,
+        password: password,
+        connectTimeout: 10000
+      }
+    });
   }
   
-  // Try hardcoded TCP proxy as fallback
+  // Try hardcoded TCP proxy
   connectionMethods.push({
     name: 'TCP Proxy',
     config: {
@@ -105,6 +120,18 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
     }
   });
   
+  // Try TCP proxy without database name
+  connectionMethods.push({
+    name: 'TCP Proxy (no DB)',
+    config: {
+      host: 'tramway.proxy.rlwy.net',
+      port: 13023,
+      user: user,
+      password: password,
+      connectTimeout: 10000
+    }
+  });
+  
   // Try each connection method
   for (const method of connectionMethods) {
     console.log(`🔗 Testing ${method.name} connection...`);
@@ -112,6 +139,7 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         console.log(`   Attempt ${attempt}/${retries} for ${method.name}`);
+        console.log(`   Connecting to: ${method.config.host}:${method.config.port}`);
         
         const connection = await mysql.createConnection(method.config);
         
@@ -131,6 +159,8 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
         console.error(`❌ ${method.name} connection failed (Attempt ${attempt}/${retries}):`);
         console.error(`   Error Code: ${error.code}`);
         console.error(`   Error Message: ${error.message}`);
+        console.error(`   Error Number: ${error.errno}`);
+        console.error(`   SQL State: ${error.sqlState}`);
         
         if (attempt < retries) {
           console.log(`   ⏳ Retrying ${method.name} in ${delay}ms...`);
