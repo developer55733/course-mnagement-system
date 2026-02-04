@@ -1,13 +1,47 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway TCP proxy with SSL - Railway requires SSL for proxy connections
+// Use Railway MYSQL_PUBLIC_URL which should be properly resolved by Railway
 const getDatabaseConfig = () => {
-  // Railway TCP proxy configuration with SSL
+  // Try MYSQL_PUBLIC_URL first - Railway should resolve the template variables
+  if (process.env.MYSQL_PUBLIC_URL) {
+    console.log('🔗 Using Railway MYSQL_PUBLIC_URL for database connection');
+    try {
+      const url = new URL(process.env.MYSQL_PUBLIC_URL);
+      console.log('🔗 Parsed URL:', process.env.MYSQL_PUBLIC_URL);
+      
+      return {
+        host: url.hostname,
+        port: parseInt(url.port) || 13023,
+        user: url.username,
+        password: url.password,
+        database: url.pathname.substring(1), // Remove leading slash
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        ssl: {
+          rejectUnauthorized: false
+        },
+        connectTimeout: 10000,
+        idleTimeout: 300000,
+        maxIdle: 10
+      };
+    } catch (error) {
+      console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL:', error.message);
+      console.log('🔗 Falling back to manual TCP proxy configuration');
+    }
+  }
+  
+  // Fallback to manual TCP proxy configuration
   const proxyHost = 'tramway.proxy.rlwy.net';
   const proxyPort = '13023';
   
-  console.log('🔗 Using Railway TCP proxy with SSL for database connection');
+  console.log('🔗 Using manual TCP proxy configuration');
+  console.log('🔗 Credentials check:');
+  console.log('   MYSQLUSER:', process.env.MYSQLUSER || 'NOT SET');
+  console.log('   MYSQLPASSWORD:', process.env.MYSQLPASSWORD ? 'SET' : 'NOT SET');
+  console.log('   MYSQLDATABASE:', process.env.MYSQLDATABASE || 'NOT SET');
+  
   return {
     host: proxyHost,
     port: parseInt(proxyPort),
@@ -33,7 +67,7 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'enabled (required for TCP proxy)');
+console.log('   SSL:', 'enabled');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
