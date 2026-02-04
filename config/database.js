@@ -10,7 +10,7 @@ const getDatabaseConfig = () => {
   console.log(`   MYSQLUSER: ${process.env.MYSQLUSER || 'root'}`);
   console.log(`   MYSQLPASSWORD: ${process.env.MYSQLPASSWORD ? 'SET' : 'NOT SET'}`);
   console.log(`   MYSQLDATABASE: ${process.env.MYSQLDATABASE || 'railway'}`);
-  console.log('   SSL: disabled');
+  console.log('   SSL: enabled');
   console.log('-------------------------------');
 
   const user = process.env.MYSQLUSER || 'root';
@@ -39,7 +39,9 @@ const getDatabaseConfig = () => {
     connectTimeout: 20000,
     idleTimeout: 300000,
     maxIdle: 10,
-    ssl: false
+    ssl: {
+      rejectUnauthorized: false
+    }
   };
 };
 
@@ -102,7 +104,9 @@ async function testConnectionWithFallback() {
           connectTimeout: 20000,
           idleTimeout: 300000,
           maxIdle: 10,
-          ssl: false
+          ssl: {
+            rejectUnauthorized: false
+          }
         };
         
         console.log(`   Connecting to TCP proxy: ${tcpConfig.host}:${tcpConfig.port}`);
