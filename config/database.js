@@ -39,8 +39,7 @@ const getDatabaseConfig = () => {
           minVersion: 'TLSv1.2'
         },
         flags: '+MULTI_STATEMENTS',
-        charset: 'utf8mb4',
-        protocol: 'tcp'
+        charset: 'utf8mb4'
       };
       
       console.log(`   Host: ${config.host}`);
@@ -88,8 +87,7 @@ const getDatabaseConfig = () => {
       minVersion: 'TLSv1.2'
     },
     flags: '+MULTI_STATEMENTS',
-    charset: 'utf8mb4',
-    protocol: 'tcp'
+    charset: 'utf8mb4'
   };
 };
 
@@ -157,8 +155,7 @@ async function testConnectionWithFallback() {
             minVersion: 'TLSv1.2'
           },
           flags: '+MULTI_STATEMENTS',
-          charset: 'utf8mb4',
-          protocol: 'tcp'
+          charset: 'utf8mb4'
         };
         
         console.log(`   Connecting to TCP proxy: ${tcpConfig.host}:${tcpConfig.port}`);
