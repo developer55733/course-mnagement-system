@@ -48,7 +48,7 @@ const dbConfig = getDatabaseConfig();
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Simple connection test
+// Simple connection test function
 async function testConnectionWithFallback() {
   console.log('🔍 Testing Database Connection...');
   
@@ -104,20 +104,6 @@ async function query(sql, params = []) {
     throw error;
   }
 }
-
-// Test connection on startup
-testConnectionWithFallback().then(success => {
-  if (success) {
-    console.log('🎉 DATABASE CONNECTION ESTABLISHED SUCCESSFULLY!');
-    console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
-    console.log(`✅ Database: ${dbConfig.database}`);
-    console.log('🚀 Application is ready with full database functionality');
-  } else {
-    console.log('⚠️  DATABASE CONNECTION FAILED');
-    console.log('💡 Application will start in limited mode without database');
-    console.log('💡 Check Railway MySQL service status in dashboard');
-  }
-});
 
 module.exports = { 
   pool, 
