@@ -1,47 +1,43 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway MYSQL_PUBLIC_URL which should be properly resolved by Railway
+// Use Railway environment variables directly - MYSQL_PUBLIC_URL is malformed
 const getDatabaseConfig = () => {
-  // Try MYSQL_PUBLIC_URL first - Railway should resolve the template variables
-  if (process.env.MYSQL_PUBLIC_URL) {
-    console.log('🔗 Using Railway MYSQL_PUBLIC_URL for database connection');
-    try {
-      const url = new URL(process.env.MYSQL_PUBLIC_URL);
-      console.log('🔗 Parsed URL:', process.env.MYSQL_PUBLIC_URL);
-      
-      return {
-        host: url.hostname,
-        port: parseInt(url.port) || 13023,
-        user: url.username,
-        password: url.password,
-        database: url.pathname.substring(1), // Remove leading slash
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-        ssl: {
-          rejectUnauthorized: false
-        },
-        connectTimeout: 10000,
-        idleTimeout: 300000,
-        maxIdle: 10
-      };
-    } catch (error) {
-      console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL:', error.message);
-      console.log('🔗 Falling back to manual TCP proxy configuration');
-    }
-  }
-  
-  // Fallback to manual TCP proxy configuration
-  const proxyHost = 'tramway.proxy.rlwy.net';
-  const proxyPort = '13023';
-  
-  console.log('🔗 Using manual TCP proxy configuration');
-  console.log('🔗 Credentials check:');
+  console.log('🔗 Using Railway environment variables for database connection');
+  console.log('🔗 Environment variables check:');
+  console.log('   MYSQLHOST:', process.env.MYSQLHOST || 'NOT SET');
+  console.log('   MYSQLPORT:', process.env.MYSQLPORT || 'NOT SET');
   console.log('   MYSQLUSER:', process.env.MYSQLUSER || 'NOT SET');
   console.log('   MYSQLPASSWORD:', process.env.MYSQLPASSWORD ? 'SET' : 'NOT SET');
   console.log('   MYSQLDATABASE:', process.env.MYSQLDATABASE || 'NOT SET');
+  console.log('   MYSQL_PUBLIC_URL:', process.env.MYSQL_PUBLIC_URL || 'NOT SET');
   
+  // Try Railway private domain first (if available)
+  if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('railway.internal')) {
+    console.log('🔗 Using Railway private domain connection');
+    return {
+      host: process.env.MYSQLHOST,
+      port: parseInt(process.env.MYSQLPORT) || 3306,
+      user: process.env.MYSQLUSER || 'root',
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE || 'railway',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      ssl: {
+        rejectUnauthorized: false
+      },
+      connectTimeout: 10000,
+      idleTimeout: 300000,
+      maxIdle: 10
+    };
+  }
+  
+  // Fallback to TCP proxy
+  const proxyHost = 'tramway.proxy.rlwy.net';
+  const proxyPort = '13023';
+  
+  console.log('🔗 Falling back to Railway TCP proxy connection');
   return {
     host: proxyHost,
     port: parseInt(proxyPort),
