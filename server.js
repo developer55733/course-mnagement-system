@@ -5,7 +5,6 @@ const path = require('path');
 const config = require('./config/config');
 const database = require('./config/database'); // Use MySQL only
 const errorHandler = require('./middleware/errorHandler');
-const enhancedErrorHandler = require('./middleware/enhancedErrorHandler');
 const userRoutes = require('./routes/users');
 
 // CORS middleware
