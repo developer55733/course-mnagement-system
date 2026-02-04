@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Simple and robust Railway MySQL configuration using Railway's MySQL service
+// Simple and robust Railway MySQL configuration using Railway's web service variables
 const getDatabaseConfig = () => {
   console.log('🔗 Railway Database Configuration:');
   console.log('-------------------------------');
@@ -10,14 +10,15 @@ const getDatabaseConfig = () => {
   console.log(`   MYSQLUSER: ${process.env.MYSQLUSER || 'root'}`);
   console.log(`   MYSQLPASSWORD: ${process.env.MYSQLPASSWORD ? 'SET' : 'NOT SET'}`);
   console.log(`   MYSQLDATABASE: ${process.env.MYSQLDATABASE || 'railway'}`);
-  console.log(`   MySQL.MYSQL_URL: ${process.env.MYSQL_URL || 'NOT SET'}`);
+  console.log(`   MYSQL_URL: ${process.env.MYSQL_URL || 'NOT SET'}`);
+  console.log(`   MYSQL_PUBLIC_URL: ${process.env.MYSQL_PUBLIC_URL || 'NOT SET'}`);
   console.log('   SSL: enabled');
   console.log('-------------------------------');
 
-  // Try to use Railway's MySQL service URL first
-  if (process.env.MYSQL_URL) {
+  // Try to use Railway's MYSQL_URL first (should be resolved by Railway)
+  if (process.env.MYSQL_URL && !process.env.MYSQL_URL.includes('${{')) {
     try {
-      console.log('🔗 Using Railway MySQL.MYSQL_URL connection:');
+      console.log('🔗 Using Railway MYSQL_URL connection:');
       console.log('-------------------------------');
       console.log(`   URL: ${process.env.MYSQL_URL}`);
       
@@ -50,19 +51,62 @@ const getDatabaseConfig = () => {
       
       return config;
     } catch (error) {
-      console.log(`⚠️  Failed to parse MySQL.MYSQL_URL: ${error.message}`);
+      console.log(`⚠️  Failed to parse MYSQL_URL: ${error.message}`);
       console.log('🔄 Falling back to environment variables...');
     }
   }
 
-  // Fallback to individual environment variables
-  const user = process.env.MYSQLUSER || 'root';
-  const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD;
-  const database = process.env.MYSQLDATABASE || 'railway';
-  const host = process.env.MYSQLHOST || 'yamabiko.proxy.rlwy.net';
-  const port = parseInt(process.env.MYSQLPORT) || 33264;
+  // Try to use Railway's MYSQL_PUBLIC_URL (should be resolved by Railway)
+  if (process.env.MYSQL_PUBLIC_URL && !process.env.MYSQL_PUBLIC_URL.includes('${{')) {
+    try {
+      console.log('🔗 Using Railway MYSQL_PUBLIC_URL connection:');
+      console.log('-------------------------------');
+      console.log(`   URL: ${process.env.MYSQL_PUBLIC_URL}`);
+      
+      const url = new URL(process.env.MYSQL_PUBLIC_URL);
+      const config = {
+        host: url.hostname,
+        port: parseInt(url.port) || 33264,
+        user: url.username,
+        password: url.password,
+        database: url.pathname.substring(1) || 'railway',
+        waitForConnections: true,
+        connectionLimit: 5,
+        queueLimit: 0,
+        connectTimeout: 30000,
+        idleTimeout: 600000,
+        maxIdle: 5,
+        ssl: {
+          rejectUnauthorized: false,
+          minVersion: 'TLSv1.2'
+        },
+        flags: '+MULTI_STATEMENTS',
+        charset: 'utf8mb4'
+      };
+      
+      console.log(`   Host: ${config.host}`);
+      console.log(`   Port: ${config.port}`);
+      console.log(`   User: ${config.user}`);
+      console.log(`   Database: ${config.database}`);
+      console.log('-------------------------------');
+      
+      return config;
+    } catch (error) {
+      console.log(`⚠️  Failed to parse MYSQL_PUBLIC_URL: ${error.message}`);
+      console.log('🔄 Falling back to environment variables...');
+    }
+  }
 
-  console.log('🔗 Using environment variable fallback:');
+  // Fallback to individual environment variables or hardcoded TCP proxy
+  const user = process.env.MYSQLUSER || 'root';
+  const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'TBTdIyRIUxlOnTBZRSgWKVeaMfUWRvVY';
+  const database = process.env.MYSQLDATABASE || 'railway';
+  
+  // Use TCP proxy directly since we know the working connection
+  const host = 'yamabiko.proxy.rlwy.net';
+  const port = 33264;
+
+  console.log('🔗 Using direct TCP proxy connection:');
   console.log('-------------------------------');
   console.log(`   Host: ${host}`);
   console.log(`   Port: ${port}`);
