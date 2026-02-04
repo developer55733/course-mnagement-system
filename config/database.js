@@ -1,35 +1,13 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Fallback strategy: try private domain, then TCP proxy, then public URL
+// Use Railway TCP proxy directly - only working method
 const getDatabaseConfig = () => {
-  // Method 1: Railway private domain (MYSQLHOST) - preferred
-  const privateHost = process.env.MYSQLHOST;
-  const privatePort = process.env.MYSQLPORT || '3306';
-  
-  if (privateHost) {
-    console.log('🔗 Attempting Railway private domain connection');
-    return {
-      host: privateHost,
-      port: parseInt(privatePort),
-      user: process.env.MYSQLUSER || 'root',
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE || 'railway',
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      connectTimeout: 10000,
-      idleTimeout: 300000,
-      maxIdle: 10,
-      _method: 'private_domain'
-    };
-  }
-  
-  // Method 2: Railway TCP proxy - fallback
+  // Railway TCP proxy configuration
   const proxyHost = 'tramway.proxy.rlwy.net';
   const proxyPort = '13023';
   
-  console.log('🔗 Falling back to Railway TCP proxy connection');
+  console.log('🔗 Using Railway TCP proxy for database connection');
   return {
     host: proxyHost,
     port: parseInt(proxyPort),
@@ -41,8 +19,7 @@ const getDatabaseConfig = () => {
     queueLimit: 0,
     connectTimeout: 10000,
     idleTimeout: 300000,
-    maxIdle: 10,
-    _method: 'tcp_proxy'
+    maxIdle: 10
   };
 };
 
@@ -53,80 +30,46 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   Method:', dbConfig._method || 'unknown');
-console.log('   SSL:', 'disabled');
+console.log('   SSL:', 'disabled (TCP proxy)');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Function to test connection with fallback methods
-async function testConnectionWithFallback(retries = 3, delay = 1000) {
-  const methods = [
-    {
-      name: 'Private Domain',
-      config: {
-        host: process.env.MYSQLHOST,
-        port: parseInt(process.env.MYSQLPORT || '3306'),
-        user: process.env.MYSQLUSER || 'root',
-        password: process.env.MYSQLPASSWORD,
-        database: process.env.MYSQLDATABASE || 'railway',
+// Simple TCP proxy connection test
+async function testTCPProxyConnection(retries = 3, delay = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`🔍 Testing TCP Proxy connection... (Attempt ${attempt}/${retries})`);
+      
+      const connection = await mysql.createConnection({
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
         connectTimeout: 10000
-      }
-    },
-    {
-      name: 'TCP Proxy',
-      config: {
-        host: 'tramway.proxy.rlwy.net',
-        port: 13023,
-        user: process.env.MYSQLUSER || 'root',
-        password: process.env.MYSQLPASSWORD,
-        database: process.env.MYSQLDATABASE || 'railway',
-        connectTimeout: 10000
-      }
-    }
-  ];
-
-  for (const method of methods) {
-    if (!method.config.host) {
-      console.log(`⚠️  Skipping ${method.name} - host not available`);
-      continue;
-    }
-
-    console.log(`🔗 Testing ${method.name} connection...`);
-    
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        console.log(`   Attempt ${attempt}/${retries} for ${method.name}`);
-        
-        const connection = await mysql.createConnection(method.config);
-        
-        // Test query
-        const [rows] = await connection.query('SELECT 1 as test');
-        await connection.end();
-        
-        console.log(`✅ ${method.name} connection successful!`);
-        console.log(`   Test result:`, rows[0]);
-        
-        // Update global pool config to working method
-        Object.assign(dbConfig, method.config);
-        dbConfig._method = method.name.toLowerCase().replace(' ', '_');
-        
-        return true;
-        
-      } catch (error) {
-        console.error(`❌ ${method.name} connection failed (Attempt ${attempt}/${retries}):`);
-        console.error(`   Error Code: ${error.code}`);
-        console.error(`   Error Message: ${error.message}`);
-        
-        if (attempt < retries) {
-          console.log(`   ⏳ Retrying ${method.name} in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2;
-        }
+      });
+      
+      // Test query
+      const [rows] = await connection.query('SELECT 1 as test');
+      await connection.end();
+      
+      console.log('✅ TCP Proxy connection successful!');
+      console.log('   Test result:', rows[0]);
+      
+      return true;
+      
+    } catch (error) {
+      console.error(`❌ TCP Proxy connection failed (Attempt ${attempt}/${retries}):`);
+      console.error(`   Error Code: ${error.code}`);
+      console.error(`   Error Message: ${error.message}`);
+      
+      if (attempt < retries) {
+        console.log(`⏳ Retrying TCP Proxy in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
       }
     }
-    
-    console.log(`❌ ${method.name} failed after ${retries} attempts`);
   }
   
   return false;
@@ -158,20 +101,21 @@ async function query(sql, params = []) {
   }
 }
 
-// Test connection on startup with fallback methods
-testConnectionWithFallback().then(success => {
+// Test TCP Proxy connection on startup
+testTCPProxyConnection().then(success => {
   if (success) {
     console.log('🎉 Database is ready for use');
-    console.log(`✅ Using connection method: ${dbConfig._method}`);
+    console.log('✅ Connected via TCP Proxy');
     console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
   } else {
-    console.error('⚠️  All database connection methods failed - application may not work properly');
+    console.error('⚠️  TCP Proxy connection failed - application may not work properly');
+    console.error('💡 Check Railway MySQL service status and credentials');
   }
 });
 
 module.exports = { 
   pool, 
-  testConnection: testConnectionWithFallback, 
+  testConnection: testTCPProxyConnection, 
   query,
   config: dbConfig
 };
