@@ -48,6 +48,12 @@ const dbConfig = getDatabaseConfig();
 // Create connection pool (will be updated if fallback is needed)
 let pool = mysql.createPool(dbConfig);
 
+// Test connection on startup to activate TCP proxy fallback if needed
+setTimeout(async () => {
+  console.log('🔄 Startup database connection test...');
+  await testConnectionWithFallback();
+}, 2000); // Wait 2 seconds for server to fully start
+
 // Simple connection test with automatic fallback
 async function testConnectionWithFallback() {
   console.log('🔍 Testing Database Connection...');
