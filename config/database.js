@@ -34,14 +34,17 @@ const getDatabaseConfig = () => {
     password: password,
     database: database,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 5,
     queueLimit: 0,
-    connectTimeout: 20000,
-    idleTimeout: 300000,
-    maxIdle: 10,
+    connectTimeout: 30000,
+    idleTimeout: 600000,
+    maxIdle: 5,
     ssl: {
-      rejectUnauthorized: false
-    }
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2'
+    },
+    flags: '+MULTI_STATEMENTS',
+    charset: 'utf8mb4'
   };
 };
 
@@ -99,14 +102,17 @@ async function testConnectionWithFallback() {
           password: dbConfig.password,
           database: dbConfig.database,
           waitForConnections: true,
-          connectionLimit: 10,
+          connectionLimit: 5,
           queueLimit: 0,
-          connectTimeout: 20000,
-          idleTimeout: 300000,
-          maxIdle: 10,
+          connectTimeout: 30000,
+          idleTimeout: 600000,
+          maxIdle: 5,
           ssl: {
-            rejectUnauthorized: false
-          }
+            rejectUnauthorized: false,
+            minVersion: 'TLSv1.2'
+          },
+          flags: '+MULTI_STATEMENTS',
+          charset: 'utf8mb4'
         };
         
         console.log(`   Connecting to TCP proxy: ${tcpConfig.host}:${tcpConfig.port}`);
