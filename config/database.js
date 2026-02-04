@@ -1,19 +1,24 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway TCP proxy directly since internal host is failing
+// Use Railway private domain as specified
 const getDatabaseConfig = () => {
-  // Railway proxy configuration - most reliable
-  const railwayProxyHost = 'tramway.proxy.rlwy.net';
-  const railwayProxyPort = '13023';
+  // Use Railway private domain (MYSQLHOST) and port 3306
+  const host = process.env.MYSQLHOST;
+  const port = process.env.MYSQLPORT || '3306';
   
-  console.log('🔗 Using Railway TCP proxy for database connection');
+  if (!host) {
+    console.error('❌ MYSQLHOST environment variable is not set!');
+    process.exit(1);
+  }
+  
+  console.log('🔗 Using Railway private domain for database connection');
   return {
-    host: railwayProxyHost,
-    port: railwayProxyPort,
-    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
-    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
-    database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
+    host: host,
+    port: parseInt(port),
+    user: process.env.MYSQLUSER || 'root',
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE || 'railway',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -30,7 +35,7 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'disabled (using TCP proxy)');
+console.log('   SSL:', 'disabled (Railway private domain)');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
