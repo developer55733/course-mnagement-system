@@ -148,11 +148,13 @@ const dbConfig = getDatabaseConfig();
 // Create connection pool (will be updated if fallback is needed)
 let pool = mysql.createPool(dbConfig);
 
-// Test connection on startup to activate TCP proxy fallback if needed
-setTimeout(async () => {
-  console.log('🔄 Startup database connection test...');
-  await testConnectionWithFallback();
-}, 2000); // Wait 2 seconds for server to fully start
+// Test connection on startup only in development, not production
+if (process.env.NODE_ENV !== 'production') {
+  setTimeout(async () => {
+    console.log('🔄 Startup database connection test...');
+    await testConnectionWithFallback();
+  }, 2000); // Wait 2 seconds for server to fully start
+}
 
 // Simple connection test with automatic fallback
 async function testConnectionWithFallback() {
@@ -252,13 +254,6 @@ async function testConnectionWithFallback() {
 
 // Enhanced query function with error logging and automatic connection test
 async function query(sql, params = []) {
-  // Test connection on first query if not already tested
-  if (!global.dbConnectionTested) {
-    global.dbConnectionTested = true;
-    console.log('🔄 First database operation - testing connection...');
-    await testConnectionWithFallback();
-  }
-  
   try {
     console.log('🔍 Executing query:', sql);
     if (params.length > 0) {
@@ -295,6 +290,22 @@ async function query(sql, params = []) {
       } catch (initError) {
         console.error('❌ Failed to initialize database:', initError.message);
         throw error; // Throw original error if initialization fails
+      }
+    }
+    
+    // If connection issues, try fallback
+    if (error.code === 'ECONNREFUSED' && !global.fallbackAttempted) {
+      global.fallbackAttempted = true;
+      console.log('🔄 Connection failed, trying TCP proxy fallback...');
+      try {
+        await testConnectionWithFallback();
+        console.log('✅ Fallback successful, retrying query...');
+        const retryResult = await pool.query(sql, params);
+        const [retryRows] = retryResult;
+        return retryRows || [];
+      } catch (fallbackError) {
+        console.error('❌ Fallback failed:', fallbackError.message);
+        throw error;
       }
     }
     
