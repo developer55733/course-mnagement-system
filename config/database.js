@@ -15,10 +15,6 @@ const getDatabaseConfig = () => {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
-      ssl: {
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
-      },
       connectTimeout: 10000,
       idleTimeout: 300000,
       maxIdle: 10
@@ -49,10 +45,6 @@ const getDatabaseConfig = () => {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
-        ssl: {
-          rejectUnauthorized: false,
-          minVersion: 'TLSv1.2'
-        },
         connectTimeout: 10000,
         idleTimeout: 300000,
         maxIdle: 10
@@ -73,10 +65,6 @@ const getDatabaseConfig = () => {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: {
-      rejectUnauthorized: false,
-      minVersion: 'TLSv1.2'
-    },
     connectTimeout: 10000,
     idleTimeout: 300000,
     maxIdle: 10
@@ -90,7 +78,7 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'enabled');
+console.log('   SSL:', 'disabled (Railway internal)');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
@@ -108,7 +96,6 @@ async function testConnection(retries = 3, delay = 1000) {
         user: dbConfig.user,
         password: dbConfig.password,
         database: dbConfig.database,
-        ssl: dbConfig.ssl,
         connectTimeout: 10000
       });
       
