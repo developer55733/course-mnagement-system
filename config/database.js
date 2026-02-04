@@ -34,8 +34,6 @@ const getDatabaseConfig = () => {
         },
         connectTimeout: 10000,
         acquireTimeout: 10000,
-        timeout: 60000,
-        reconnect: true,
         idleTimeout: 300000,
         maxIdle: 10
       };
@@ -61,8 +59,6 @@ const getDatabaseConfig = () => {
     },
     connectTimeout: 10000,
     acquireTimeout: 10000,
-    timeout: 60000,
-    reconnect: true,
     idleTimeout: 300000,
     maxIdle: 10
   };
