@@ -282,12 +282,12 @@ async function query(sql, params = []) {
     console.error('   Error Code:', error.code);
     console.error('   Error Message:', error.message);
     
-    // If table doesn't exist, try to create it
-    if (error.code === 'ER_NO_SUCH_TABLE') {
-      console.log('🔄 Table does not exist, attempting to create database tables...');
+    // If table doesn't exist or has incorrect structure, try to create it
+    if (error.code === 'ER_NO_SUCH_TABLE' || error.code === 'ER_NO_DEFAULT_FOR_FIELD') {
+      console.log('🔄 Table issue detected, attempting to recreate database tables...');
       try {
         await initializeDatabase();
-        console.log('✅ Database tables created successfully, retrying query...');
+        console.log('✅ Database tables recreated successfully, retrying query...');
         // Retry the original query
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
