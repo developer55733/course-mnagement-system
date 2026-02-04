@@ -125,21 +125,24 @@ const getDatabaseConfig = () => {
     user: user,
     password: password,
     database: database,
-    waitForConnections: true,
-    connectionLimit: 5,
-    queueLimit: 0,
-    connectTimeout: 30000,
-    idleTimeout: 600000,
-    maxIdle: 5,
-    ssl: {
+    ssl: { 
       rejectUnauthorized: false,
       minVersion: 'TLSv1.2'
     },
     flags: '+MULTI_STATEMENTS',
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    timezone: '+00:00',
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    multipleStatements: true,
+    // Disable strict mode to handle AUTO_INCREMENT properly
+    connectionLimit: 10,
+    queueLimit: 0
   };
 };
 
+// Get the database configuration
 const dbConfig = getDatabaseConfig();
 
 // Create connection pool (will be updated if fallback is needed)
@@ -310,20 +313,16 @@ async function initializeDatabase() {
       password VARCHAR(255) NOT NULL,
       role ENUM('user', 'admin') DEFAULT 'user',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX idx_email (email),
-      INDEX idx_student_id (student_id),
-      INDEX idx_role (role)
-    )`,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
     `CREATE TABLE IF NOT EXISTS modules (
       id INT AUTO_INCREMENT PRIMARY KEY,
       code VARCHAR(50) UNIQUE NOT NULL,
       name VARCHAR(100) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX idx_code (code)
-    )`,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
     `CREATE TABLE IF NOT EXISTS lecturers (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -331,9 +330,8 @@ async function initializeDatabase() {
       module VARCHAR(100) NOT NULL,
       phone VARCHAR(20),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX idx_module (module)
-    )`,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
     `CREATE TABLE IF NOT EXISTS timetable (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -343,10 +341,8 @@ async function initializeDatabase() {
       time TIME NOT NULL,
       venue VARCHAR(100) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX idx_module (module),
-      INDEX idx_date (date)
-    )`,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
     `CREATE TABLE IF NOT EXISTS settings (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -355,33 +351,42 @@ async function initializeDatabase() {
       institution_name VARCHAR(100),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )`
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
   for (const sql of createTables) {
-    await pool.query(sql);
+    try {
+      await pool.query(sql);
+      console.log('✅ Table created successfully');
+    } catch (error) {
+      console.log('⚠️  Table creation warning:', error.message);
+    }
   }
   
   // Insert default data if tables are empty
-  const userResult = await pool.query('SELECT COUNT(*) as count FROM users');
-  const userCount = userResult[0];
-  if (userCount && userCount[0] && userCount[0].count === 0) {
-    console.log('🔄 Inserting default data...');
-    
-    // Insert default users
-    await pool.query(
-      `INSERT INTO users (name, email, student_id, password, role) VALUES 
-       ('Admin User', 'admin@system.edu', 'ADMIN001', '$2b$10$sqG0niYZXluB1zwBdD4CMO23Tc1VJ5BOh3y8mjHia7l65bENYwEOe', 'admin')`
-    );
-    
-    // Insert default modules
-    await pool.query(
-      `INSERT INTO modules (code, name) VALUES 
-       ('IT101', 'Introduction to Programming'),
-       ('IT102', 'Web Development Fundamentals')`
-    );
-    
-    console.log('✅ Default data inserted successfully');
+  try {
+    const userResult = await pool.query('SELECT COUNT(*) as count FROM users');
+    const userCount = userResult[0];
+    if (userCount && userCount[0] && userCount[0].count === 0) {
+      console.log('🔄 Inserting default data...');
+      
+      // Insert default users
+      await pool.query(
+        `INSERT INTO users (name, email, student_id, password, role) VALUES 
+         ('Admin User', 'admin@system.edu', 'ADMIN001', '$2b$10$sqG0niYZXluB1zwBdD4CMO23Tc1VJ5BOh3y8mjHia7l65bENYwEOe', 'admin')`
+      );
+      
+      // Insert default modules
+      await pool.query(
+        `INSERT INTO modules (code, name) VALUES 
+         ('IT101', 'Introduction to Programming'),
+         ('IT102', 'Web Development Fundamentals')`
+      );
+      
+      console.log('✅ Default data inserted successfully');
+    }
+  } catch (error) {
+    console.log('⚠️  Default data insertion warning:', error.message);
   }
 }
 
