@@ -67,7 +67,7 @@ console.log('   SSL:', 'disabled');
 const pool = mysql.createPool(dbConfig);
 
 // Test both private domain and TCP proxy with fallback and enhanced debugging
-async function testConnectionWithFallback(retries = 3, delay = 1000) {
+async function testConnectionWithFallback(retries = 1, delay = 500) {
   // Use standard Railway MySQL variables
   const user = process.env.MYSQLUSER || 'root';
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD;
@@ -90,7 +90,7 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
         user: user,
         password: password,
         database: database,
-        connectTimeout: 10000
+        connectTimeout: 5000
       }
     });
     
@@ -102,7 +102,7 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
         port: port,
         user: user,
         password: password,
-        connectTimeout: 10000
+        connectTimeout: 5000
       }
     });
   }
@@ -116,7 +116,7 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
       user: user,
       password: password,
       database: database,
-      connectTimeout: 10000
+      connectTimeout: 5000
     }
   });
   
@@ -128,7 +128,7 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
       port: 13023,
       user: user,
       password: password,
-      connectTimeout: 10000
+      connectTimeout: 5000
     }
   });
   
