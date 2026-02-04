@@ -1,13 +1,13 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway TCP proxy directly - only working method
+// Use Railway TCP proxy with SSL - Railway requires SSL for proxy connections
 const getDatabaseConfig = () => {
-  // Railway TCP proxy configuration
+  // Railway TCP proxy configuration with SSL
   const proxyHost = 'tramway.proxy.rlwy.net';
   const proxyPort = '13023';
   
-  console.log('🔗 Using Railway TCP proxy for database connection');
+  console.log('🔗 Using Railway TCP proxy with SSL for database connection');
   return {
     host: proxyHost,
     port: parseInt(proxyPort),
@@ -17,6 +17,9 @@ const getDatabaseConfig = () => {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    ssl: {
+      rejectUnauthorized: false
+    },
     connectTimeout: 10000,
     idleTimeout: 300000,
     maxIdle: 10
@@ -30,12 +33,12 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'disabled (TCP proxy)');
+console.log('   SSL:', 'enabled (required for TCP proxy)');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Simple TCP proxy connection test
+// Simple TCP proxy connection test with SSL
 async function testTCPProxyConnection(retries = 3, delay = 1000) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -47,6 +50,9 @@ async function testTCPProxyConnection(retries = 3, delay = 1000) {
         user: dbConfig.user,
         password: dbConfig.password,
         database: dbConfig.database,
+        ssl: {
+          rejectUnauthorized: false
+        },
         connectTimeout: 10000
       });
       
@@ -63,6 +69,14 @@ async function testTCPProxyConnection(retries = 3, delay = 1000) {
       console.error(`❌ TCP Proxy connection failed (Attempt ${attempt}/${retries}):`);
       console.error(`   Error Code: ${error.code}`);
       console.error(`   Error Message: ${error.message}`);
+      
+      if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+        console.error(`   Possible causes:`);
+        console.error(`   - SSL handshake issues`);
+        console.error(`   - Railway MySQL service down`);
+        console.error(`   - Incorrect database credentials`);
+        console.error(`   - TCP proxy not properly configured`);
+      }
       
       if (attempt < retries) {
         console.log(`⏳ Retrying TCP Proxy in ${delay}ms...`);
@@ -105,11 +119,16 @@ async function query(sql, params = []) {
 testTCPProxyConnection().then(success => {
   if (success) {
     console.log('🎉 Database is ready for use');
-    console.log('✅ Connected via TCP Proxy');
+    console.log('✅ Connected via TCP Proxy with SSL');
     console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
   } else {
     console.error('⚠️  TCP Proxy connection failed - application may not work properly');
-    console.error('💡 Check Railway MySQL service status and credentials');
+    console.error('💡 Troubleshooting steps:');
+    console.error('   1. Check Railway MySQL service status');
+    console.error('   2. Verify MYSQL credentials in Railway dashboard');
+    console.error('   3. Ensure TCP proxy is enabled for MySQL service');
+    console.error('   4. Check Railway MySQL service logs');
+    console.error('   5. Try restarting MySQL service in Railway');
   }
 });
 
