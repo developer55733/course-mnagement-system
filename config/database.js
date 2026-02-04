@@ -33,7 +33,6 @@ const getDatabaseConfig = () => {
           minVersion: 'TLSv1.2'
         },
         connectTimeout: 10000,
-        acquireTimeout: 10000,
         idleTimeout: 300000,
         maxIdle: 10
       };
@@ -58,7 +57,6 @@ const getDatabaseConfig = () => {
       minVersion: 'TLSv1.2'
     },
     connectTimeout: 10000,
-    acquireTimeout: 10000,
     idleTimeout: 300000,
     maxIdle: 10
   };
@@ -81,7 +79,19 @@ async function testConnection(retries = 3, delay = 1000) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       console.log(`🔍 Testing database connection... (Attempt ${attempt}/${retries})`);
-      const connection = await pool.getConnection();
+      
+      // Create a fresh connection for each attempt
+      const connection = await mysql.createConnection({
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        ssl: dbConfig.ssl,
+        connectTimeout: 10000,
+        timeout: 60000
+      });
+      
       console.log('✅ Database connected successfully!');
       console.log('   Connection ID:', connection.threadId);
       
@@ -89,8 +99,8 @@ async function testConnection(retries = 3, delay = 1000) {
       const [rows] = await connection.query('SELECT 1 as test');
       console.log('✅ Database query test passed:', rows[0]);
       
-      connection.release();
-      console.log('✅ Connection released back to pool');
+      await connection.end();
+      console.log('✅ Connection closed successfully');
       
       return true;
     } catch (error) {
@@ -119,6 +129,12 @@ async function testConnection(retries = 3, delay = 1000) {
         console.error('   Possible causes:');
         console.error('   - Database does not exist');
         console.error('   - Wrong database name');
+      } else if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+        console.error('   Possible causes:');
+        console.error('   - Network interruption');
+        console.error('   - Database server restarted');
+        console.error('   - Connection timeout');
+        console.error('   - SSL handshake issues');
       }
       
       if (attempt < retries) {
