@@ -45,8 +45,8 @@ const getDatabaseConfig = () => {
 
 const dbConfig = getDatabaseConfig();
 
-// Create connection pool
-const pool = mysql.createPool(dbConfig);
+// Create connection pool (will be updated if fallback is needed)
+let pool = mysql.createPool(dbConfig);
 
 // Simple connection test with automatic fallback
 async function testConnectionWithFallback() {
@@ -117,11 +117,13 @@ async function testConnectionWithFallback() {
         
         await connection.end();
         
-        // Update pool configuration to use TCP proxy
+        // Update dbConfig and recreate pool with TCP proxy
         Object.assign(dbConfig, tcpConfig);
+        pool = mysql.createPool(tcpConfig);
         
         console.log(`✅ TCP PROXY CONNECTION SUCCESSFUL!`);
         console.log(`🎉 Database ready for use via TCP proxy`);
+        console.log(`🔄 Connection pool updated to use TCP proxy`);
         return true;
         
       } catch (tcpError) {
@@ -157,8 +159,13 @@ async function query(sql, params = []) {
   }
 }
 
+// Function to get current pool (updated after fallback)
+function getPool() {
+  return pool;
+}
+
 module.exports = { 
-  pool, 
+  pool: getPool(), 
   testConnection: testConnectionWithFallback, 
   query,
   config: dbConfig
