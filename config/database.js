@@ -12,6 +12,9 @@ const getDatabaseConfig = () => {
   console.log(`   MYSQLDATABASE: ${process.env.MYSQLDATABASE || 'railway'}`);
   console.log(`   MYSQL_URL: ${process.env.MYSQL_URL || 'NOT SET'}`);
   console.log(`   MYSQL_PUBLIC_URL: ${process.env.MYSQL_PUBLIC_URL || 'NOT SET'}`);
+  console.log(`   RAILWAY_TCP_PROXY_DOMAIN: ${process.env.RAILWAY_TCP_PROXY_DOMAIN || 'NOT SET'}`);
+  console.log(`   RAILWAY_TCP_PROXY_PORT: ${process.env.RAILWAY_TCP_PROXY_PORT || 'NOT SET'}`);
+  console.log(`   RAILWAY_PRIVATE_DOMAIN: ${process.env.RAILWAY_PRIVATE_DOMAIN || 'NOT SET'}`);
   console.log('   SSL: enabled');
   console.log('-------------------------------');
 
@@ -102,12 +105,14 @@ const getDatabaseConfig = () => {
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'TBTdIyRIUxlOnTBZRSgWKVeaMfUWRvVY';
   const database = process.env.MYSQLDATABASE || 'railway';
   
-  // Use TCP proxy directly since we know the working connection
-  const host = 'yamabiko.proxy.rlwy.net';
-  const port = 33264;
+  // Use Railway TCP proxy environment variables if available, otherwise fallback
+  const host = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
+  const port = parseInt(process.env.RAILWAY_TCP_PROXY_PORT) || 33264;
 
-  console.log('🔗 Using direct TCP proxy connection:');
+  console.log('🔗 Using Railway TCP proxy connection:');
   console.log('-------------------------------');
+  console.log(`   RAILWAY_TCP_PROXY_DOMAIN: ${process.env.RAILWAY_TCP_PROXY_DOMAIN || 'NOT SET'}`);
+  console.log(`   RAILWAY_TCP_PROXY_PORT: ${process.env.RAILWAY_TCP_PROXY_PORT || 'NOT SET'}`);
   console.log(`   Host: ${host}`);
   console.log(`   Port: ${port}`);
   console.log(`   User: ${user}`);
