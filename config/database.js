@@ -1,26 +1,35 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway environment variables directly - MYSQL_PUBLIC_URL is malformed
+// Use Railway environment variables with proper variable names
 const getDatabaseConfig = () => {
   console.log('🔗 Using Railway environment variables for database connection');
   console.log('🔗 Environment variables check:');
-  console.log('   MYSQLHOST:', process.env.MYSQLHOST || 'NOT SET');
-  console.log('   MYSQLPORT:', process.env.MYSQLPORT || 'NOT SET');
   console.log('   MYSQLUSER:', process.env.MYSQLUSER || 'NOT SET');
-  console.log('   MYSQLPASSWORD:', process.env.MYSQLPASSWORD ? 'SET' : 'NOT SET');
-  console.log('   MYSQLDATABASE:', process.env.MYSQLDATABASE || 'NOT SET');
+  console.log('   MYSQL_ROOT_PASSWORD:', process.env.MYSQL_ROOT_PASSWORD ? 'SET' : 'NOT SET');
+  console.log('   MYSQL_DATABASE:', process.env.MYSQL_DATABASE || 'NOT SET');
+  console.log('   RAILWAY_TCP_PROXY_DOMAIN:', process.env.RAILWAY_TCP_PROXY_DOMAIN || 'NOT SET');
+  console.log('   RAILWAY_TCP_PROXY_PORT:', process.env.RAILWAY_TCP_PROXY_PORT || 'NOT SET');
+  console.log('   RAILWAY_PRIVATE_DOMAIN:', process.env.RAILWAY_PRIVATE_DOMAIN || 'NOT SET');
   console.log('   MYSQL_PUBLIC_URL:', process.env.MYSQL_PUBLIC_URL || 'NOT SET');
   
+  // Use Railway's resolved variables or fallback to hardcoded values
+  const user = process.env.MYSQLUSER || 'root';
+  const password = process.env.MYSQL_ROOT_PASSWORD || process.env.MYSQLPASSWORD;
+  const database = process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway';
+  const proxyDomain = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'tramway.proxy.rlwy.net';
+  const proxyPort = process.env.RAILWAY_TCP_PROXY_PORT || '13023';
+  const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
+  
   // Try Railway private domain first (if available)
-  if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('railway.internal')) {
+  if (privateDomain) {
     console.log('🔗 Using Railway private domain connection');
     return {
-      host: process.env.MYSQLHOST,
-      port: parseInt(process.env.MYSQLPORT) || 3306,
-      user: process.env.MYSQLUSER || 'root',
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE || 'railway',
+      host: privateDomain,
+      port: 3306,
+      user: user,
+      password: password,
+      database: database,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
@@ -34,16 +43,13 @@ const getDatabaseConfig = () => {
   }
   
   // Fallback to TCP proxy
-  const proxyHost = 'tramway.proxy.rlwy.net';
-  const proxyPort = '13023';
-  
   console.log('🔗 Falling back to Railway TCP proxy connection');
   return {
-    host: proxyHost,
+    host: proxyDomain,
     port: parseInt(proxyPort),
-    user: process.env.MYSQLUSER || 'root',
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE || 'railway',
+    user: user,
+    password: password,
+    database: database,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
