@@ -266,6 +266,15 @@ async function query(sql, params = []) {
     global.dbConnectionTested = true;
     console.log('🔄 First database operation - testing connection...');
     await testConnectionWithFallback();
+    
+    // Force database initialization to fix table structure issues
+    console.log('🔄 Checking and fixing database table structure...');
+    try {
+      await initializeDatabase();
+      console.log('✅ Database table structure verified and fixed');
+    } catch (error) {
+      console.log('⚠️  Database initialization warning:', error.message);
+    }
   }
   
   try {
