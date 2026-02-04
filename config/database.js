@@ -157,13 +157,15 @@ async function testConnectionWithFallback() {
     const connection = await mysql.createConnection(dbConfig);
     
     // Test basic connection
-    const [rows] = await connection.query('SELECT 1 as test');
-    console.log(`   ✅ Basic connection successful: ${rows[0].test}`);
+    const result = await connection.query('SELECT 1 as test');
+    const [rows] = result;
+    console.log(`   ✅ Basic connection successful: ${rows && rows[0] ? rows[0].test : 'N/A'}`);
     
     // Test database operations
     try {
-      const [dbRows] = await connection.query('SELECT DATABASE() as current_db');
-      console.log(`   ✅ Database operations successful: ${dbRows[0].current_db}`);
+      const dbResult = await connection.query('SELECT DATABASE() as current_db');
+      const [dbRows] = dbResult;
+      console.log(`   ✅ Database operations successful: ${dbRows && dbRows[0] ? dbRows[0].current_db : 'N/A'}`);
     } catch (dbError) {
       console.log(`   ⚠️  Database operations test failed: ${dbError.message}`);
     }
@@ -207,13 +209,15 @@ async function testConnectionWithFallback() {
         const connection = await mysql.createConnection(tcpConfig);
         
         // Test basic connection
-        const [rows] = await connection.query('SELECT 1 as test');
-        console.log(`   ✅ TCP Proxy connection successful: ${rows[0].test}`);
+        const result = await connection.query('SELECT 1 as test');
+        const [rows] = result;
+        console.log(`   ✅ TCP Proxy connection successful: ${rows && rows[0] ? rows[0].test : 'N/A'}`);
         
         // Test database operations
         try {
-          const [dbRows] = await connection.query('SELECT DATABASE() as current_db');
-          console.log(`   ✅ TCP Proxy database operations successful: ${dbRows[0].current_db}`);
+          const dbResult = await connection.query('SELECT DATABASE() as current_db');
+          const [dbRows] = dbResult;
+          console.log(`   ✅ TCP Proxy database operations successful: ${dbRows && dbRows[0] ? dbRows[0].current_db : 'N/A'}`);
         } catch (dbError) {
           console.log(`   ⚠️  TCP Proxy database operations test failed: ${dbError.message}`);
         }
@@ -253,11 +257,16 @@ async function query(sql, params = []) {
       console.log('   Parameters:', params);
     }
     
-    const [rows] = await pool.query(sql, params);
-    console.log('✅ Query executed successfully');
-    console.log('   Rows returned:', rows.length);
+    const result = await pool.query(sql, params);
+    const [rows] = result;
     
-    return rows;
+    // Handle case where rows might be undefined
+    const safeRows = rows || [];
+    
+    console.log('✅ Query executed successfully');
+    console.log('   Rows returned:', safeRows.length);
+    
+    return safeRows;
   } catch (error) {
     console.error('❌ Query failed:');
     console.error('   SQL:', sql);
