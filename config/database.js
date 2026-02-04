@@ -304,9 +304,34 @@ async function query(sql, params = []) {
 
 // Initialize database tables
 async function initializeDatabase() {
+  console.log('🔄 Initializing database tables...');
+  
+  // First, let's check if tables exist and drop them to recreate with proper structure
+  const tablesToRecreate = ['users', 'modules', 'lecturers', 'timetable', 'settings'];
+  
+  for (const tableName of tablesToRecreate) {
+    try {
+      // Check if table exists and has proper structure
+      const tableCheck = await pool.query(`DESCRIBE ${tableName}`);
+      console.log(`✅ Table ${tableName} exists, checking structure...`);
+      
+      // Check if id field has AUTO_INCREMENT
+      const idField = tableCheck[0].find(field => field.Field === 'id');
+      if (idField && !idField.Extra.includes('auto_increment')) {
+        console.log(`⚠️  Table ${tableName} has incorrect ID field, recreating...`);
+        
+        // Drop the table to recreate it properly
+        await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
+        console.log(`🗑️  Dropped table ${tableName}`);
+      }
+    } catch (error) {
+      console.log(`ℹ️  Table ${tableName} doesn't exist, will create it`);
+    }
+  }
+  
   const createTables = [
     `CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       student_id VARCHAR(50) UNIQUE,
@@ -314,27 +339,27 @@ async function initializeDatabase() {
       role ENUM('user', 'admin') DEFAULT 'user',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
     
     `CREATE TABLE IF NOT EXISTS modules (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       code VARCHAR(50) UNIQUE NOT NULL,
       name VARCHAR(100) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
     
     `CREATE TABLE IF NOT EXISTS lecturers (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       module VARCHAR(100) NOT NULL,
       phone VARCHAR(20),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
     
     `CREATE TABLE IF NOT EXISTS timetable (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       test VARCHAR(100) NOT NULL,
       module VARCHAR(100) NOT NULL,
       date DATE NOT NULL,
@@ -342,24 +367,40 @@ async function initializeDatabase() {
       venue VARCHAR(100) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
     
     `CREATE TABLE IF NOT EXISTS settings (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       academic_year VARCHAR(20),
       semester INT,
       institution_name VARCHAR(100),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
   ];
 
   for (const sql of createTables) {
     try {
       await pool.query(sql);
-      console.log('✅ Table created successfully');
+      console.log('✅ Table created/recreated successfully');
     } catch (error) {
       console.log('⚠️  Table creation warning:', error.message);
+    }
+  }
+  
+  // Verify tables were created with proper AUTO_INCREMENT
+  console.log('🔍 Verifying table structures...');
+  for (const tableName of tablesToRecreate) {
+    try {
+      const desc = await pool.query(`DESCRIBE ${tableName}`);
+      const idField = desc[0].find(field => field.Field === 'id');
+      if (idField && idField.Extra.includes('auto_increment')) {
+        console.log(`✅ Table ${tableName} has proper AUTO_INCREMENT on id field`);
+      } else {
+        console.log(`❌ Table ${tableName} still has incorrect id field structure`);
+      }
+    } catch (error) {
+      console.log(`❌ Could not verify table ${tableName}: ${error.message}`);
     }
   }
   
@@ -388,6 +429,8 @@ async function initializeDatabase() {
   } catch (error) {
     console.log('⚠️  Default data insertion warning:', error.message);
   }
+  
+  console.log('✅ Database initialization completed');
 }
 
 // Function to get current pool (updated after fallback)
