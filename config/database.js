@@ -24,7 +24,7 @@ const getDatabaseConfig = () => {
       const url = new URL(process.env.MYSQL_URL);
       const config = {
         host: url.hostname,
-        port: parseInt(url.port) || 3306,
+        port: parseInt(url.port) || 33264,
         user: url.username,
         password: url.password,
         database: url.pathname.substring(1) || 'railway',
@@ -39,7 +39,8 @@ const getDatabaseConfig = () => {
           minVersion: 'TLSv1.2'
         },
         flags: '+MULTI_STATEMENTS',
-        charset: 'utf8mb4'
+        charset: 'utf8mb4',
+        protocol: 'tcp'
       };
       
       console.log(`   Host: ${config.host}`);
@@ -87,7 +88,8 @@ const getDatabaseConfig = () => {
       minVersion: 'TLSv1.2'
     },
     flags: '+MULTI_STATEMENTS',
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    protocol: 'tcp'
   };
 };
 
@@ -155,7 +157,8 @@ async function testConnectionWithFallback() {
             minVersion: 'TLSv1.2'
           },
           flags: '+MULTI_STATEMENTS',
-          charset: 'utf8mb4'
+          charset: 'utf8mb4',
+          protocol: 'tcp'
         };
         
         console.log(`   Connecting to TCP proxy: ${tcpConfig.host}:${tcpConfig.port}`);
