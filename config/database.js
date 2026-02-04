@@ -3,6 +3,11 @@ const mysql = require('mysql2/promise');
 
 // Try Railway public URL first, then fallback to private host
 const getDatabaseConfig = () => {
+  // For Railway, we need to use the proxy host and port
+  // Railway provides these specific values for MySQL connections
+  const railwayProxyHost = 'tramway.proxy.rlwy.net';
+  const railwayProxyPort = '13023';
+  
   // If Railway public URL is available, use it
   if (process.env.MYSQL_PUBLIC_URL) {
     console.log('🔗 Using Railway Public URL for database connection');
@@ -10,44 +15,38 @@ const getDatabaseConfig = () => {
       // Parse the public URL to extract connection details
       const url = new URL(process.env.MYSQL_PUBLIC_URL.replace('${{MYSQLUSER}}', process.env.MYSQLUSER || 'root')
                                                    .replace('${{MYSQL_ROOT_PASSWORD}}', process.env.MYSQLPASSWORD || '')
-                                                   .replace('${{RAILWAY_TCP_PROXY_DOMAIN}}', process.env.RAILWAY_TCP_PROXY_DOMAIN || '')
-                                                   .replace('${{RAILWAY_TCP_PROXY_PORT}}', process.env.RAILWAY_TCP_PROXY_PORT || '3306')
+                                                   .replace('${{RAILWAY_TCP_PROXY_DOMAIN}}', railwayProxyHost)
+                                                   .replace('${{RAILWAY_TCP_PROXY_PORT}}', railwayProxyPort)
                                                    .replace('${{MYSQL_DATABASE}}', process.env.MYSQLDATABASE || 'railway'));
       
       return {
         host: url.hostname,
-        port: url.port || 3306,
+        port: url.port || railwayProxyPort,
         user: url.username,
         password: url.password,
         database: url.pathname.substring(1), // Remove leading slash
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
-        ssl: { rejectUnauthorized: false },
-        acquireTimeout: 60000,
-        timeout: 60000,
-        reconnect: true
+        ssl: { rejectUnauthorized: false }
       };
     } catch (error) {
-      console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL, falling back to individual variables');
+      console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL, falling back to Railway proxy');
     }
   }
   
-  // Fallback to individual variables
-  console.log('🔗 Using individual environment variables for database connection');
+  // Fallback to Railway proxy configuration
+  console.log('🔗 Using Railway TCP proxy for database connection');
   return {
-    host: process.env.MYSQLHOST || process.env.DB_HOST,
-    port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
-    user: process.env.MYSQLUSER || process.env.DB_USER,
+    host: railwayProxyHost,
+    port: railwayProxyPort,
+    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
     password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
     database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: { rejectUnauthorized: false },
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true
+    ssl: { rejectUnauthorized: false }
   };
 };
 
