@@ -202,20 +202,22 @@ async function query(sql, params = []) {
   }
 }
 
-// Test connection with fallback on startup
+// Test connection with fallback on startup - don't block app startup
 testConnectionWithFallback().then(success => {
   if (success) {
     console.log('🎉 Database is ready for use');
     console.log('✅ Connected successfully');
     console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
   } else {
-    console.error('⚠️  All database connection methods failed - application may not work properly');
+    console.error('⚠️  All database connection methods failed');
+    console.error('💡 Application will start but database features will be unavailable');
     console.error('💡 Troubleshooting steps:');
     console.error('   1. Check Railway MySQL service status');
     console.error('   2. Verify MYSQL credentials in Railway dashboard');
     console.error('   3. Ensure TCP proxy is enabled for MySQL service');
     console.error('   4. Check Railway MySQL service logs');
     console.error('   5. Try restarting MySQL service in Railway');
+    console.error('   6. Check if database and app services are in the same Railway project');
   }
 });
 
