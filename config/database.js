@@ -48,10 +48,11 @@ const dbConfig = getDatabaseConfig();
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Simple connection test function
+// Simple connection test with automatic fallback
 async function testConnectionWithFallback() {
   console.log('🔍 Testing Database Connection...');
   
+  // Try current configuration first
   try {
     console.log(`   Connecting to: ${dbConfig.host}:${dbConfig.port}`);
     
@@ -77,6 +78,57 @@ async function testConnectionWithFallback() {
     
   } catch (error) {
     console.log(`   ❌ Connection failed: ${error.code} - ${error.message}`);
+    
+    // If internal connection fails, try TCP proxy
+    if (dbConfig.host.includes('railway.internal')) {
+      console.log(`🔄 Trying TCP proxy fallback...`);
+      
+      try {
+        const tcpConfig = {
+          host: 'tramway.proxy.rlwy.net',
+          port: 13023,
+          user: dbConfig.user,
+          password: dbConfig.password,
+          database: dbConfig.database,
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0,
+          connectTimeout: 20000,
+          idleTimeout: 300000,
+          maxIdle: 10,
+          ssl: false
+        };
+        
+        console.log(`   Connecting to TCP proxy: ${tcpConfig.host}:${tcpConfig.port}`);
+        
+        const connection = await mysql.createConnection(tcpConfig);
+        
+        // Test basic connection
+        const [rows] = await connection.query('SELECT 1 as test');
+        console.log(`   ✅ TCP Proxy connection successful: ${rows[0].test}`);
+        
+        // Test database operations
+        try {
+          const [dbRows] = await connection.query('SELECT DATABASE() as current_db');
+          console.log(`   ✅ TCP Proxy database operations successful: ${dbRows[0].current_db}`);
+        } catch (dbError) {
+          console.log(`   ⚠️  TCP Proxy database operations test failed: ${dbError.message}`);
+        }
+        
+        await connection.end();
+        
+        // Update pool configuration to use TCP proxy
+        Object.assign(dbConfig, tcpConfig);
+        
+        console.log(`✅ TCP PROXY CONNECTION SUCCESSFUL!`);
+        console.log(`🎉 Database ready for use via TCP proxy`);
+        return true;
+        
+      } catch (tcpError) {
+        console.log(`   ❌ TCP Proxy also failed: ${tcpError.code} - ${tcpError.message}`);
+      }
+    }
+    
     return false;
   }
 }
