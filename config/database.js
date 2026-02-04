@@ -1,60 +1,12 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Try Railway internal host first (more reliable), then fallback to proxy
+// Use Railway TCP proxy directly since internal host is failing
 const getDatabaseConfig = () => {
-  // Try Railway internal host first - more reliable within Railway environment
-  if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('railway.internal')) {
-    console.log('🔗 Using Railway internal host for database connection');
-    return {
-      host: process.env.MYSQLHOST,
-      port: process.env.MYSQLPORT || 3306,
-      user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
-      password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
-      database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      connectTimeout: 10000,
-      idleTimeout: 300000,
-      maxIdle: 10
-    };
-  }
-  
-  // Railway proxy configuration as fallback
+  // Railway proxy configuration - most reliable
   const railwayProxyHost = 'tramway.proxy.rlwy.net';
   const railwayProxyPort = '13023';
   
-  // If Railway public URL is available, use it
-  if (process.env.MYSQL_PUBLIC_URL) {
-    console.log('🔗 Using Railway Public URL for database connection');
-    try {
-      // Parse the public URL to extract connection details
-      const url = new URL(process.env.MYSQL_PUBLIC_URL.replace('${{MYSQLUSER}}', process.env.MYSQLUSER || 'root')
-                                                   .replace('${{MYSQL_ROOT_PASSWORD}}', process.env.MYSQLPASSWORD || '')
-                                                   .replace('${{RAILWAY_TCP_PROXY_DOMAIN}}', railwayProxyHost)
-                                                   .replace('${{RAILWAY_TCP_PROXY_PORT}}', railwayProxyPort)
-                                                   .replace('${{MYSQL_DATABASE}}', process.env.MYSQLDATABASE || 'railway'));
-      
-      return {
-        host: url.hostname,
-        port: url.port || railwayProxyPort,
-        user: url.username,
-        password: url.password,
-        database: url.pathname.substring(1), // Remove leading slash
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-        connectTimeout: 10000,
-        idleTimeout: 300000,
-        maxIdle: 10
-      };
-    } catch (error) {
-      console.log('⚠️  Failed to parse MYSQL_PUBLIC_URL, falling back to Railway proxy');
-    }
-  }
-  
-  // Fallback to Railway proxy configuration
   console.log('🔗 Using Railway TCP proxy for database connection');
   return {
     host: railwayProxyHost,
@@ -78,7 +30,7 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'disabled (Railway internal)');
+console.log('   SSL:', 'disabled (using TCP proxy)');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
