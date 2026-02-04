@@ -3,25 +3,32 @@ const mysql = require('mysql2/promise');
 
 // Use standard Railway MySQL environment variables
 const getDatabaseConfig = () => {
-  console.log('🔗 Using standard Railway MySQL environment variables');
-  console.log('🔗 Environment variables check:');
-  console.log('   MYSQLUSER:', process.env.MYSQLUSER || 'NOT SET');
-  console.log('   MYSQLPASSWORD:', process.env.MYSQLPASSWORD || 'NOT SET');
-  console.log('   MYSQLDATABASE:', process.env.MYSQLDATABASE || 'NOT SET');
-  console.log('   MYSQLHOST:', process.env.MYSQLHOST || 'NOT SET');
-  console.log('   MYSQLPORT:', process.env.MYSQLPORT || 'NOT SET');
-  console.log('   MYSQL_ROOT_PASSWORD:', process.env.MYSQL_ROOT_PASSWORD ? 'SET' : 'NOT SET');
-  
+  console.log('🔗 Railway Database Configuration:');
+  console.log('-------------------------------');
+  console.log(`   Host: ${process.env.MYSQLHOST || 'NOT SET'}`);
+  console.log(`   Port: ${process.env.MYSQLPORT || '3306'}`);
+  console.log(`   User: ${process.env.MYSQLUSER || 'root'}`);
+  console.log(`   Database: ${process.env.MYSQLDATABASE || 'railway'}`);
+  console.log('   SSL: disabled');
+  console.log('-------------------------------');
+
   // Use standard Railway MySQL variables
   const user = process.env.MYSQLUSER || 'root';
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD;
   const database = process.env.MYSQLDATABASE || 'railway';
   const host = process.env.MYSQLHOST;
   const port = parseInt(process.env.MYSQLPORT) || 3306;
-  
+
   // Try standard Railway MySQL connection first
   if (host) {
-    console.log('🔗 Using Railway MySQL connection');
+    console.log('🔗 Using Railway MySQL connection:');
+    console.log('-------------------------------');
+    console.log(`   Host: ${host}`);
+    console.log(`   Port: ${port}`);
+    console.log(`   User: ${user}`);
+    console.log(`   Database: ${database}`);
+    console.log('-------------------------------');
+
     return {
       host: host,
       port: port,
@@ -36,9 +43,16 @@ const getDatabaseConfig = () => {
       maxIdle: 10
     };
   }
-  
+
   // Fallback to hardcoded TCP proxy
-  console.log('🔗 Falling back to hardcoded TCP proxy connection');
+  console.log('🔗 Falling back to TCP proxy connection:');
+  console.log('-------------------------------');
+  console.log('   Host: tramway.proxy.rlwy.net');
+  console.log('   Port: 13023');
+  console.log(`   User: ${user}`);
+  console.log(`   Database: ${database}`);
+  console.log('-------------------------------');
+
   return {
     host: 'tramway.proxy.rlwy.net',
     port: 13023,
@@ -48,7 +62,7 @@ const getDatabaseConfig = () => {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    connectTimeout: 10000,
+    connectTimeout: 5000,
     idleTimeout: 300000,
     maxIdle: 10
   };
@@ -56,31 +70,22 @@ const getDatabaseConfig = () => {
 
 const dbConfig = getDatabaseConfig();
 
-console.log('🔗 Database Configuration:');
-console.log('   Host:', dbConfig.host || 'NOT SET');
-console.log('   Port:', dbConfig.port);
-console.log('   User:', dbConfig.user || 'NOT SET');
-console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'disabled');
-
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Test both private domain and TCP proxy with fallback and enhanced debugging
+// Test database connection with fallback
 async function testConnectionWithFallback(retries = 1, delay = 500) {
-  // Use standard Railway MySQL variables
   const user = process.env.MYSQLUSER || 'root';
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD;
   const database = process.env.MYSQLDATABASE || 'railway';
   const host = process.env.MYSQLHOST;
   const port = parseInt(process.env.MYSQLPORT) || 3306;
   
-  console.log('🔍 Enhanced connection debugging:');
-  console.log('   Full connection string: mysql://' + user + ':***@' + (host || 'NO-HOST') + ':' + port + '/' + database);
+  console.log('🔍 Testing Database Connection...');
   
   const connectionMethods = [];
   
-  // Try standard Railway MySQL connection first
+  // Try Railway MySQL connection
   if (host) {
     connectionMethods.push({
       name: 'Railway MySQL',
@@ -93,21 +98,9 @@ async function testConnectionWithFallback(retries = 1, delay = 500) {
         connectTimeout: 5000
       }
     });
-    
-    // Also try without database name
-    connectionMethods.push({
-      name: 'Railway MySQL (no DB)',
-      config: {
-        host: host,
-        port: port,
-        user: user,
-        password: password,
-        connectTimeout: 5000
-      }
-    });
   }
   
-  // Try hardcoded TCP proxy
+  // Try TCP proxy fallback
   connectionMethods.push({
     name: 'TCP Proxy',
     config: {
@@ -120,57 +113,22 @@ async function testConnectionWithFallback(retries = 1, delay = 500) {
     }
   });
   
-  // Try TCP proxy without database name
-  connectionMethods.push({
-    name: 'TCP Proxy (no DB)',
-    config: {
-      host: 'tramway.proxy.rlwy.net',
-      port: 13023,
-      user: user,
-      password: password,
-      connectTimeout: 5000
-    }
-  });
-  
-  // Try each connection method
+  // Test each method
   for (const method of connectionMethods) {
-    console.log(`🔗 Testing ${method.name} connection...`);
+    console.log(`🔗 Testing ${method.name}...`);
     
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        console.log(`   Attempt ${attempt}/${retries} for ${method.name}`);
-        console.log(`   Connecting to: ${method.config.host}:${method.config.port}`);
-        
-        const connection = await mysql.createConnection(method.config);
-        
-        // Test query
-        const [rows] = await connection.query('SELECT 1 as test');
-        await connection.end();
-        
-        console.log(`✅ ${method.name} connection successful!`);
-        console.log(`   Test result:`, rows[0]);
-        
-        // Update global pool config to working method
-        Object.assign(dbConfig, method.config);
-        
-        return true;
-        
-      } catch (error) {
-        console.error(`❌ ${method.name} connection failed (Attempt ${attempt}/${retries}):`);
-        console.error(`   Error Code: ${error.code}`);
-        console.error(`   Error Message: ${error.message}`);
-        console.error(`   Error Number: ${error.errno}`);
-        console.error(`   SQL State: ${error.sqlState}`);
-        
-        if (attempt < retries) {
-          console.log(`   ⏳ Retrying ${method.name} in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2;
-        }
-      }
+    try {
+      const connection = await mysql.createConnection(method.config);
+      const [rows] = await connection.query('SELECT 1 as test');
+      await connection.end();
+      
+      console.log(`✅ ${method.name} connected successfully!`);
+      Object.assign(dbConfig, method.config);
+      return true;
+      
+    } catch (error) {
+      console.log(`❌ ${method.name} failed: ${error.code}`);
     }
-    
-    console.log(`❌ ${method.name} failed after ${retries} attempts`);
   }
   
   return false;
@@ -202,22 +160,15 @@ async function query(sql, params = []) {
   }
 }
 
-// Test connection with fallback on startup - don't block app startup
+// Test connection on startup
 testConnectionWithFallback().then(success => {
   if (success) {
-    console.log('🎉 Database is ready for use');
-    console.log('✅ Connected successfully');
+    console.log('🎉 Database connected successfully!');
     console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
   } else {
-    console.error('⚠️  All database connection methods failed');
-    console.error('💡 Application will start but database features will be unavailable');
-    console.error('💡 Troubleshooting steps:');
-    console.error('   1. Check Railway MySQL service status');
-    console.error('   2. Verify MYSQL credentials in Railway dashboard');
-    console.error('   3. Ensure TCP proxy is enabled for MySQL service');
-    console.error('   4. Check Railway MySQL service logs');
-    console.error('   5. Try restarting MySQL service in Railway');
-    console.error('   6. Check if database and app services are in the same Railway project');
+    console.log('⚠️  Database connection failed');
+    console.log('💡 Application will start but database features will be unavailable');
+    console.log('💡 To fix: Check Railway MySQL service status and restart if needed');
   }
 });
 
