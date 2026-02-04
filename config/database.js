@@ -1,21 +1,38 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Use Railway private domain as specified
+// Fallback strategy: try private domain, then TCP proxy, then public URL
 const getDatabaseConfig = () => {
-  // Use Railway private domain (MYSQLHOST) and port 3306
-  const host = process.env.MYSQLHOST;
-  const port = process.env.MYSQLPORT || '3306';
+  // Method 1: Railway private domain (MYSQLHOST) - preferred
+  const privateHost = process.env.MYSQLHOST;
+  const privatePort = process.env.MYSQLPORT || '3306';
   
-  if (!host) {
-    console.error('❌ MYSQLHOST environment variable is not set!');
-    process.exit(1);
+  if (privateHost) {
+    console.log('🔗 Attempting Railway private domain connection');
+    return {
+      host: privateHost,
+      port: parseInt(privatePort),
+      user: process.env.MYSQLUSER || 'root',
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE || 'railway',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      connectTimeout: 10000,
+      idleTimeout: 300000,
+      maxIdle: 10,
+      _method: 'private_domain'
+    };
   }
   
-  console.log('🔗 Using Railway private domain for database connection');
+  // Method 2: Railway TCP proxy - fallback
+  const proxyHost = 'tramway.proxy.rlwy.net';
+  const proxyPort = '13023';
+  
+  console.log('🔗 Falling back to Railway TCP proxy connection');
   return {
-    host: host,
-    port: parseInt(port),
+    host: proxyHost,
+    port: parseInt(proxyPort),
     user: process.env.MYSQLUSER || 'root',
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE || 'railway',
@@ -24,7 +41,8 @@ const getDatabaseConfig = () => {
     queueLimit: 0,
     connectTimeout: 10000,
     idleTimeout: 300000,
-    maxIdle: 10
+    maxIdle: 10,
+    _method: 'tcp_proxy'
   };
 };
 
@@ -35,78 +53,80 @@ console.log('   Host:', dbConfig.host || 'NOT SET');
 console.log('   Port:', dbConfig.port);
 console.log('   User:', dbConfig.user || 'NOT SET');
 console.log('   Database:', dbConfig.database);
-console.log('   SSL:', 'disabled (Railway private domain)');
+console.log('   Method:', dbConfig._method || 'unknown');
+console.log('   SSL:', 'disabled');
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Function to test connection with detailed error logging and retry logic
-async function testConnection(retries = 3, delay = 1000) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      console.log(`🔍 Testing database connection... (Attempt ${attempt}/${retries})`);
-      
-      // Create a fresh connection for each attempt
-      const connection = await mysql.createConnection({
-        host: dbConfig.host,
-        port: dbConfig.port,
-        user: dbConfig.user,
-        password: dbConfig.password,
-        database: dbConfig.database,
+// Function to test connection with fallback methods
+async function testConnectionWithFallback(retries = 3, delay = 1000) {
+  const methods = [
+    {
+      name: 'Private Domain',
+      config: {
+        host: process.env.MYSQLHOST,
+        port: parseInt(process.env.MYSQLPORT || '3306'),
+        user: process.env.MYSQLUSER || 'root',
+        password: process.env.MYSQLPASSWORD,
+        database: process.env.MYSQLDATABASE || 'railway',
         connectTimeout: 10000
-      });
-      
-      console.log('✅ Database connected successfully!');
-      console.log('   Connection ID:', connection.threadId);
-      
-      // Test a simple query
-      const [rows] = await connection.query('SELECT 1 as test');
-      console.log('✅ Database query test passed:', rows[0]);
-      
-      await connection.end();
-      console.log('✅ Connection closed successfully');
-      
-      return true;
-    } catch (error) {
-      console.error(`❌ Database connection failed (Attempt ${attempt}/${retries}):`);
-      console.error('   Error Code:', error.code);
-      console.error('   Error Message:', error.message);
-      console.error('   Error Number:', error.errno);
-      console.error('   SQL State:', error.sqlState);
-      
-      if (error.code === 'ETIMEDOUT') {
-        console.error('   Possible causes:');
-        console.error('   - Network connectivity issues');
-        console.error('   - Database server is overloaded');
-        console.error('   - Firewall blocking connection');
-        console.error('   - Wrong host or port');
-      } else if (error.code === 'ECONNREFUSED') {
-        console.error('   Possible causes:');
-        console.error('   - Database server is not running');
-        console.error('   - Wrong host or port');
-        console.error('   - Firewall blocking connection');
-      } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-        console.error('   Possible causes:');
-        console.error('   - Wrong username or password');
-        console.error('   - User does not have permission');
-      } else if (error.code === 'ER_BAD_DB_ERROR') {
-        console.error('   Possible causes:');
-        console.error('   - Database does not exist');
-        console.error('   - Wrong database name');
-      } else if (error.code === 'PROTOCOL_CONNECTION_LOST') {
-        console.error('   Possible causes:');
-        console.error('   - Network interruption');
-        console.error('   - Database server restarted');
-        console.error('   - Connection timeout');
-        console.error('   - SSL handshake issues');
       }
-      
-      if (attempt < retries) {
-        console.log(`⏳ Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2; // Exponential backoff
+    },
+    {
+      name: 'TCP Proxy',
+      config: {
+        host: 'tramway.proxy.rlwy.net',
+        port: 13023,
+        user: process.env.MYSQLUSER || 'root',
+        password: process.env.MYSQLPASSWORD,
+        database: process.env.MYSQLDATABASE || 'railway',
+        connectTimeout: 10000
       }
     }
+  ];
+
+  for (const method of methods) {
+    if (!method.config.host) {
+      console.log(`⚠️  Skipping ${method.name} - host not available`);
+      continue;
+    }
+
+    console.log(`🔗 Testing ${method.name} connection...`);
+    
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`   Attempt ${attempt}/${retries} for ${method.name}`);
+        
+        const connection = await mysql.createConnection(method.config);
+        
+        // Test query
+        const [rows] = await connection.query('SELECT 1 as test');
+        await connection.end();
+        
+        console.log(`✅ ${method.name} connection successful!`);
+        console.log(`   Test result:`, rows[0]);
+        
+        // Update global pool config to working method
+        Object.assign(dbConfig, method.config);
+        dbConfig._method = method.name.toLowerCase().replace(' ', '_');
+        
+        return true;
+        
+      } catch (error) {
+        console.error(`❌ ${method.name} connection failed (Attempt ${attempt}/${retries}):`);
+        console.error(`   Error Code: ${error.code}`);
+        console.error(`   Error Message: ${error.message}`);
+        
+        if (attempt < retries) {
+          console.log(`   ⏳ Retrying ${method.name} in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
+        }
+      }
+    }
+    
+    console.log(`❌ ${method.name} failed after ${retries} attempts`);
   }
   
   return false;
@@ -138,18 +158,20 @@ async function query(sql, params = []) {
   }
 }
 
-// Test connection on startup
-testConnection().then(success => {
+// Test connection on startup with fallback methods
+testConnectionWithFallback().then(success => {
   if (success) {
     console.log('🎉 Database is ready for use');
+    console.log(`✅ Using connection method: ${dbConfig._method}`);
+    console.log(`✅ Connected to: ${dbConfig.host}:${dbConfig.port}`);
   } else {
-    console.error('⚠️  Database connection failed - application may not work properly');
+    console.error('⚠️  All database connection methods failed - application may not work properly');
   }
 });
 
 module.exports = { 
   pool, 
-  testConnection, 
+  testConnection: testConnectionWithFallback, 
   query,
   config: dbConfig
 };
