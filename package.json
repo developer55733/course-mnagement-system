@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "test-db": "node test-db-connection.js",
     "dev": "nodemon server.js",
     "build": "echo 'Build completed'",
     "heroku-postbuild": "npm install"
