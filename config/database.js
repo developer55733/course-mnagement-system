@@ -279,7 +279,108 @@ async function query(sql, params = []) {
     console.error('   Error Code:', error.code);
     console.error('   Error Message:', error.message);
     
+    // If table doesn't exist, try to create it
+    if (error.code === 'ER_NO_SUCH_TABLE') {
+      console.log('🔄 Table does not exist, attempting to create database tables...');
+      try {
+        await initializeDatabase();
+        console.log('✅ Database tables created successfully, retrying query...');
+        // Retry the original query
+        const retryResult = await pool.query(sql, params);
+        const [retryRows] = retryResult;
+        return retryRows || [];
+      } catch (initError) {
+        console.error('❌ Failed to initialize database:', initError.message);
+        throw error; // Throw original error if initialization fails
+      }
+    }
+    
     throw error;
+  }
+}
+
+// Initialize database tables
+async function initializeDatabase() {
+  const createTables = [
+    `CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(100) UNIQUE NOT NULL,
+      student_id VARCHAR(50) UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      role ENUM('user', 'admin') DEFAULT 'user',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_email (email),
+      INDEX idx_student_id (student_id),
+      INDEX idx_role (role)
+    )`,
+    
+    `CREATE TABLE IF NOT EXISTS modules (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      code VARCHAR(50) UNIQUE NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_code (code)
+    )`,
+    
+    `CREATE TABLE IF NOT EXISTS lecturers (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      module VARCHAR(100) NOT NULL,
+      phone VARCHAR(20),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_module (module)
+    )`,
+    
+    `CREATE TABLE IF NOT EXISTS timetable (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      test VARCHAR(100) NOT NULL,
+      module VARCHAR(100) NOT NULL,
+      date DATE NOT NULL,
+      time TIME NOT NULL,
+      venue VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_module (module),
+      INDEX idx_date (date)
+    )`,
+    
+    `CREATE TABLE IF NOT EXISTS settings (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      academic_year VARCHAR(20),
+      semester INT,
+      institution_name VARCHAR(100),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`
+  ];
+
+  for (const sql of createTables) {
+    await pool.query(sql);
+  }
+  
+  // Insert default data if tables are empty
+  const userCount = await pool.query('SELECT COUNT(*) as count FROM users');
+  if (userCount[0][0].count === 0) {
+    console.log('🔄 Inserting default data...');
+    
+    // Insert default users
+    await pool.query(
+      `INSERT INTO users (name, email, student_id, password, role) VALUES 
+       ('Admin User', 'admin@system.edu', 'ADMIN001', '$2b$10$sqG0niYZXluB1zwBdD4CMO23Tc1VJ5BOh3y8mjHia7l65bENYwEOe', 'admin')`
+    );
+    
+    // Insert default modules
+    await pool.query(
+      `INSERT INTO modules (code, name) VALUES 
+       ('IT101', 'Introduction to Programming'),
+       ('IT102', 'Web Development Fundamentals')`
+    );
+    
+    console.log('✅ Default data inserted successfully');
   }
 }
 
