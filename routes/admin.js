@@ -22,8 +22,9 @@ router.get('/info', adminAuth, async (req, res) => {
     const results = {};
     for (const [key, q] of Object.entries(queries)) {
       try {
-        const [rows] = await pool.query(q);
-        results[key] = rows[0]?.count || 0;
+        const result = await pool.query(q);
+        const [rows] = result;
+        results[key] = (rows && rows[0]) ? rows[0].count : 0;
       } catch (e) {
         results[key] = 0;
       }

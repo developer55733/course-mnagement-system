@@ -2,13 +2,15 @@ const pool = require('../config/database');
 
 class Timetable {
   static async getAll() {
-    const [rows] = await pool.query('SELECT id, test, module, date, time, venue, created_at FROM timetable ORDER BY date, time');
-    return rows;
+    const result = await pool.query('SELECT id, test, module, date, time, venue, created_at FROM timetable ORDER BY date, time');
+    const [rows] = result;
+    return rows || [];
   }
 
   static async getById(id) {
-    const [rows] = await pool.query('SELECT * FROM timetable WHERE id = ?', [id]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM timetable WHERE id = ?', [id]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async create(test, module, date, time, venue) {
@@ -33,7 +35,8 @@ class Timetable {
   }
 
   static async getByModule(module) {
-    const [rows] = await pool.query('SELECT * FROM timetable WHERE module = ? ORDER BY date, time', [module]);
+    const result = await pool.query('SELECT * FROM timetable WHERE module = ? ORDER BY date, time', [module]);
+    const [rows] = result;
     return rows || [];
   }
 }

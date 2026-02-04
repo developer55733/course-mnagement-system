@@ -2,18 +2,21 @@ const pool = require('../config/database');
 
 class Module {
   static async getAll() {
-    const [rows] = await pool.query('SELECT id, code, name, created_at FROM modules ORDER BY code');
-    return rows;
+    const result = await pool.query('SELECT id, code, name, created_at FROM modules ORDER BY code');
+    const [rows] = result;
+    return rows || [];
   }
 
   static async getById(id) {
-    const [rows] = await pool.query('SELECT * FROM modules WHERE id = ?', [id]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM modules WHERE id = ?', [id]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async getByCode(code) {
-    const [rows] = await pool.query('SELECT * FROM modules WHERE code = ?', [code]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM modules WHERE code = ?', [code]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async create(code, name) {

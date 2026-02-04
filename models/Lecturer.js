@@ -2,13 +2,15 @@ const pool = require('../config/database');
 
 class Lecturer {
   static async getAll() {
-    const [rows] = await pool.query('SELECT id, name, module, phone, created_at FROM lecturers ORDER BY id');
-    return rows;
+    const result = await pool.query('SELECT id, name, module, phone, created_at FROM lecturers ORDER BY id');
+    const [rows] = result;
+    return rows || [];
   }
 
   static async getById(id) {
-    const [rows] = await pool.query('SELECT * FROM lecturers WHERE id = ?', [id]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM lecturers WHERE id = ?', [id]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async create(name, module, phone) {
@@ -33,7 +35,8 @@ class Lecturer {
   }
 
   static async findByModule(module) {
-    const [rows] = await pool.query('SELECT * FROM lecturers WHERE module = ?', [module]);
+    const result = await pool.query('SELECT * FROM lecturers WHERE module = ?', [module]);
+    const [rows] = result;
     return rows || [];
   }
 }

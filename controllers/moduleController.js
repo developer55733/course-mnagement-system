@@ -7,7 +7,7 @@ exports.getAllModules = async (req, res) => {
     // attach lecturer name (first lecturer found for the module) if available
     const enriched = await Promise.all(modules.map(async (m) => {
       const lecturers = await Lecturer.findByModule(m.code);
-      return { ...m, lecturer: (lecturers && lecturers[0]) ? lecturers[0].name : null };
+      return { ...m, lecturer: (lecturers && lecturers.length > 0 && lecturers[0]) ? lecturers[0].name : null };
     }));
     res.json({ success: true, data: enriched });
   } catch (error) {

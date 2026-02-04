@@ -2,8 +2,9 @@ const pool = require('../config/database');
 
 class Settings {
   static async get() {
-    const [rows] = await pool.query('SELECT * FROM settings LIMIT 1');
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM settings LIMIT 1');
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async update(academicYear, semester, institutionName) {

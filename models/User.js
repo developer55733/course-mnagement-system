@@ -3,28 +3,33 @@ const bcrypt = require('bcryptjs');
 
 class User {
   static async getAll() {
-    const [rows] = await pool.query('SELECT id, name, email, student_id, role, created_at FROM users');
-    return rows;
+    const result = await pool.query('SELECT id, name, email, student_id, role, created_at FROM users');
+    const [rows] = result;
+    return rows || [];
   }
 
   static async getById(id) {
-    const [rows] = await pool.query('SELECT id, name, email, student_id, role, created_at FROM users WHERE id = ?', [id]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT id, name, email, student_id, role, created_at FROM users WHERE id = ?', [id]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async findByEmail(email) {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async findByStudentId(studentId) {
-    const [rows] = await pool.query('SELECT * FROM users WHERE student_id = ?', [studentId]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM users WHERE student_id = ?', [studentId]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async findById(id) {
-    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
-    return rows[0] || null;
+    const result = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    const [rows] = result;
+    return rows && rows[0] ? rows[0] : null;
   }
 
   static async create(name, email, password, studentId = null) {
