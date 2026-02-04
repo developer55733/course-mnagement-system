@@ -59,8 +59,8 @@ const getDatabaseConfig = () => {
   const user = process.env.MYSQLUSER || 'root';
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD;
   const database = process.env.MYSQLDATABASE || 'railway';
-  const host = process.env.MYSQLHOST || 'tramway.proxy.rlwy.net';
-  const port = parseInt(process.env.MYSQLPORT) || 13023;
+  const host = process.env.MYSQLHOST || 'yamabiko.proxy.rlwy.net';
+  const port = parseInt(process.env.MYSQLPORT) || 33264;
 
   console.log('🔗 Using environment variable fallback:');
   console.log('-------------------------------');
@@ -139,8 +139,8 @@ async function testConnectionWithFallback() {
       
       try {
         const tcpConfig = {
-          host: 'tramway.proxy.rlwy.net',
-          port: 13023,
+          host: 'yamabiko.proxy.rlwy.net',
+          port: 33264,
           user: dbConfig.user,
           password: dbConfig.password,
           database: dbConfig.database,
