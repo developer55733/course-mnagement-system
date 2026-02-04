@@ -1,41 +1,112 @@
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'tramway.proxy.rlwy.net',
-  port: process.env.DB_PORT || 13023,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'IdrpXrLjiqhSvhxumRfcVooPyKkSGKXF',
-  database: process.env.DB_NAME || 'railway',
+// Database configuration using Railway MySQL variables
+const dbConfig = {
+  host: process.env.MYSQLHOST || process.env.DB_HOST,
+  port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
+  user: process.env.MYSQLUSER || process.env.DB_USER,
+  password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+  database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  // MySQL SSL configuration for production
-  ssl: process.env.NODE_ENV === 'production' ? {
+  // SSL configuration for Railway MySQL
+  ssl: {
     rejectUnauthorized: false
-  } : false,
-});
-
-// Test connection with retry logic
-const testConnection = async (retries = 5) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const conn = await pool.getConnection();
-      console.log('✓ MySQL connected successfully');
-      conn.release();
-      return true;
-    } catch (err) {
-      console.error(`✗ MySQL connection attempt ${i + 1} failed:`, err.message);
-      if (i === retries - 1) {
-        console.error('❌ MySQL connection failed. Please check your database configuration.');
-        return false;
-      }
-      // Wait before retry with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
-    }
   }
 };
 
-// Test connection
-testConnection();
+console.log('🔗 Database Configuration:');
+console.log('   Host:', dbConfig.host || 'NOT SET');
+console.log('   Port:', dbConfig.port);
+console.log('   User:', dbConfig.user || 'NOT SET');
+console.log('   Database:', dbConfig.database);
+console.log('   SSL:', 'enabled');
 
-module.exports = pool;
+// Create connection pool
+const pool = mysql.createPool(dbConfig);
+
+// Function to test connection with detailed error logging
+async function testConnection() {
+  try {
+    console.log('🔍 Testing database connection...');
+    const connection = await pool.getConnection();
+    console.log('✅ Database connected successfully!');
+    console.log('   Connection ID:', connection.threadId);
+    
+    // Test a simple query
+    const [rows] = await connection.query('SELECT 1 as test');
+    console.log('✅ Database query test passed:', rows[0]);
+    
+    connection.release();
+    console.log('✅ Connection released back to pool');
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:');
+    console.error('   Error Code:', error.code);
+    console.error('   Error Message:', error.message);
+    console.error('   Error Number:', error.errno);
+    console.error('   SQL State:', error.sqlState);
+    
+    if (error.code === 'ECONNREFUSED') {
+      console.error('   Possible causes:');
+      console.error('   - Database server is not running');
+      console.error('   - Wrong host or port');
+      console.error('   - Firewall blocking connection');
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error('   Possible causes:');
+      console.error('   - Wrong username or password');
+      console.error('   - User does not have permission');
+    } else if (error.code === 'ER_BAD_DB_ERROR') {
+      console.error('   Possible causes:');
+      console.error('   - Database does not exist');
+      console.error('   - Wrong database name');
+    }
+    
+    return false;
+  }
+}
+
+// Enhanced query function with error logging
+async function query(sql, params = []) {
+  try {
+    console.log('🔍 Executing query:', sql);
+    if (params.length > 0) {
+      console.log('   Parameters:', params);
+    }
+    
+    const [rows] = await pool.query(sql, params);
+    console.log('✅ Query executed successfully');
+    console.log('   Rows returned:', rows.length);
+    
+    return rows;
+  } catch (error) {
+    console.error('❌ Query failed:');
+    console.error('   SQL:', sql);
+    console.error('   Parameters:', params);
+    console.error('   Error Code:', error.code);
+    console.error('   Error Message:', error.message);
+    console.error('   Error Number:', error.errno);
+    console.error('   SQL State:', error.sqlState);
+    
+    throw error;
+  }
+}
+
+// Test connection on startup
+testConnection().then(success => {
+  if (success) {
+    console.log('🎉 Database is ready for use');
+  } else {
+    console.error('⚠️  Database connection failed - application may not work properly');
+  }
+});
+
+module.exports = { 
+  pool, 
+  testConnection, 
+  query,
+  config: dbConfig
+};
