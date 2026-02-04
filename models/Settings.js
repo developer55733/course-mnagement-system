@@ -12,20 +12,22 @@ class Settings {
     
     if (!settings) {
       // Create initial settings if they don't exist
-      const [result] = await pool.execute(
+      const result = await pool.query(
         'INSERT INTO settings (academic_year, semester, institution_name) VALUES (?, ?, ?)',
         [academicYear, semester, institutionName]
       );
-      return { id: result.insertId, academic_year: academicYear, semester, institution_name: institutionName };
+      const [insertResult] = result;
+      return { id: insertResult.insertId, academic_year: academicYear, semester, institution_name: institutionName };
     }
     
     // Update existing settings
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'UPDATE settings SET academic_year = ?, semester = ?, institution_name = ? WHERE id = ?',
       [academicYear, semester, institutionName, settings.id]
     );
+    const [updateResult] = result;
     
-    if (result.affectedRows > 0) {
+    if (updateResult.affectedRows > 0) {
       return { id: settings.id, academic_year: academicYear, semester, institution_name: institutionName };
     }
     

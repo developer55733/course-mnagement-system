@@ -20,24 +20,27 @@ class Module {
   }
 
   static async create(code, name) {
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'INSERT INTO modules (code, name) VALUES (?, ?)',
       [code, name]
     );
-    return { id: result.insertId, code, name };
+    const [insertResult] = result;
+    return { id: insertResult.insertId, code, name };
   }
 
   static async update(id, code, name) {
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'UPDATE modules SET code = ?, name = ? WHERE id = ?',
       [code, name, id]
     );
-    return result.affectedRows > 0;
+    const [updateResult] = result;
+    return updateResult.affectedRows > 0;
   }
 
   static async delete(id) {
-    const [result] = await pool.execute('DELETE FROM modules WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+    const result = await pool.query('DELETE FROM modules WHERE id = ?', [id]);
+    const [deleteResult] = result;
+    return deleteResult.affectedRows > 0;
   }
 }
 

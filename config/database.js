@@ -363,8 +363,9 @@ async function initializeDatabase() {
   }
   
   // Insert default data if tables are empty
-  const userCount = await pool.query('SELECT COUNT(*) as count FROM users');
-  if (userCount[0][0].count === 0) {
+  const userResult = await pool.query('SELECT COUNT(*) as count FROM users');
+  const userCount = userResult[0];
+  if (userCount && userCount[0] && userCount[0].count === 0) {
     console.log('🔄 Inserting default data...');
     
     // Insert default users

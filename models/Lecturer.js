@@ -14,24 +14,27 @@ class Lecturer {
   }
 
   static async create(name, module, phone) {
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'INSERT INTO lecturers (name, module, phone) VALUES (?, ?, ?)',
       [name, module, phone]
     );
-    return { id: result.insertId, name, module, phone };
+    const [insertResult] = result;
+    return { id: insertResult.insertId, name, module, phone };
   }
 
   static async update(id, name, module, phone) {
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'UPDATE lecturers SET name = ?, module = ?, phone = ? WHERE id = ?',
       [name, module, phone, id]
     );
-    return result.affectedRows > 0;
+    const [updateResult] = result;
+    return updateResult.affectedRows > 0;
   }
 
   static async delete(id) {
-    const [result] = await pool.execute('DELETE FROM lecturers WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+    const result = await pool.query('DELETE FROM lecturers WHERE id = ?', [id]);
+    const [deleteResult] = result;
+    return deleteResult.affectedRows > 0;
   }
 
   static async findByModule(module) {

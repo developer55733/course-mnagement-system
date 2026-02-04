@@ -34,20 +34,22 @@ class User {
 
   static async create(name, email, password, studentId = null) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'INSERT INTO users (name, email, password, student_id, role) VALUES (?, ?, ?, ?, ?)',
       [name, email, hashedPassword, studentId, 'user']
     );
-    return { id: result.insertId, name, email, student_id: studentId, role: 'user' };
+    const [insertResult] = result;
+    return { id: insertResult.insertId, name, email, student_id: studentId, role: 'user' };
   }
 
   static async createAdmin(name, email, password, studentId = null) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'INSERT INTO users (name, email, password, student_id, role) VALUES (?, ?, ?, ?, ?)',
       [name, email, hashedPassword, studentId, 'admin']
     );
-    return { id: result.insertId, name, email, student_id: studentId, role: 'admin' };
+    const [insertResult] = result;
+    return { id: insertResult.insertId, name, email, student_id: studentId, role: 'admin' };
   }
 
   static async verifyPassword(storedPassword, inputPassword) {
@@ -55,22 +57,25 @@ class User {
   }
 
   static async update(id, name, email) {
-    const [result] = await pool.execute(
+    const result = await pool.query(
       'UPDATE users SET name = ?, email = ? WHERE id = ?',
       [name, email, id]
     );
-    return result.affectedRows > 0;
+    const [updateResult] = result;
+    return updateResult.affectedRows > 0;
   }
 
   static async updatePassword(id, newPassword) {
     const hashed = await bcrypt.hash(newPassword, 10);
-    const [result] = await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashed, id]);
-    return result.affectedRows > 0;
+    const result = await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, id]);
+    const [updateResult] = result;
+    return updateResult.affectedRows > 0;
   }
 
   static async delete(id) {
-    const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+    const result = await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    const [deleteResult] = result;
+    return deleteResult.affectedRows > 0;
   }
 }
 
