@@ -96,7 +96,6 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
         user: user,
         password: password,
         database: database,
-        ssl: { rejectUnauthorized: false },
         connectTimeout: 10000
       }
     });
@@ -111,7 +110,6 @@ async function testConnectionWithFallback(retries = 3, delay = 1000) {
       user: user,
       password: password,
       database: database,
-      ssl: { rejectUnauthorized: false },
       connectTimeout: 10000
     }
   });
