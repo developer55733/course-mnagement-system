@@ -759,10 +759,17 @@ document.addEventListener('DOMContentLoaded', function() {
       btnAddNote.disabled = true;
 
       try {
+        console.log('🔍 Sending note data:', { 
+          module, title, content: content.substring(0, 100) + '...', type, visibility, tags,
+          moduleName: document.querySelector('#noteModule option:checked').text
+        });
+        
         const res = await request('post', '/admin/notes', { 
           module, title, content, formatted_content: content, type, visibility, tags,
           moduleName: document.querySelector('#noteModule option:checked').text
         });
+        
+        console.log('🔍 API response:', res);
         
         if (res && res.success) {
           showMessage('noteMsg', res.message || 'Note added successfully!', false);
@@ -778,11 +785,16 @@ document.addEventListener('DOMContentLoaded', function() {
           await loadNotes();
           await loadDatabaseStats();
         } else {
-          console.log('API response:', res);
-          showMessage('noteMsg', 'Failed to add note. Please try again.', true);
+          console.log('❌ API response failed:', res);
+          showMessage('noteMsg', 'Failed to add note: ' + (res?.error || 'Unknown error'), true);
         }
       } catch (error) {
-        console.error('Error adding note:', error);
+        console.error('❌ Error adding note:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
         showMessage('noteMsg', 'Error adding note: ' + error.message, true);
       }
 

@@ -65,6 +65,8 @@ router.get('/notes', adminAuth, async (req, res) => {
 // Create new note (admin only)
 router.post('/notes', adminAuth, async (req, res) => {
   try {
+    console.log('🔍 Creating note request body:', req.body);
+    
     const {
       title,
       content,
@@ -76,22 +78,69 @@ router.post('/notes', adminAuth, async (req, res) => {
       visibility
     } = req.body;
 
+    console.log('🔍 Extracted data:', { title, content: content?.substring(0, 50) + '...', module, moduleName, type, tags, visibility });
+
     // Validation
     if (!title || !content || !module || !moduleName) {
+      console.log('❌ Validation failed:', { title: !!title, content: !!content, module: !!module, moduleName: !!moduleName });
       return res.status(400).json({
         success: false,
         error: 'Title, content, module, and module name are required'
       });
     }
 
+    // Check if notes table exists
+    try {
+      await pool.execute('SELECT 1 FROM notes LIMIT 1');
+      console.log('✅ Notes table exists');
+    } catch (tableError) {
+      console.log('❌ Notes table does not exist, creating it...');
+      // Create notes table
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS notes (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          content TEXT NOT NULL,
+          formatted_content TEXT,
+          module_code VARCHAR(50) NOT NULL,
+          module_name VARCHAR(100) NOT NULL,
+          type ENUM('lecture', 'tutorial', 'assignment', 'exam', 'reference') DEFAULT 'lecture',
+          tags VARCHAR(255),
+          visibility ENUM('public', 'private') DEFAULT 'public',
+          created_by INT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_module (module_code),
+          INDEX idx_type (type),
+          INDEX idx_visibility (visibility),
+          INDEX idx_created_by (created_by)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      `;
+      await pool.execute(createTableQuery);
+      console.log('✅ Notes table created successfully');
+    }
+
     // Get admin user ID
     const [adminUsers] = await pool.execute('SELECT id FROM users WHERE role = "admin" LIMIT 1');
     const createdBy = adminUsers.length > 0 ? adminUsers[0].id : 1;
+    console.log('✅ Admin user ID:', createdBy);
 
     const query = `
       INSERT INTO notes (title, content, formatted_content, module_code, module_name, type, tags, visibility, created_by)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
+    
+    console.log('🔍 Executing query with params:', [
+      title,
+      content?.substring(0, 50) + '...',
+      formatted_content?.substring(0, 50) + '...' || content?.substring(0, 50) + '...',
+      module,
+      moduleName,
+      type || 'lecture',
+      tags,
+      visibility || 'public',
+      createdBy
+    ]);
     
     const [result] = await pool.execute(query, [
       title,
@@ -104,6 +153,8 @@ router.post('/notes', adminAuth, async (req, res) => {
       visibility || 'public',
       createdBy
     ]);
+
+    console.log('✅ Note created successfully with ID:', result.insertId);
 
     res.status(201).json({
       success: true,
@@ -122,10 +173,16 @@ router.post('/notes', adminAuth, async (req, res) => {
       message: 'Note created successfully'
     });
   } catch (error) {
-    console.error('Error creating note:', error);
+    console.error('❌ Error creating note:', error);
+    console.error('❌ Error details:', {
+      code: error.code,
+      message: error.message,
+      sqlMessage: error.sqlMessage,
+      sqlState: error.sqlState
+    });
     res.status(500).json({
       success: false,
-      error: 'Failed to create note'
+      error: 'Failed to create note: ' + error.message
     });
   }
 });
