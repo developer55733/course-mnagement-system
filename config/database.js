@@ -187,7 +187,8 @@ async function query(sql, params = []) {
     console.log('✅ Query executed successfully');
     console.log('   Rows returned:', safeRows.length);
     
-    return safeRows;
+    // Return in mysql2 format: [rows, fields] for compatibility with models
+    return [safeRows, []];
   } catch (error) {
     console.error('❌ Query failed:');
     console.error('   SQL:', sql);
@@ -207,7 +208,7 @@ async function query(sql, params = []) {
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
         const safeRetryRows = retryRows || [];
-        return safeRetryRows;
+        return [safeRetryRows, []];
       } catch (initError) {
         console.error('❌ Failed to recreate tables:', initError.message);
         throw error; // Throw original error if recreation fails
@@ -224,7 +225,7 @@ async function query(sql, params = []) {
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
         const safeRetryRows = retryRows || [];
-        return safeRetryRows;
+        return [safeRetryRows, []];
       } catch (initError) {
         console.error('❌ Failed to initialize database:', initError.message);
         throw error; // Throw original error if initialization fails
@@ -241,7 +242,7 @@ async function query(sql, params = []) {
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
         const safeRetryRows = retryRows || [];
-        return safeRetryRows;
+        return [safeRetryRows, []];
       } catch (fallbackError) {
         console.error('❌ Fallback failed:', fallbackError.message);
         throw error;
