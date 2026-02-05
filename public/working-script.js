@@ -331,10 +331,12 @@ function updateDashboard() {
         if (moduleActionHeader) moduleActionHeader.style.display = 'table-cell';
         if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
         
-        // Show all admin action columns
-        document.querySelectorAll('.admin-only').forEach(el => {
-            el.style.display = 'table-cell';
-        });
+        // Show all admin action columns with delay to ensure DOM is ready
+        setTimeout(() => {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = 'table-cell';
+            });
+        }, 100);
     } else {
         if (lecturerAdminControls) lecturerAdminControls.classList.add('hidden');
         if (adminLecturerActionHeader) adminLecturerActionHeader.classList.add('hidden');
@@ -352,6 +354,26 @@ function updateDashboard() {
     loadModules();
     loadLecturers();
     loadTimetable();
+}
+
+// Helper function to show admin actions after tables are loaded
+function showAdminActions() {
+    console.log('Showing admin actions...');
+    if (isAdmin()) {
+        setTimeout(() => {
+            const adminElements = document.querySelectorAll('.admin-only');
+            console.log('Found admin elements:', adminElements.length);
+            adminElements.forEach(el => {
+                el.style.display = 'table-cell';
+            });
+            
+            // Show table headers
+            const moduleActionHeader = document.getElementById('module-action-header');
+            const adminActionHeader = document.getElementById('admin-action-header');
+            if (moduleActionHeader) moduleActionHeader.style.display = 'table-cell';
+            if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
+        }, 200);
+    }
 }
 
 // Load modules
@@ -383,6 +405,9 @@ async function loadModules() {
                     </tr>
                 `).join('');
             }
+            
+            // Call helper to show admin actions
+            showAdminActions();
         }
     } catch (error) {
         console.error('Error loading modules:', error);
@@ -422,6 +447,9 @@ async function loadLecturers() {
                     </tr>
                 `).join('');
             }
+            
+            // Call helper to show admin actions
+            showAdminActions();
         }
     } catch (error) {
         console.error('Error loading lecturers:', error);
@@ -457,12 +485,15 @@ async function loadTimetable() {
                                 <button class="action-btn delete-btn-small" onclick="deleteTimetable(${index})" title="Delete Entry">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                <span class="status-badge active">Scheduled</span>
+                                <span class="status-badge scheduled">Scheduled</span>
                             </div>
                         </td>
                     </tr>
                 `).join('');
             }
+            
+            // Call helper to show admin actions
+            showAdminActions();
         }
     } catch (error) {
         console.error('Error loading timetable:', error);
