@@ -44,6 +44,9 @@
     const editProfileBtn = document.getElementById('btnEditProfile');
     if (editProfileBtn) {
       editProfileBtn.style.display = 'block';
+      console.log('Edit profile button shown after login'); // Debug log
+    } else {
+      console.error('Edit profile button not found!'); // Debug log
     }
   });
 
@@ -317,6 +320,13 @@
         btnLogout.style.display = 'none';
         console.log('Logout button hidden'); // Debug log
         
+        // Hide edit profile button
+        const editProfileBtn = document.getElementById('btnEditProfile');
+        if (editProfileBtn) {
+          editProfileBtn.style.display = 'none';
+          console.log('Edit profile button hidden'); // Debug log
+        }
+        
         // Clear login form
         if (secretInput) secretInput.value = '';
         if (loginMsg) {
@@ -493,6 +503,11 @@
       const loginCard = document.getElementById('loginCard');
       if (loginCard) loginCard.style.display = 'block';
       if (logoutBtn) logoutBtn.style.display = 'none';
+      
+      // Hide edit profile button
+      const editProfileBtn = document.getElementById('btnEditProfile');
+      if (editProfileBtn) editProfileBtn.style.display = 'none';
+      
       if (secretInput) secretInput.value = '';
       if (loginMsg) {
         loginMsg.textContent = 'Logged out successfully!';
