@@ -345,38 +345,58 @@ function showMobileAuthMessage() {
 
 // Logout function
 function logout() {
-    currentUser = null;
-    sessionStorage.removeItem('currentUser');
+    // Show confirmation dialog
+    const isConfirmed = confirm('Are you sure you want to logout?');
+    if (!isConfirmed) return;
     
-    // Hide dashboard and show auth forms
-    const userProfileHeader = document.getElementById('user-profile-header');
-    const dashboardTab = document.getElementById('dashboard-tab');
-    const devadminTab = document.getElementById('devadmin-tab');
-    
-    if (userProfileHeader) userProfileHeader.classList.add('hidden');
-    if (dashboardTab) dashboardTab.classList.add('hidden');
-    if (devadminTab) devadminTab.classList.add('hidden');
-    
-    // Switch to login tab and show login message
-    switchToTab('login');
-    
-    // Show logout success message
-    const loginMessage = document.getElementById('login-message');
-    if (loginMessage) {
-        loginMessage.innerHTML = '✅ <strong>Logged out successfully!</strong> Please log in again to continue';
-        loginMessage.style.color = '#4caf50';
-        loginMessage.style.fontSize = '14px';
+    // Show loading state
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+        logoutBtn.disabled = true;
     }
     
-    // Clear all forms
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    
-    if (loginForm) loginForm.reset();
-    if (registerForm) registerForm.reset();
-    
-    // Show mobile auth message
-    showMobileAuthMessage();
+    // Simulate logout process for better UX
+    setTimeout(() => {
+        currentUser = null;
+        sessionStorage.removeItem('currentUser');
+        
+        // Hide dashboard and show auth forms
+        const userProfileHeader = document.getElementById('user-profile-header');
+        const dashboardTab = document.getElementById('dashboard-tab');
+        const devadminTab = document.getElementById('devadmin-tab');
+        
+        if (userProfileHeader) userProfileHeader.classList.add('hidden');
+        if (dashboardTab) dashboardTab.classList.add('hidden');
+        if (devadminTab) devadminTab.classList.add('hidden');
+        
+        // Switch to login tab and show login message
+        switchToTab('login');
+        
+        // Show logout success message
+        const loginMessage = document.getElementById('login-message');
+        if (loginMessage) {
+            loginMessage.innerHTML = '✅ <strong>Logged out successfully!</strong> Please log in again to continue';
+            loginMessage.style.color = '#4caf50';
+            loginMessage.style.fontSize = '14px';
+        }
+        
+        // Clear all forms
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if (loginForm) loginForm.reset();
+        if (registerForm) registerForm.reset();
+        
+        // Show mobile auth message
+        showMobileAuthMessage();
+        
+        // Reset logout button
+        if (logoutBtn) {
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            logoutBtn.disabled = false;
+        }
+    }, 800); // Simulate logout process
 }
 
 // Hide all forms when logged in
@@ -411,6 +431,14 @@ function initialize() {
     
     // Show mobile auth message on startup if not logged in
     showMobileAuthMessage();
+    
+    // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l' && currentUser) {
+            e.preventDefault();
+            logout();
+        }
+    });
     
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
