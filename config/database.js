@@ -315,6 +315,9 @@ async function query(sql, params = []) {
 
 // Initialize database tables
 async function initializeDatabase() {
+  // First try to recreate tables to fix AUTO_INCREMENT issues
+  await recreateTablesWithAutoIncrement();
+  
   const createTables = [
     `CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -398,6 +401,31 @@ async function initializeDatabase() {
     }
   } catch (error) {
     console.log('⚠️  Default data insertion warning:', error.message);
+  }
+}
+
+// Recreate tables to fix AUTO_INCREMENT issues
+async function recreateTablesWithAutoIncrement() {
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings'];
+  
+  for (const tableName of tables) {
+    try {
+      // Check if table exists and has AUTO_INCREMENT issues
+      const descResult = await pool.query(`DESCRIBE ${tableName}`);
+      const [desc] = descResult;
+      
+      const idColumn = desc.find(col => col.Field === 'id');
+      if (idColumn && idColumn.Extra !== 'auto_increment') {
+        console.log(`🔄 Recreating table ${tableName} to fix AUTO_INCREMENT...`);
+        
+        // Drop and recreate table
+        await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
+        console.log(`✅ Dropped table ${tableName}`);
+      }
+    } catch (error) {
+      // Table doesn't exist, which is fine
+      console.log(`ℹ️  Table ${tableName} doesn't exist yet`);
+    }
   }
 }
 
