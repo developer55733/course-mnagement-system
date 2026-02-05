@@ -201,18 +201,12 @@ function updateDashboard() {
     if (userProfileHeader) userProfileHeader.classList.remove('hidden');
     if (dashboardTab) dashboardTab.classList.remove('hidden');
 
-    // Check if on mobile and hide admin access
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile) {
-        hideAdminAccessOnMobile();
-    }
-
-    // Show/hide admin controls based on user role (only on desktop)
+    // Show/hide admin controls based on user role
     const lecturerAdminControls = document.getElementById('lecturer-admin-controls');
     const adminLecturerActionHeader = document.getElementById('admin-lecturer-action-header');
     const devadminTab = document.getElementById('devadmin-tab');
     
-    if (isAdmin() && !isMobile) {
+    if (isAdmin()) {
         if (lecturerAdminControls) lecturerAdminControls.classList.remove('hidden');
         if (adminLecturerActionHeader) adminLecturerActionHeader.classList.remove('hidden');
         if (devadminTab) devadminTab.classList.remove('hidden');
@@ -328,31 +322,6 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
-// Hide admin access on mobile devices
-function hideAdminAccessOnMobile() {
-    // Hide admin tab button on mobile
-    const adminTab = document.querySelector('[data-tab="devadmin"]');
-    if (adminTab) {
-        adminTab.style.display = 'none';
-    }
-    
-    // Hide admin badge on mobile
-    const adminBadge = document.getElementById('admin-badge');
-    if (adminBadge) {
-        adminBadge.style.display = 'none';
-    }
-    
-    // Hide any admin controls on mobile
-    const adminControls = document.querySelectorAll('[id*="admin"], [class*="admin"]');
-    adminControls.forEach(control => {
-        if (control.id !== 'admin-badge') { // Already handled above
-            control.style.display = 'none';
-        }
-    });
-    
-    console.log('Admin access hidden on mobile device');
-}
-
 // Test logout function for debugging
 window.testLogout = function() {
     console.log('=== TEST LOGOUT FUNCTION CALLED ===');
@@ -388,40 +357,14 @@ function showMobileAuthMessage() {
         
         // Show register first on mobile for better UX
         if (registerTab && loginTab) {
-            // Add mobile guidance with icons
+            // Add mobile guidance
             const loginMessage = document.getElementById('login-message');
             if (loginMessage) {
-                loginMessage.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; margin: 10px 0;">
-                        <div style="font-size: 24px; margin-bottom: 15px;">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">
-                            📱 Welcome to Course Management
-                        </h3>
-                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
-                            New to our system? Please register first to access all features.
-                        </p>
-                        <button onclick="switchToTab('register'); return false;" 
-                                style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.0.2);"
-                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.0.3)'"
-                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.0.2)'">
-                            <i class="fas fa-user-plus"></i> Register First
-                        </button>
-                        <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
-                            <i class="fas fa-shield-alt"></i> Secure • <i class="fas fa-graduation-cap"></i> Educational • <i class="fas fa-users"></i> Community
-                        </div>
-                    </div>
-                `;
-                loginMessage.style.color = '';
-                loginMessage.style.fontSize = '';
+                loginMessage.innerHTML = '📱 <strong>New User?</strong> Please <a href="#" onclick="switchToTab(\'register\'); return false;">Register First</a> to access the system';
+                loginMessage.style.color = '#1976d2';
+                loginMessage.style.fontSize = '14px';
             }
         }
-    }
-    
-    // Hide admin access on mobile
-    if (isMobile) {
-        hideAdminAccessOnMobile();
     }
 }
 

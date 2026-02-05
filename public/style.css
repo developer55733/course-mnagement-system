@@ -816,49 +816,42 @@
         }
 
         .logout-btn i {
-    }
-    
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .logout-btn {
-        margin-top: 15px;
-    }
-    
-    .user-profile-header {
-        position: relative;
-        right: 0;
-        top: 0;
-        margin-top: 15px;
-        justify-content: center;
-    }
-    
-    header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .logout-btn {
-        padding: 12px 16px;
-        font-size: 13px;
-        margin-top: 10px;
-    }
-    
-    .logout-btn i {
-        font-size: 14px;
-    }
-}
+            margin-right: 8px;
+            font-size: 16px;
+        }
 
-.whatsapp-icon {
-    color: #25D366;
-    margin-right: 8px;
-}
+        .logout-btn i.fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive logout button */
+        @media (max-width: 768px) {
+            .logout-btn {
+                padding: 12px 16px;
+                font-size: 13px;
+                margin-top: 10px;
+            }
+            
+            .logout-btn i {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logout-btn {
+                padding: 14px 12px;
+                font-size: 12px;
+                letter-spacing: 0.3px;
+            }
+        }
+
+        .timetable-actions {
+            display: flex;
             gap: 10px;
             margin-top: 10px;
         }
