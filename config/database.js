@@ -305,6 +305,26 @@ async function initializeDatabase() {
       institution_name VARCHAR(100),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    
+    `CREATE TABLE notes (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      content TEXT NOT NULL,
+      formatted_content TEXT,
+      module_code VARCHAR(50) NOT NULL,
+      module_name VARCHAR(100) NOT NULL,
+      type ENUM('lecture', 'tutorial', 'assignment', 'exam', 'reference') DEFAULT 'lecture',
+      tags VARCHAR(255),
+      visibility ENUM('public', 'private') DEFAULT 'public',
+      created_by INT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_module (module_code),
+      INDEX idx_type (type),
+      INDEX idx_visibility (visibility),
+      INDEX idx_created_by (created_by),
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -346,7 +366,7 @@ async function initializeDatabase() {
 
 // Recreate tables to fix AUTO_INCREMENT issues
 async function recreateTablesWithAutoIncrement() {
-  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings'];
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes'];
   
   for (const tableName of tables) {
     try {

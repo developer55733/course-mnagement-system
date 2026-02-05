@@ -643,12 +643,11 @@ document.addEventListener('DOMContentLoaded', function() {
         notesData = res.data;
         displayNotes(notesData);
       } else {
-        // Load demo notes if API not available
+        console.log('Failed to load notes from API, using demo data');
         loadDemoNotes();
       }
     } catch (error) {
       console.error('Error loading notes:', error);
-      // Load demo notes
       loadDemoNotes();
     }
   }
@@ -761,7 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       try {
         const res = await request('post', '/admin/notes', { 
-          module, title, content, type, visibility, tags,
+          module, title, content, formatted_content: content, type, visibility, tags,
           moduleName: document.querySelector('#noteModule option:checked').text
         });
         
@@ -779,13 +778,12 @@ document.addEventListener('DOMContentLoaded', function() {
           await loadNotes();
           await loadDatabaseStats();
         } else {
-          // Simulate success for demo
-          simulateAddNote({ module, title, content, type, visibility, tags });
+          console.log('API response:', res);
+          showMessage('noteMsg', 'Failed to add note. Please try again.', true);
         }
       } catch (error) {
         console.error('Error adding note:', error);
-        // Simulate success for demo
-        simulateAddNote({ module, title, content, type, visibility, tags });
+        showMessage('noteMsg', 'Error adding note: ' + error.message, true);
       }
 
       setTimeout(() => {

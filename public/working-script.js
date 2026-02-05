@@ -460,6 +460,36 @@ async function loadLecturers() {
     }
 }
 
+// Load timetable
+async function loadTimetable() {
+    try {
+        const response = await apiCall('/timetable');
+        const timetableList = document.getElementById('timetable-list');
+        
+        if (timetableList && response.success) {
+            if (response.data.length === 0) {
+                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+            } else {
+                timetableList.innerHTML = response.data.map((entry, index) => `
+                    <tr>
+                        <td>${entry.test}</td>
+                        <td>${entry.module}</td>
+                        <td>${entry.date}</td>
+                        <td>${entry.time}</td>
+                        <td>${entry.venue}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading timetable:', error);
+        const timetableList = document.getElementById('timetable-list');
+        if (timetableList) {
+            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+        }
+    }
+}
+
 // Refresh dashboard data
 function refreshDashboard() {
     if (currentUser) {
@@ -944,6 +974,36 @@ function logout() {
         currentUser = null;
         sessionStorage.removeItem('currentUser');
         
+        // Load timetable
+        async function loadTimetable() {
+            try {
+                const response = await apiCall('/timetable');
+                const timetableList = document.getElementById('timetable-list');
+                
+                if (timetableList && response.success) {
+                    if (response.data.length === 0) {
+                        timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+                    } else {
+                        timetableList.innerHTML = response.data.map((entry, index) => `
+                            <tr>
+                                <td>${entry.test}</td>
+                                <td>${entry.module}</td>
+                                <td>${entry.date}</td>
+                                <td>${entry.time}</td>
+                                <td>${entry.venue}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading timetable:', error);
+                const timetableList = document.getElementById('timetable-list');
+                if (timetableList) {
+                    timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+                }
+            }
+        }
+
         // Hide dashboard and show auth forms
         const userProfileHeader = document.getElementById('user-profile-header');
         const dashboardTab = document.getElementById('dashboard-tab');
