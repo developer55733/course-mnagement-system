@@ -270,48 +270,68 @@
 
   // Logout button handler
   const btnLogout = document.getElementById('btnLogout');
+  console.log('Logout button found:', !!btnLogout); // Debug log
+  
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
+      console.log('Logout button clicked'); // Debug log
+      
       // Show confirmation dialog
       const isConfirmed = confirm('Are you sure you want to logout from the admin panel?');
+      console.log('User confirmed:', isConfirmed); // Debug log
+      
       if (!isConfirmed) return;
       
       // Show loading state
       btnLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
       btnLogout.disabled = true;
+      console.log('Loading state activated'); // Debug log
       
       // Simulate logout process for better UX
       setTimeout(() => {
+        console.log('Starting logout process'); // Debug log
+        
         // Clear admin secret
         ADMIN_SECRET = '';
+        console.log('Admin secret cleared'); // Debug log
         
         // Hide panel and show login card
         panel.style.display = 'none';
         document.getElementById('loginCard').style.display = 'block';
+        console.log('Panel hidden, login card shown'); // Debug log
         
         // Hide logout button
         btnLogout.style.display = 'none';
+        console.log('Logout button hidden'); // Debug log
         
         // Clear login form
         secretInput.value = '';
         loginMsg.textContent = '';
+        console.log('Login form cleared'); // Debug log
         
         // Clear output
         outPre.textContent = 'Use buttons above to perform admin actions.';
+        console.log('Output cleared'); // Debug log
         
         // Reset logout button
         btnLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
         btnLogout.disabled = false;
+        console.log('Logout button reset'); // Debug log
         
         // Show success message
         loginMsg.textContent = 'Logged out successfully!';
         loginMsg.style.color = '#28a745';
+        console.log('Success message shown'); // Debug log
+        
         setTimeout(() => {
           loginMsg.textContent = '';
           loginMsg.style.color = '';
+          console.log('Success message cleared'); // Debug log
         }, 3000);
       }, 800); // Simulate logout process
     });
+  } else {
+    console.error('Logout button element not found!');
   }
 
   // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
