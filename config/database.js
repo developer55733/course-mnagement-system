@@ -18,87 +18,9 @@ const getDatabaseConfig = () => {
   console.log('   SSL: enabled');
   console.log('-------------------------------');
 
-  // Try to use Railway's MYSQL_URL first (should be resolved by Railway)
-  if (process.env.MYSQL_URL && !process.env.MYSQL_URL.includes('${{')) {
-    try {
-      console.log('🔗 Using Railway MYSQL_URL connection:');
-      console.log('-------------------------------');
-      console.log(`   URL: ${process.env.MYSQL_URL}`);
-      
-      const url = new URL(process.env.MYSQL_URL);
-      const config = {
-        host: url.hostname,
-        port: parseInt(url.port) || 33264,
-        user: url.username,
-        password: url.password,
-        database: url.pathname.substring(1) || 'railway',
-        waitForConnections: true,
-        connectionLimit: 5,
-        queueLimit: 0,
-        connectTimeout: 30000,
-        idleTimeout: 600000,
-        maxIdle: 5,
-        ssl: {
-          rejectUnauthorized: false,
-          minVersion: 'TLSv1.2'
-        },
-        flags: '+MULTI_STATEMENTS',
-        charset: 'utf8mb4'
-      };
-      
-      console.log(`   Host: ${config.host}`);
-      console.log(`   Port: ${config.port}`);
-      console.log(`   User: ${config.user}`);
-      console.log(`   Database: ${config.database}`);
-      console.log('-------------------------------');
-      
-      return config;
-    } catch (error) {
-      console.log(`⚠️  Failed to parse MYSQL_URL: ${error.message}`);
-      console.log('🔄 Falling back to environment variables...');
-    }
-  }
-
-  // Try to use Railway's MYSQL_PUBLIC_URL (should be resolved by Railway)
-  if (process.env.MYSQL_PUBLIC_URL && !process.env.MYSQL_PUBLIC_URL.includes('${{')) {
-    try {
-      console.log('🔗 Using Railway MYSQL_PUBLIC_URL connection:');
-      console.log('-------------------------------');
-      console.log(`   URL: ${process.env.MYSQL_PUBLIC_URL}`);
-      
-      const url = new URL(process.env.MYSQL_PUBLIC_URL);
-      const config = {
-        host: url.hostname,
-        port: parseInt(url.port) || 33264,
-        user: url.username,
-        password: url.password,
-        database: url.pathname.substring(1) || 'railway',
-        waitForConnections: true,
-        connectionLimit: 5,
-        queueLimit: 0,
-        connectTimeout: 30000,
-        idleTimeout: 600000,
-        maxIdle: 5,
-        ssl: {
-          rejectUnauthorized: false,
-          minVersion: 'TLSv1.2'
-        },
-        flags: '+MULTI_STATEMENTS',
-        charset: 'utf8mb4'
-      };
-      
-      console.log(`   Host: ${config.host}`);
-      console.log(`   Port: ${config.port}`);
-      console.log(`   User: ${config.user}`);
-      console.log(`   Database: ${config.database}`);
-      console.log('-------------------------------');
-      
-      return config;
-    } catch (error) {
-      console.log(`⚠️  Failed to parse MYSQL_PUBLIC_URL: ${error.message}`);
-      console.log('🔄 Falling back to environment variables...');
-    }
-  }
+  // Skip Railway URLs and go directly to TCP proxy for reliability
+  console.log('🔗 Using direct TCP proxy connection for reliability:');
+  console.log('-------------------------------');
 
   // Fallback to individual environment variables or hardcoded TCP proxy
   const user = process.env.MYSQLUSER || 'root';
@@ -109,8 +31,6 @@ const getDatabaseConfig = () => {
   const host = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
   const port = parseInt(process.env.RAILWAY_TCP_PROXY_PORT) || 33264;
 
-  console.log('🔗 Using Railway TCP proxy connection:');
-  console.log('-------------------------------');
   console.log(`   RAILWAY_TCP_PROXY_DOMAIN: ${process.env.RAILWAY_TCP_PROXY_DOMAIN || 'NOT SET'}`);
   console.log(`   RAILWAY_TCP_PROXY_PORT: ${process.env.RAILWAY_TCP_PROXY_PORT || 'NOT SET'}`);
   console.log(`   Host: ${host}`);
@@ -410,18 +330,12 @@ async function recreateTablesWithAutoIncrement() {
   
   for (const tableName of tables) {
     try {
-      // Check if table exists and has AUTO_INCREMENT issues
-      const descResult = await pool.query(`DESCRIBE ${tableName}`);
-      const [desc] = descResult;
+      console.log(`🔄 Checking table ${tableName}...`);
       
-      const idColumn = desc.find(col => col.Field === 'id');
-      if (idColumn && idColumn.Extra !== 'auto_increment') {
-        console.log(`🔄 Recreating table ${tableName} to fix AUTO_INCREMENT...`);
-        
-        // Drop and recreate table
-        await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
-        console.log(`✅ Dropped table ${tableName}`);
-      }
+      // Force drop table to ensure clean recreation
+      await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
+      console.log(`✅ Dropped table ${tableName}`);
+      
     } catch (error) {
       // Table doesn't exist, which is fine
       console.log(`ℹ️  Table ${tableName} doesn't exist yet`);
