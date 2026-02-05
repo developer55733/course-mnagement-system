@@ -52,7 +52,6 @@ const getDatabaseConfig = () => {
     flags: '+MULTI_STATEMENTS',
     charset: 'utf8mb4',
     timezone: '+00:00',
-    acquireTimeout: 60000,
     connectTimeout: 30000,
     multipleStatements: true,
     // Disable strict mode to handle AUTO_INCREMENT properly
@@ -331,13 +330,13 @@ async function recreateTablesWithAutoIncrement() {
     try {
       console.log(`🔄 Checking table ${tableName}...`);
       
-      // Force drop table to ensure clean recreation
+      // Force drop table to ensure clean recreation with proper AUTO_INCREMENT
       await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
-      console.log(`✅ Dropped table ${tableName}`);
+      console.log(`✅ Dropped table ${tableName} for clean recreation`);
       
     } catch (error) {
       // Table doesn't exist, which is fine
-      console.log(`ℹ️  Table ${tableName} doesn't exist yet`);
+      console.log(`ℹ️  Table ${tableName} doesn't exist yet, will create new`);
     }
   }
 }
