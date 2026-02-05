@@ -282,7 +282,7 @@ async function loadLecturers() {
 async function loadTimetable() {
     try {
         const response = await apiCall('/timetable');
-        const timetableList = document.getElementById('timetable-list');
+        const timetableList = document.getElementById('timetable-body');
         
         if (timetableList && response.success) {
             if (response.data.length === 0) {
@@ -301,7 +301,7 @@ async function loadTimetable() {
         }
     } catch (error) {
         console.error('Error loading timetable:', error);
-        const timetableList = document.getElementById('timetable-list');
+        const timetableList = document.getElementById('timetable-body');
         if (timetableList) {
             timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
         }
