@@ -33,6 +33,12 @@
     loginMsg.textContent = '';
     panel.style.display = 'block';
     document.getElementById('loginCard').style.display = 'none';
+    
+    // Show logout button after successful login
+    const logoutBtn = document.getElementById('btnLogout');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'block';
+    }
   });
 
   const request = async (method, url, data) => {
@@ -260,4 +266,61 @@
   }
 
   // Load timetables on page load
-  window.addEventListener('load', loadTimetables);})();
+  window.addEventListener('load', loadTimetables);
+
+  // Logout button handler
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      // Show confirmation dialog
+      const isConfirmed = confirm('Are you sure you want to logout from the admin panel?');
+      if (!isConfirmed) return;
+      
+      // Show loading state
+      btnLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+      btnLogout.disabled = true;
+      
+      // Simulate logout process for better UX
+      setTimeout(() => {
+        // Clear admin secret
+        ADMIN_SECRET = '';
+        
+        // Hide panel and show login card
+        panel.style.display = 'none';
+        document.getElementById('loginCard').style.display = 'block';
+        
+        // Hide logout button
+        btnLogout.style.display = 'none';
+        
+        // Clear login form
+        secretInput.value = '';
+        loginMsg.textContent = '';
+        
+        // Clear output
+        outPre.textContent = 'Use buttons above to perform admin actions.';
+        
+        // Reset logout button
+        btnLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        btnLogout.disabled = false;
+        
+        // Show success message
+        loginMsg.textContent = 'Logged out successfully!';
+        loginMsg.style.color = '#28a745';
+        setTimeout(() => {
+          loginMsg.textContent = '';
+          loginMsg.style.color = '';
+        }, 3000);
+      }, 800); // Simulate logout process
+    });
+  }
+
+  // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l' && ADMIN_SECRET) {
+      e.preventDefault();
+      if (btnLogout && btnLogout.style.display !== 'none') {
+        btnLogout.click();
+      }
+    }
+  });
+})();
