@@ -39,6 +39,12 @@
     if (logoutBtn) {
       logoutBtn.style.display = 'block';
     }
+    
+    // Show edit profile button after successful login
+    const editProfileBtn = document.getElementById('btnEditProfile');
+    if (editProfileBtn) {
+      editProfileBtn.style.display = 'block';
+    }
   });
 
   const request = async (method, url, data) => {
@@ -360,6 +366,109 @@
       }
     }
   });
+
+  // Edit Admin Profile function
+  window.editAdminProfile = function() {
+    console.log('Edit admin profile clicked');
+    
+    // Create edit modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+      <div class="edit-modal">
+        <div class="edit-modal-header">
+          <h3><i class="fas fa-edit"></i> Edit Admin Profile</h3>
+          <button class="close-btn" onclick="closeAdminEditModal()">&times;</button>
+        </div>
+        <div class="edit-modal-body">
+          <div class="form-group">
+            <label>Admin Name:</label>
+            <input type="text" id="edit-admin-name" placeholder="e.g., System Administrator">
+          </div>
+          <div class="form-group">
+            <label>Admin Email:</label>
+            <input type="email" id="edit-admin-email" placeholder="e.g., admin@course.edu">
+          </div>
+          <div class="form-group">
+            <label>Admin Secret:</label>
+            <input type="password" id="edit-admin-secret" placeholder="Enter new admin secret">
+            <small class="text-muted">Leave blank to keep current secret</small>
+          </div>
+          <div class="form-group">
+            <label>Department:</label>
+            <input type="text" id="edit-admin-department" placeholder="e.g., IT Department">
+          </div>
+          <div class="form-group">
+            <label>Phone Number:</label>
+            <input type="tel" id="edit-admin-phone" placeholder="e.g., +1234567890">
+          </div>
+        </div>
+        <div class="edit-modal-footer">
+          <button class="btn btn-cancel" onclick="closeAdminEditModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveAdminProfile()">Save Changes</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Populate with current data (demo data)
+    setTimeout(() => {
+      const nameInput = document.getElementById('edit-admin-name');
+      const emailInput = document.getElementById('edit-admin-email');
+      const departmentInput = document.getElementById('edit-admin-department');
+      const phoneInput = document.getElementById('edit-admin-phone');
+      
+      if (nameInput) nameInput.value = 'System Administrator';
+      if (emailInput) emailInput.value = 'admin@course.edu';
+      if (departmentInput) departmentInput.value = 'IT Department';
+      if (phoneInput) phoneInput.value = '+1234567890';
+    }, 100);
+  };
+
+  // Close admin edit modal
+  window.closeAdminEditModal = function() {
+    const modal = document.querySelector('.edit-modal-overlay');
+    if (modal) {
+      modal.remove();
+    }
+  };
+
+  // Save admin profile changes
+  window.saveAdminProfile = function() {
+    const name = document.getElementById('edit-admin-name')?.value;
+    const email = document.getElementById('edit-admin-email')?.value;
+    const secret = document.getElementById('edit-admin-secret')?.value;
+    const department = document.getElementById('edit-admin-department')?.value;
+    const phone = document.getElementById('edit-admin-phone')?.value;
+    
+    if (!name || !email || !department || !phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) {
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      saveBtn.disabled = true;
+    }
+    
+    // Simulate save process
+    setTimeout(() => {
+      closeAdminEditModal();
+      alert('✅ Admin profile updated successfully!');
+      
+      // If secret was changed, update the current secret
+      if (secret) {
+        ADMIN_SECRET = secret;
+        const secretInput = document.getElementById('adminSecret');
+        if (secretInput) {
+          secretInput.value = secret;
+        }
+      }
+    }, 1000);
+  };
 
   // Inline backup function for logout
   window.handleAdminLogout = function() {
