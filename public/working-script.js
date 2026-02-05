@@ -648,8 +648,8 @@ function updateDashboard() {
 
     const adminActionHeader = document.getElementById('admin-action-header');
 
+    const timetableActionHeader = document.getElementById('timetable-action-header');
     
-
     if (isAdmin()) {
 
         if (lecturerAdminControls) lecturerAdminControls.classList.remove('hidden');
@@ -662,8 +662,8 @@ function updateDashboard() {
 
         if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
 
+        if (timetableActionHeader) timetableActionHeader.style.display = 'table-cell';
         
-
         // Show all admin action columns with delay to ensure DOM is ready
 
         setTimeout(() => {
@@ -688,8 +688,8 @@ function updateDashboard() {
 
         if (adminActionHeader) adminActionHeader.style.display = 'none';
 
+        if (timetableActionHeader) timetableActionHeader.style.display = 'none';
         
-
         // Hide all admin action columns
 
         document.querySelectorAll('.admin-only').forEach(el => {
@@ -742,16 +742,19 @@ function showAdminActions() {
 
             const adminActionHeader = document.getElementById('admin-action-header');
 
+            const timetableActionHeader = document.getElementById('timetable-action-header');
+
             if (moduleActionHeader) moduleActionHeader.style.display = 'table-cell';
 
             if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
+
+            if (timetableActionHeader) timetableActionHeader.style.display = 'table-cell';
 
         }, 200);
 
     }
 
 }
-
 
 
 // Load modules
@@ -941,6 +944,17 @@ async function loadTimetable() {
                         <td>${entry.date}</td>
                         <td>${entry.time}</td>
                         <td>${entry.venue}</td>
+                        <td class="admin-only" id="timetable-actions-${index}" style="display: none;">
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn-small" onclick="editTimetable(${index})" title="Edit Timetable Entry">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn-small" onclick="deleteTimetable(${index})" title="Delete Timetable Entry">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </td>
                     </tr>
                 `).join('');
                 console.log('✅ Timetable rendered successfully');
