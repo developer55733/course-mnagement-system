@@ -322,6 +322,31 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
+// Test logout function for debugging
+window.testLogout = function() {
+    console.log('=== TEST LOGOUT FUNCTION CALLED ===');
+    console.log('Current user:', currentUser);
+    
+    const btn = document.getElementById('logout-btn');
+    console.log('Button element:', !!btn);
+    
+    if (btn) {
+        console.log('Button found, starting test logout...');
+        btn.style.backgroundColor = 'orange';
+        btn.textContent = 'TEST LOGOUT';
+        
+        setTimeout(() => {
+            btn.style.backgroundColor = '';
+            btn.innerHTML = 'Logout <i class="fas fa-sign-out-alt"></i>';
+            
+            // Call actual logout
+            logout();
+        }, 1000);
+    } else {
+        console.error('Logout button not found for test!');
+    }
+};
+
 // Show mobile-friendly message for unauthenticated users
 function showMobileAuthMessage() {
     // Check if on mobile
@@ -432,10 +457,16 @@ function initialize() {
     // Show mobile auth message on startup if not logged in
     showMobileAuthMessage();
     
+    // Debug logout button immediately
+    const logoutBtnTest = document.getElementById('logout-btn');
+    console.log('Logout button element found on init:', !!logoutBtnTest);
+    console.log('Logout button HTML:', logoutBtnTest ? logoutBtnTest.outerHTML : 'NOT FOUND');
+    
     // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'l' && currentUser) {
             e.preventDefault();
+            console.log('Keyboard shortcut triggered, calling logout()');
             logout();
         }
     });
