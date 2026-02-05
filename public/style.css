@@ -808,51 +808,66 @@
             display: grid;
             gap: 25px;
             margin-bottom: 30px;
+            grid-template-areas: 
+                "modules lecturers"
+                "timetable timetable"
+                "notes notes";
         }
 
-        /* Desktop/Laptop: 1200px and above - 2 columns for modules & lecturers, timetable full width */
+        .card-modules { grid-area: modules; }
+        .card-lecturers { grid-area: lecturers; }
+        .card-timetable { grid-area: timetable; }
+        .card-notes { grid-area: notes; }
+
+        /* Desktop/Laptop: 1200px and above - 2 columns for modules & lecturers, timetable full width, notes full width */
         @media (min-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "modules lecturers"
+                    "timetable timetable"
+                    "notes notes";
             }
 
-            .card-modules {
-                grid-column: 1;
-                order: 1;
-            }
-
+            .card-modules,
             .card-lecturers {
-                grid-column: 2;
-                order: 2;
+                min-height: 400px;
             }
 
-            .card-timetable {
-                grid-column: 1 / -1;
-                order: 3;
-                margin-top: 10px;
+            .card-timetable,
+            .card-notes {
+                min-height: 350px;
             }
         }
 
-        /* Large Tablets/Small Laptops: 992px to 1199px - 2 columns for modules & lecturers, timetable full width */
+        /* Large Tablets/Small Laptops: 992px to 1199px - 2 columns for modules & lecturers, timetable full width, notes full width */
         @media (min-width: 992px) and (max-width: 1199px) {
             .dashboard-grid {
                 grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "modules lecturers"
+                    "timetable timetable"
+                    "notes notes";
             }
 
             .card-modules {
-                grid-column: 1;
+                grid-area: modules;
                 order: 1;
             }
 
             .card-lecturers {
-                grid-column: 2;
+                grid-area: lecturers;
                 order: 2;
             }
 
             .card-timetable {
-                grid-column: 1 / -1;
+                grid-area: timetable;
                 order: 3;
-                margin-top: 10px;
+            }
+
+            .card-notes {
+                grid-area: notes;
+                order: 4;
             }
         }
 
@@ -860,22 +875,31 @@
         @media (min-width: 768px) and (max-width: 991px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "modules"
+                    "lecturers"
+                    "timetable"
+                    "notes";
             }
 
             .card-modules {
-                grid-column: 1;
+                grid-area: modules;
                 order: 1;
             }
 
             .card-lecturers {
-                grid-column: 1;
+                grid-area: lecturers;
                 order: 2;
             }
 
             .card-timetable {
-                grid-column: 1;
+                grid-area: timetable;
                 order: 3;
-                margin-top: 10px;
+            }
+
+            .card-notes {
+                grid-area: notes;
+                order: 4;
             }
         }
 
@@ -883,23 +907,32 @@
         @media (min-width: 576px) and (max-width: 767px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "modules"
+                    "lecturers"
+                    "timetable"
+                    "notes";
                 gap: 20px;
             }
 
             .card-modules {
-                grid-column: 1;
+                grid-area: modules;
                 order: 1;
             }
 
             .card-lecturers {
-                grid-column: 1;
+                grid-area: lecturers;
                 order: 2;
             }
 
             .card-timetable {
-                grid-column: 1;
+                grid-area: timetable;
                 order: 3;
-                margin-top: 5px;
+            }
+
+            .card-notes {
+                grid-area: notes;
+                order: 4;
             }
 
             .card {
@@ -911,23 +944,32 @@
         @media (max-width: 575px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "modules"
+                    "lecturers"
+                    "timetable"
+                    "notes";
                 gap: 15px;
             }
 
             .card-modules {
-                grid-column: 1;
+                grid-area: modules;
                 order: 1;
             }
 
             .card-lecturers {
-                grid-column: 1;
+                grid-area: lecturers;
                 order: 2;
             }
 
             .card-timetable {
-                grid-column: 1;
+                grid-area: timetable;
                 order: 3;
-                margin-top: 0;
+            }
+
+            .card-notes {
+                grid-area: notes;
+                order: 4;
             }
 
             .card {
@@ -2025,6 +2067,284 @@
         .login-footer {
             text-align: center;
             margin-top: 20px;
+        }
+
+        /* Notes System Styles */
+        .card-notes {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .notes-wrapper {
+            padding: 20px;
+        }
+
+        .notes-controls {
+            margin-bottom: 20px;
+        }
+
+        .search-filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-filter-group input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-filter-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-filter-group select {
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .search-filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .notes-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            min-height: 200px;
+        }
+
+        .note-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e1e8ed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .note-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .note-header {
+            margin-bottom: 15px;
+        }
+
+        .note-header h4 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .note-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .note-module {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .note-type {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            border: 1px solid #dee2e6;
+        }
+
+        .note-content {
+            margin-bottom: 15px;
+        }
+
+        .note-content p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .note-actions .btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-actions .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .note-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .note-actions .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .no-notes-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-notes-message i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .no-notes-message p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .no-notes-message p:last-child {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design for Notes */
+        @media (max-width: 768px) {
+            .card-notes {
+                grid-column: span 1;
+            }
+
+            .search-filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-filter-group input[type="text"],
+            .search-filter-group select {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .notes-list {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .note-item {
+                padding: 15px;
+            }
+
+            .note-header h4 {
+                font-size: 1.1rem;
+            }
+
+            .note-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .note-actions {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .notes-wrapper {
+                padding: 15px;
+            }
+
+            .note-item {
+                padding: 12px;
+            }
+
+            .note-header h4 {
+                font-size: 1rem;
+            }
+
+            .note-content p {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Loading State for Notes */
+        .notes-list.loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .notes-list.loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
     
