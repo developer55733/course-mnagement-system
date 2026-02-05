@@ -981,13 +981,23 @@ async function loadTimetable() {
 async function loadUserNotes() {
     try {
         console.log('🔍 Loading user notes...');
-        const response = await apiCall('/api/notes/public');
-        console.log('🔍 Notes API response:', response);
         const notesList = document.getElementById('user-notes-list');
         
-        if (notesList && response.success) {
+        if (!notesList) {
+            console.error('❌ user-notes-list element not found!');
+            return;
+        }
+        
+        console.log('🔍 Making API call to /api/notes/public...');
+        const response = await apiCall('/api/notes/public');
+        console.log('🔍 Notes API response:', response);
+        
+        if (response && response.success) {
             console.log('🔍 Notes data received:', response.data);
+            console.log('🔍 Number of notes:', response.data.length);
+            
             if (response.data.length === 0) {
+                console.log('🔍 No notes found, showing empty message');
                 notesList.innerHTML = `
                     <div class="no-notes-message">
                         <i class="fas fa-file-alt"></i>
@@ -996,6 +1006,7 @@ async function loadUserNotes() {
                     </div>
                 `;
             } else {
+                console.log('🔍 Rendering notes cards...');
                 notesList.innerHTML = response.data.map((note, index) => `
                     <div class="note-item" data-note-id="${note.id}">
                         <div class="note-header">
@@ -1019,15 +1030,12 @@ async function loadUserNotes() {
             }
         } else {
             console.log('❌ Notes API response failed:', response);
-            const notesList = document.getElementById('user-notes-list');
-            if (notesList) {
-                notesList.innerHTML = `
-                    <div class="no-notes-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Error loading notes. Please try again.</p>
-                    </div>
-                `;
-            }
+            notesList.innerHTML = `
+                <div class="no-notes-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading notes. Please try again.</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('❌ Error loading notes:', error);
