@@ -970,27 +970,128 @@ async function loadTimetable() {
         }
     }
 }
-    if (currentUser) {
 
-        loadModules();
 
-        loadLecturers();
-
-        loadTimetable();
-
+// Load user notes
+async function loadUserNotes() {
+    try {
+        console.log('🔍 Loading user notes...');
+        const response = await apiCall('/api/notes/public');
+        console.log('🔍 Notes API response:', response);
+        const notesList = document.getElementById('notes-list');
+        
+        if (notesList && response.success) {
+            console.log('🔍 Notes data received:', response.data);
+            if (response.data.length === 0) {
+                notesList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No notes available</td></tr>';
+            } else {
+                notesList.innerHTML = response.data.map((note, index) => `
+                    <tr>
+                        <td>${note.title}</td>
+                        <td>${note.module_code}</td>
+                        <td>${note.type}</td>
+                        <td>
+                            <button class="btn btn-small" onclick="downloadNote('${note.id}')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                console.log('✅ Notes rendered successfully');
+            }
+        } else {
+            console.log('❌ Notes API response failed:', response);
+        }
+    } catch (error) {
+        console.error('❌ Error loading notes:', error);
+        const notesList = document.getElementById('notes-list');
+        if (notesList) {
+            notesList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading notes</td></tr>';
+        }
     }
-
 }
 
+// Download note function
+window.downloadNote = function(noteId) {
+    try {
+        console.log('🔍 Downloading note:', noteId);
+        
+        // Create a temporary window to print the note
+        const printWindow = window.open('', '_blank');
+        
+        // Fetch the note details
+        apiCall(`/api/notes/${noteId}`).then(response => {
+            if (response.success && response.data) {
+                const note = response.data;
+                
+                // Create HTML content for printing
+                const htmlContent = `
+                    <html>
+                        <head>
+                            <title>${note.title} - Study Note</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+                                .meta { color: #666; margin: 10px 0; }
+                                .content { margin-top: 20px; line-height: 1.6; }
+                                @media print { body { margin: 10px; } }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>${note.title}</h1>
+                            <div class="meta">
+                                <strong>Module:</strong> ${note.module_code} - ${note.module_name}<br>
+                                <strong>Type:</strong> ${note.type}<br>
+                                <strong>Created:</strong> ${new Date(note.created_at).toLocaleDateString()}
+                            </div>
+                            <div class="content">
+                                ${note.formatted_content || note.content}
+                            </div>
+                        </body>
+                    </html>
+                `;
+                
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                
+                // Wait for content to load, then print
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+                
+            } else {
+                alert('Error loading note details');
+                printWindow.close();
+            }
+        }).catch(error => {
+            console.error('Error downloading note:', error);
+            alert('Error downloading note');
+            printWindow.close();
+        });
+        
+    } catch (error) {
+        console.error('Error in downloadNote:', error);
+        alert('Error downloading note');
+    }
+};
 
+// Refresh dashboard data
 
 function refreshDashboard() {
+
     if (currentUser) {
+
         loadModules();
+
         loadLecturers();
+
         loadTimetable();
+
         loadUserNotes();
+
     }
+
 }
 
 
