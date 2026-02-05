@@ -350,7 +350,7 @@ function logout() {
     if (!isConfirmed) return;
     
     // Show loading state
-    const logoutBtn = document.querySelector('.logout-btn');
+    const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
         logoutBtn.disabled = true;
@@ -393,7 +393,7 @@ function logout() {
         
         // Reset logout button
         if (logoutBtn) {
-            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> <span>Logout</span>';
             logoutBtn.disabled = false;
         }
     }, 800); // Simulate logout process
