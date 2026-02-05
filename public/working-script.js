@@ -715,6 +715,8 @@ function updateDashboard() {
 
     loadTimetable();
 
+    loadUserNotes(); // Load user notes
+
 }
 
 
