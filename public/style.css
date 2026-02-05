@@ -337,6 +337,105 @@
             }
         }
 
+        /* Table Action Buttons */
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: white;
+        }
+
+        .edit-btn-small {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .edit-btn-small:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+
+        .delete-btn-small {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .delete-btn-small:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+
+        .action-btn i {
+            font-size: 10px;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .status-badge.inactive {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .status-badge.scheduled {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: white;
+        }
+
+        /* Admin Only Elements */
+        .admin-only {
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Table Actions */
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .action-btn {
+                font-size: 10px;
+                padding: 4px 6px;
+            }
+            
+            .status-badge {
+                font-size: 9px;
+                padding: 2px 6px;
+            }
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .user-details-popup {

@@ -321,15 +321,31 @@ function updateDashboard() {
     const lecturerAdminControls = document.getElementById('lecturer-admin-controls');
     const adminLecturerActionHeader = document.getElementById('admin-lecturer-action-header');
     const devadminTab = document.getElementById('devadmin-tab');
+    const moduleActionHeader = document.getElementById('module-action-header');
+    const adminActionHeader = document.getElementById('admin-action-header');
     
     if (isAdmin()) {
         if (lecturerAdminControls) lecturerAdminControls.classList.remove('hidden');
         if (adminLecturerActionHeader) adminLecturerActionHeader.classList.remove('hidden');
         if (devadminTab) devadminTab.classList.remove('hidden');
+        if (moduleActionHeader) moduleActionHeader.style.display = 'table-cell';
+        if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
+        
+        // Show all admin action columns
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = 'table-cell';
+        });
     } else {
         if (lecturerAdminControls) lecturerAdminControls.classList.add('hidden');
         if (adminLecturerActionHeader) adminLecturerActionHeader.classList.add('hidden');
         if (devadminTab) devadminTab.classList.add('hidden');
+        if (moduleActionHeader) moduleActionHeader.style.display = 'none';
+        if (adminActionHeader) adminActionHeader.style.display = 'none';
+        
+        // Hide all admin action columns
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = 'none';
+        });
     }
 
     // Load dashboard data
@@ -346,13 +362,24 @@ async function loadModules() {
         
         if (modulesList && response.success) {
             if (response.data.length === 0) {
-                modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">No modules available</td></tr>';
+                modulesList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No modules available</td></tr>';
             } else {
-                modulesList.innerHTML = response.data.map(module => `
+                modulesList.innerHTML = response.data.map((module, index) => `
                     <tr>
                         <td>${module.code}</td>
                         <td>${module.name}</td>
                         <td>3</td>
+                        <td class="admin-only" id="module-actions-${index}" style="display: none;">
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn-small" onclick="editModule(${index})" title="Edit Module">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn-small" onclick="deleteModule(${index})" title="Delete Module">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </td>
                     </tr>
                 `).join('');
             }
@@ -361,7 +388,7 @@ async function loadModules() {
         console.error('Error loading modules:', error);
         const modulesList = document.getElementById('modules-list');
         if (modulesList) {
-            modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
+            modulesList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading modules</td></tr>';
         }
     }
 }
@@ -374,13 +401,24 @@ async function loadLecturers() {
         
         if (lecturersList && response.success) {
             if (response.data.length === 0) {
-                lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">No lecturers available</td></tr>';
+                lecturersList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No lecturers available</td></tr>';
             } else {
-                lecturersList.innerHTML = response.data.map(lecturer => `
+                lecturersList.innerHTML = response.data.map((lecturer, index) => `
                     <tr>
                         <td>${lecturer.name}</td>
                         <td>${lecturer.module}</td>
                         <td>${lecturer.phone || 'N/A'}</td>
+                        <td class="admin-only" id="lecturer-actions-${index}" style="display: none;">
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn-small" onclick="editLecturer(${index})" title="Edit Lecturer">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn-small" onclick="deleteLecturer(${index})" title="Delete Lecturer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </td>
                     </tr>
                 `).join('');
             }
@@ -389,7 +427,7 @@ async function loadLecturers() {
         console.error('Error loading lecturers:', error);
         const lecturersList = document.getElementById('lecturers-list');
         if (lecturersList) {
-            lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
+            lecturersList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
         }
     }
 }
@@ -402,15 +440,26 @@ async function loadTimetable() {
         
         if (timetableList && response.success) {
             if (response.data.length === 0) {
-                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+                timetableList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
             } else {
-                timetableList.innerHTML = response.data.map(entry => `
+                timetableList.innerHTML = response.data.map((entry, index) => `
                     <tr>
                         <td>${entry.test}</td>
                         <td>${entry.module}</td>
                         <td>${entry.date}</td>
                         <td>${entry.time}</td>
                         <td>${entry.venue}</td>
+                        <td class="admin-only" id="timetable-actions-${index}" style="display: none;">
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn-small" onclick="editTimetable(${index})" title="Edit Entry">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn-small" onclick="deleteTimetable(${index})" title="Delete Entry">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="status-badge active">Scheduled</span>
+                            </div>
+                        </td>
                     </tr>
                 `).join('');
             }
@@ -419,7 +468,7 @@ async function loadTimetable() {
         console.error('Error loading timetable:', error);
         const timetableList = document.getElementById('timetable-body');
         if (timetableList) {
-            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+            timetableList.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading timetable</td></tr>';
         }
     }
 }
@@ -462,7 +511,7 @@ window.testLogout = function() {
     }
 };
 
-// Edit profile function
+// Edit Profile function
 window.editProfile = function() {
     console.log('Edit profile clicked');
     
@@ -524,6 +573,57 @@ window.deleteAccount = function() {
     } else {
         console.log('Account deletion cancelled - wrong confirmation');
         alert('Account deletion cancelled.');
+    }
+};
+
+// Module action functions
+window.editModule = function(index) {
+    console.log('Edit module:', index);
+    alert('Edit Module feature coming soon! This will open a module editing interface.');
+};
+
+window.deleteModule = function(index) {
+    console.log('Delete module:', index);
+    const isConfirmed = confirm('Are you sure you want to delete this module? This action cannot be undone.');
+    if (isConfirmed) {
+        alert('Module deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
+        // In real implementation, this would call API to delete the module
+        // Then reload the modules list
+        loadModules();
+    }
+};
+
+// Lecturer action functions
+window.editLecturer = function(index) {
+    console.log('Edit lecturer:', index);
+    alert('Edit Lecturer feature coming soon! This will open a lecturer editing interface.');
+};
+
+window.deleteLecturer = function(index) {
+    console.log('Delete lecturer:', index);
+    const isConfirmed = confirm('Are you sure you want to delete this lecturer? This action cannot be undone.');
+    if (isConfirmed) {
+        alert('Lecturer deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
+        // In real implementation, this would call API to delete the lecturer
+        // Then reload the lecturers list
+        loadLecturers();
+    }
+};
+
+// Timetable action functions
+window.editTimetable = function(index) {
+    console.log('Edit timetable entry:', index);
+    alert('Edit Timetable feature coming soon! This will open a timetable editing interface.');
+};
+
+window.deleteTimetable = function(index) {
+    console.log('Delete timetable entry:', index);
+    const isConfirmed = confirm('Are you sure you want to delete this timetable entry? This action cannot be undone.');
+    if (isConfirmed) {
+        alert('Timetable entry deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
+        // In real implementation, this would call API to delete the entry
+        // Then reload the timetable
+        loadTimetable();
     }
 };
 
