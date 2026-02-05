@@ -206,7 +206,8 @@ async function query(sql, params = []) {
         // Retry the original query
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
-        return retryRows || [];
+        const safeRetryRows = retryRows || [];
+        return safeRetryRows;
       } catch (initError) {
         console.error('❌ Failed to recreate tables:', initError.message);
         throw error; // Throw original error if recreation fails
@@ -222,7 +223,8 @@ async function query(sql, params = []) {
         // Retry the original query
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
-        return retryRows || [];
+        const safeRetryRows = retryRows || [];
+        return safeRetryRows;
       } catch (initError) {
         console.error('❌ Failed to initialize database:', initError.message);
         throw error; // Throw original error if initialization fails
@@ -238,7 +240,8 @@ async function query(sql, params = []) {
         console.log('✅ Fallback successful, retrying query...');
         const retryResult = await pool.query(sql, params);
         const [retryRows] = retryResult;
-        return retryRows || [];
+        const safeRetryRows = retryRows || [];
+        return safeRetryRows;
       } catch (fallbackError) {
         console.error('❌ Fallback failed:', fallbackError.message);
         throw error;
