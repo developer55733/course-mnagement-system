@@ -416,6 +416,9 @@ function logout() {
         // Show mobile auth message
         showMobileAuthMessage();
         
+        // Unhide all forms for login
+        showAllAuthForms();
+        
         // Reset logout button
         if (logoutBtn) {
             logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> <span>Logout</span>';
