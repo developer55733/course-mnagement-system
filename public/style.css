@@ -2332,14 +2332,25 @@
             min-height: 200px;
         }
 
-        .notes-list.loading::after {
+        .loading-message {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.1rem;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .loading-message::after {
             content: '';
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
         }
 
         @keyframes spin {

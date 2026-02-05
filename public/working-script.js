@@ -980,19 +980,27 @@ async function loadTimetable() {
 // Load user notes
 async function loadUserNotes() {
     try {
-        console.log('🔍 Loading user notes...');
+        console.log('🔍 Starting loadUserNotes function...');
         const notesList = document.getElementById('user-notes-list');
         
         if (!notesList) {
-            console.error('❌ user-notes-list element not found!');
+            console.error('❌ CRITICAL ERROR: user-notes-list element not found!');
+            console.error('❌ Available elements:', document.querySelectorAll('[id*="notes"]'));
             return;
         }
         
+        console.log('✅ user-notes-list element found');
         console.log('🔍 Making API call to /api/notes/public...');
+        
+        // Show loading state
+        notesList.innerHTML = '<div class="loading-message">Loading notes...</div>';
+        
         const response = await apiCall('/api/notes/public');
-        console.log('🔍 Notes API response:', response);
+        console.log('🔍 API call completed');
+        console.log('🔍 Full response:', JSON.stringify(response, null, 2));
         
         if (response && response.success) {
+            console.log('✅ API response successful');
             console.log('🔍 Notes data received:', response.data);
             console.log('🔍 Number of notes:', response.data.length);
             
@@ -1007,7 +1015,9 @@ async function loadUserNotes() {
                 `;
             } else {
                 console.log('🔍 Rendering notes cards...');
-                notesList.innerHTML = response.data.map((note, index) => `
+                notesList.innerHTML = response.data.map((note, index) => {
+                    console.log(`🔍 Rendering note ${index + 1}:`, note.title);
+                    return `
                     <div class="note-item" data-note-id="${note.id}">
                         <div class="note-header">
                             <h4>${note.title}</h4>
@@ -1025,26 +1035,31 @@ async function loadUserNotes() {
                             </button>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
                 console.log('✅ Notes rendered successfully');
+                console.log('🔍 Notes list HTML length:', notesList.innerHTML.length);
             }
         } else {
-            console.log('❌ Notes API response failed:', response);
+            console.log('❌ API response failed:', response);
             notesList.innerHTML = `
                 <div class="no-notes-message">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>Error loading notes. Please try again.</p>
+                    <p><small>Error: ${response.error || 'Unknown error'}</small></p>
                 </div>
             `;
         }
     } catch (error) {
-        console.error('❌ Error loading notes:', error);
+        console.error('❌ CRITICAL ERROR in loadUserNotes:', error);
+        console.error('❌ Error stack:', error.stack);
         const notesList = document.getElementById('user-notes-list');
         if (notesList) {
             notesList.innerHTML = `
                 <div class="no-notes-message">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>Error loading notes. Please try again.</p>
+                    <p><small>${error.message}</small></p>
                 </div>
             `;
         }
