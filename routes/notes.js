@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const { query } = require('../config/database');
 
 // Get all notes (for admin)
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    const sql = `
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
       ORDER BY n.created_at DESC
     `;
-    const [notes] = await database.execute(query);
+    const [notes] = await query(sql);
     
     res.json({
       success: true,
@@ -30,14 +30,16 @@ router.get('/', async (req, res) => {
 // Get public notes (for users)
 router.get('/public', async (req, res) => {
   try {
-    const query = `
+    const sql = `
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
       WHERE n.visibility = 'public'
       ORDER BY n.created_at DESC
     `;
-    const [notes] = await database.execute(query);
+    const [notes] = await query(sql);
+    
+    console.log('🔍 Public notes query result:', notes.length, 'notes found');
     
     res.json({
       success: true,
@@ -45,7 +47,7 @@ router.get('/public', async (req, res) => {
       message: 'Public notes retrieved successfully'
     });
   } catch (error) {
-    console.error('Error fetching public notes:', error);
+    console.error('❌ Error fetching public notes:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch public notes'
@@ -57,13 +59,13 @@ router.get('/public', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const query = `
+    const sql = `
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
       WHERE n.id = ?
     `;
-    const [notes] = await database.execute(query, [id]);
+    const [notes] = await query(sql, [id]);
     
     if (notes.length === 0) {
       return res.status(404).json({
@@ -114,12 +116,12 @@ router.post('/', async (req, res) => {
     const noteVisibility = visibility || 'public';
     const createdBy = created_by || 1; // Default to admin user if not specified
 
-    const query = `
+    const sql = `
       INSERT INTO notes (title, content, formatted_content, module_code, module_name, type, tags, visibility, created_by)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
-    const [result] = await database.execute(query, [
+    const [result] = await query(sql, [
       title,
       content,
       formatted_content || content,
@@ -172,7 +174,7 @@ router.put('/:id', async (req, res) => {
     } = req.body;
 
     // Check if note exists
-    const [existingNotes] = await database.execute('SELECT * FROM notes WHERE id = ?', [id]);
+    const [existingNotes] = await query('SELECT * FROM notes WHERE id = ?', [id]);
     if (existingNotes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -180,13 +182,13 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    const query = `
+    const sql = `
       UPDATE notes 
       SET title = ?, content = ?, formatted_content = ?, module_code = ?, module_name = ?, type = ?, tags = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
     
-    await database.execute(query, [
+    await query(sql, [
       title,
       content,
       formatted_content || content,
@@ -217,7 +219,7 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     // Check if note exists
-    const [existingNotes] = await database.execute('SELECT * FROM notes WHERE id = ?', [id]);
+    const [existingNotes] = await query('SELECT * FROM notes WHERE id = ?', [id]);
     if (existingNotes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -225,7 +227,7 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await database.execute('DELETE FROM notes WHERE id = ?', [id]);
+    await query('DELETE FROM notes WHERE id = ?', [id]);
 
     res.json({
       success: true,
@@ -243,17 +245,17 @@ router.delete('/:id', async (req, res) => {
 // Search notes
 router.get('/search/:query', async (req, res) => {
   try {
-    const { query } = req.params;
-    const searchQuery = `
+    const { query: searchQuery } = req.params;
+    const sql = `
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
       WHERE (n.title LIKE ? OR n.content LIKE ? OR n.module_name LIKE ? OR n.tags LIKE ?)
       ORDER BY n.created_at DESC
     `;
-    const searchPattern = `%${query}%`;
+    const searchPattern = `%${searchQuery}%`;
     
-    const [notes] = await database.execute(searchQuery, [
+    const [notes] = await query(sql, [
       searchPattern, searchPattern, searchPattern, searchPattern
     ]);
     
@@ -275,7 +277,7 @@ router.get('/search/:query', async (req, res) => {
 router.get('/module/:moduleCode', async (req, res) => {
   try {
     const { moduleCode } = req.params;
-    const query = `
+    const sql = `
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
@@ -283,7 +285,7 @@ router.get('/module/:moduleCode', async (req, res) => {
       ORDER BY n.created_at DESC
     `;
     
-    const [notes] = await database.execute(query, [moduleCode]);
+    const [notes] = await query(sql, [moduleCode]);
     
     res.json({
       success: true,

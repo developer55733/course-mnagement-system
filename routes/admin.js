@@ -62,6 +62,33 @@ router.get('/notes', adminAuth, async (req, res) => {
   }
 });
 
+// Get all public notes (for users)
+router.get('/notes/public', async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT id, title, content, formatted_content, module_code, module_name, type, tags, visibility, created_at
+      FROM notes 
+      WHERE visibility = 'public' 
+      ORDER BY created_at DESC
+    `);
+    const [notes] = result;
+    
+    console.log('🔍 Public notes query result:', notes.length, 'notes found');
+    
+    res.json({
+      success: true,
+      data: notes,
+      message: 'Public notes retrieved successfully'
+    });
+  } catch (error) {
+    console.error('❌ Error fetching public notes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch public notes'
+    });
+  }
+});
+
 // Create new note (admin only)
 router.post('/notes', adminAuth, async (req, res) => {
   try {
