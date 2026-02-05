@@ -978,38 +978,144 @@ async function loadUserNotes() {
         console.log('🔍 Loading user notes...');
         const response = await apiCall('/api/notes/public');
         console.log('🔍 Notes API response:', response);
-        const notesList = document.getElementById('notes-list');
+        const notesList = document.getElementById('user-notes-list');
         
         if (notesList && response.success) {
             console.log('🔍 Notes data received:', response.data);
             if (response.data.length === 0) {
-                notesList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No notes available</td></tr>';
+                notesList.innerHTML = `
+                    <div class="no-notes-message">
+                        <i class="fas fa-file-alt"></i>
+                        <p>No study notes available yet.</p>
+                        <p>Admin will add study materials for your courses.</p>
+                    </div>
+                `;
             } else {
                 notesList.innerHTML = response.data.map((note, index) => `
-                    <tr>
-                        <td>${note.title}</td>
-                        <td>${note.module_code}</td>
-                        <td>${note.type}</td>
-                        <td>
-                            <button class="btn btn-small" onclick="downloadNote('${note.id}')">
-                                <i class="fas fa-download"></i> Download
+                    <div class="note-item" data-note-id="${note.id}">
+                        <div class="note-header">
+                            <h4>${note.title}</h4>
+                            <div class="note-meta">
+                                <span class="note-module">${note.module_code}</span>
+                                <span class="note-type">${note.type}</span>
+                            </div>
+                        </div>
+                        <div class="note-content">
+                            <p>${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</p>
+                        </div>
+                        <div class="note-actions">
+                            <button class="btn btn-primary btn-small" onclick="downloadNote('${note.id}')">
+                                <i class="fas fa-download"></i> Download PDF
                             </button>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 `).join('');
                 console.log('✅ Notes rendered successfully');
             }
         } else {
             console.log('❌ Notes API response failed:', response);
+            const notesList = document.getElementById('user-notes-list');
+            if (notesList) {
+                notesList.innerHTML = `
+                    <div class="no-notes-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading notes. Please try again.</p>
+                    </div>
+                `;
+            }
         }
     } catch (error) {
         console.error('❌ Error loading notes:', error);
-        const notesList = document.getElementById('notes-list');
+        const notesList = document.getElementById('user-notes-list');
         if (notesList) {
-            notesList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading notes</td></tr>';
+            notesList.innerHTML = `
+                <div class="no-notes-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading notes. Please try again.</p>
+                </div>
+            `;
         }
     }
 }
+
+// Search and filter notes
+window.filterNotes = function() {
+    try {
+        const searchTerm = document.getElementById('user-search-notes')?.value.toLowerCase() || '';
+        const filterType = document.getElementById('user-filter-notes')?.value || '';
+        const noteItems = document.querySelectorAll('.note-item');
+        
+        console.log('🔍 Filtering notes:', { searchTerm, filterType, totalNotes: noteItems.length });
+        
+        let visibleCount = 0;
+        
+        noteItems.forEach(item => {
+            const title = item.querySelector('h4')?.textContent.toLowerCase() || '';
+            const module = item.querySelector('.note-module')?.textContent.toLowerCase() || '';
+            const type = item.querySelector('.note-type')?.textContent.toLowerCase() || '';
+            const content = item.querySelector('.note-content p')?.textContent.toLowerCase() || '';
+            
+            // Check if item matches search and filter
+            const matchesSearch = !searchTerm || 
+                title.includes(searchTerm) || 
+                module.includes(searchTerm) || 
+                content.includes(searchTerm);
+                
+            const matchesFilter = !filterType || type === filterType;
+            
+            const shouldShow = matchesSearch && matchesFilter;
+            
+            item.style.display = shouldShow ? 'block' : 'none';
+            if (shouldShow) visibleCount++;
+        });
+        
+        console.log(`✅ Filtered notes: ${visibleCount} visible out of ${noteItems.length}`);
+        
+        // Show message if no results
+        const notesList = document.getElementById('user-notes-list');
+        if (visibleCount === 0 && noteItems.length > 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'no-notes-message';
+            noResults.innerHTML = `
+                <i class="fas fa-search"></i>
+                <p>No notes found matching your criteria.</p>
+                <p>Try adjusting your search or filter settings.</p>
+            `;
+            
+            // Remove existing no-results message
+            const existingNoResults = notesList.querySelector('.no-notes-message');
+            if (existingNoResults) {
+                existingNoResults.remove();
+            }
+            
+            notesList.appendChild(noResults);
+        } else {
+            // Remove no-results message if there are results
+            const existingNoResults = notesList.querySelector('.no-notes-message');
+            if (existingNoResults) {
+                existingNoResults.remove();
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error filtering notes:', error);
+    }
+};
+
+// Add event listeners for search and filter
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('user-search-notes');
+    const filterSelect = document.getElementById('user-filter-notes');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterNotes);
+        searchInput.addEventListener('keyup', filterNotes);
+    }
+    
+    if (filterSelect) {
+        filterSelect.addEventListener('change', filterNotes);
+    }
+});
 
 // Download note function
 window.downloadNote = function(noteId) {

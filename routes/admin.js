@@ -274,6 +274,41 @@ router.delete('/notes/:id', adminAuth, async (req, res) => {
   }
 });
 
+// Get individual note (public endpoint)
+router.get('/notes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Note ID is required'
+      });
+    }
+
+    const result = await query('SELECT * FROM notes WHERE id = ? AND visibility = "public"', [id]);
+    const [notes] = result;
+    
+    if (notes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Note not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: notes[0]
+    });
+  } catch (error) {
+    console.error('Error fetching note:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch note'
+    });
+  }
+});
+
 // Admin action endpoint
 router.post('/action', adminAuth, async (req, res) => {
   try {
