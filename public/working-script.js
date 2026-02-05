@@ -2,6 +2,169 @@
 const API_BASE_URL = window.location.origin + '/api';
 let currentUser = null;
 
+// Mobile Detection
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 767;
+
+// Enhanced Mobile Interactions
+if (isMobile) {
+    // Add touch feedback
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.tab-btn, .btn, .card, tr')) {
+            e.target.closest('.tab-btn, .btn, .card, tr').style.transform = 'scale(0.98)';
+        }
+    });
+
+    document.addEventListener('touchend', function(e) {
+        if (e.target.closest('.tab-btn, .btn, .card, tr')) {
+            setTimeout(() => {
+                e.target.closest('.tab-btn, .btn, .card, tr').style.transform = '';
+            }, 150);
+        }
+    });
+
+    // Haptic feedback for mobile (if supported)
+    function triggerHaptic(type = 'light') {
+        if ('vibrate' in navigator) {
+            switch(type) {
+                case 'light':
+                    navigator.vibrate(10);
+                    break;
+                case 'medium':
+                    navigator.vibrate(25);
+                    break;
+                case 'heavy':
+                    navigator.vibrate([50, 30, 50]);
+                    break;
+            }
+        }
+    }
+
+    // Add swipe gestures for navigation
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+            const tabs = ['login', 'register', 'about', 'contact', 'dashboard'];
+            const currentTab = document.querySelector('.tab-btn.active').getAttribute('data-tab');
+            const currentIndex = tabs.indexOf(currentTab);
+
+            if (diff > 0 && currentIndex < tabs.length - 1) {
+                // Swipe left - next tab
+                switchToTab(tabs[currentIndex + 1]);
+                triggerHaptic('light');
+            } else if (diff < 0 && currentIndex > 0) {
+                // Swipe right - previous tab
+                switchToTab(tabs[currentIndex - 1]);
+                triggerHaptic('light');
+            }
+        }
+    }
+
+    // Add pull-to-refresh functionality
+    let pullStartY = 0;
+    let pullEndY = 0;
+    let isPulling = false;
+
+    document.addEventListener('touchstart', function(e) {
+        if (window.scrollY === 0) {
+            pullStartY = e.changedTouches[0].screenY;
+            isPulling = true;
+        }
+    });
+
+    document.addEventListener('touchmove', function(e) {
+        if (isPulling) {
+            pullEndY = e.changedTouches[0].screenY;
+            const pullDistance = pullEndY - pullStartY;
+            
+            if (pullDistance > 100) {
+                document.body.style.transform = `translateY(${Math.min(pullDistance * 0.5, 100)}px)`;
+            }
+        }
+    });
+
+    document.addEventListener('touchend', function(e) {
+        if (isPulling) {
+            const pullDistance = pullEndY - pullStartY;
+            document.body.style.transform = '';
+            
+            if (pullDistance > 150) {
+                triggerHaptic('medium');
+                refreshDashboard();
+                showMessage('dashboard-message', 'Refreshing data...', false);
+                setTimeout(() => {
+                    showMessage('dashboard-message', 'Data refreshed!', false);
+                }, 1000);
+            }
+            
+            isPulling = false;
+        }
+    });
+
+    // Add mobile-specific loading states
+    function showMobileLoading(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = '<div class="loading"></div> Loading...';
+        }
+    }
+
+    // Add mobile-specific error handling
+    function showMobileError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `<div style="color: #f44336; text-align: center; padding: 20px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                ${message}<br>
+                <button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px;">
+                    Try Again
+                </button>
+            </div>`;
+            triggerHaptic('heavy');
+        }
+    }
+
+    // Enhanced mobile API calls with loading states
+    async function mobileApiCall(endpoint, method = 'GET', data = null, loadingElementId = null) {
+        try {
+            if (loadingElementId) {
+                showMobileLoading(loadingElementId);
+            }
+            
+            const result = await apiCall(endpoint, method, data);
+            
+            if (loadingElementId) {
+                // Clear loading state - actual content will be set by calling function
+            }
+            
+            triggerHaptic('light');
+            return result;
+        } catch (error) {
+            if (loadingElementId) {
+                showMobileError(loadingElementId, error.message);
+            }
+            throw error;
+        }
+    }
+
+    // Override API calls for mobile
+    const originalApiCall = window.apiCall;
+    window.apiCall = mobileApiCall;
+}
+
 // Show message function
 function showMessage(elementId, message, isError = false) {
     const element = document.getElementById(elementId);
@@ -208,7 +371,7 @@ function updateDashboard() {
 // Load modules
 async function loadModules() {
     try {
-        const response = await apiCall('/modules');
+        const response = await apiCall('/modules', 'GET', null, isMobile ? 'modules-list' : null);
         const modulesList = document.getElementById('modules-list');
         
         if (modulesList && response.success) {
@@ -226,9 +389,13 @@ async function loadModules() {
         }
     } catch (error) {
         console.error('Error loading modules:', error);
-        const modulesList = document.getElementById('modules-list');
-        if (modulesList) {
-            modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
+        if (isMobile) {
+            showMobileError('modules-list', 'Failed to load modules');
+        } else {
+            const modulesList = document.getElementById('modules-list');
+            if (modulesList) {
+                modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
+            }
         }
     }
 }
@@ -236,7 +403,7 @@ async function loadModules() {
 // Load lecturers
 async function loadLecturers() {
     try {
-        const response = await apiCall('/lecturers');
+        const response = await apiCall('/lecturers', 'GET', null, isMobile ? 'lecturers-list' : null);
         const lecturersList = document.getElementById('lecturers-list');
         
         if (lecturersList && response.success) {
@@ -254,9 +421,13 @@ async function loadLecturers() {
         }
     } catch (error) {
         console.error('Error loading lecturers:', error);
-        const lecturersList = document.getElementById('lecturers-list');
-        if (lecturersList) {
-            lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
+        if (isMobile) {
+            showMobileError('lecturers-list', 'Failed to load lecturers');
+        } else {
+            const lecturersList = document.getElementById('lecturers-list');
+            if (lecturersList) {
+                lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
+            }
         }
     }
 }
@@ -264,7 +435,7 @@ async function loadLecturers() {
 // Load timetable
 async function loadTimetable() {
     try {
-        const response = await apiCall('/timetable');
+        const response = await apiCall('/timetable', 'GET', null, isMobile ? 'timetable-list' : null);
         const timetableList = document.getElementById('timetable-list');
         
         if (timetableList && response.success) {
@@ -284,9 +455,13 @@ async function loadTimetable() {
         }
     } catch (error) {
         console.error('Error loading timetable:', error);
-        const timetableList = document.getElementById('timetable-list');
-        if (timetableList) {
-            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+        if (isMobile) {
+            showMobileError('timetable-list', 'Failed to load timetable');
+        } else {
+            const timetableList = document.getElementById('timetable-list');
+            if (timetableList) {
+                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+            }
         }
     }
 }
@@ -305,252 +480,9 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
-// Smartphone-specific enhancements
-function initSmartphoneEnhancements() {
-    // Check if on smartphone (max-width: 575px)
-    const isSmartphone = window.innerWidth <= 575;
-    
-    if (isSmartphone) {
-        console.log('📱 Smartphone mode activated');
-        
-        // Add touch feedback for buttons
-        addTouchFeedback();
-        
-        // Add swipe gestures for tabs
-        addSwipeGestures();
-        
-        // Add haptic feedback (if supported)
-        addHapticFeedback();
-        
-        // Optimize scrolling for mobile
-        optimizeMobileScrolling();
-        
-        // Add pull-to-refresh for dashboard
-        addPullToRefresh();
-    }
-}
-
-// Add touch feedback for interactive elements
-function addTouchFeedback() {
-    const interactiveElements = document.querySelectorAll('.tab-btn, .btn, .card, tr');
-    
-    interactiveElements.forEach(element => {
-        element.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.95)';
-        });
-        
-        element.addEventListener('touchend', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
-}
-
-// Add swipe gestures for tab navigation
-function addSwipeGestures() {
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    const tabContainer = document.querySelector('.tabs');
-    if (!tabContainer) return;
-    
-    tabContainer.addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-    
-    tabContainer.addEventListener('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-    
-    function handleSwipe() {
-        const swipeThreshold = 50;
-        const diff = touchStartX - touchEndX;
-        
-        if (Math.abs(diff) > swipeThreshold) {
-            const tabs = ['login', 'register', 'about', 'contact', 'dashboard'];
-            const currentTab = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
-            const currentIndex = tabs.indexOf(currentTab);
-            
-            if (diff > 0 && currentIndex < tabs.length - 1) {
-                // Swipe left - next tab
-                switchToTab(tabs[currentIndex + 1]);
-            } else if (diff < 0 && currentIndex > 0) {
-                // Swipe right - previous tab
-                switchToTab(tabs[currentIndex - 1]);
-            }
-        }
-    }
-}
-
-// Add haptic feedback for better user experience
-function addHapticFeedback() {
-    if ('vibrate' in navigator) {
-        const buttons = document.querySelectorAll('.btn, .tab-btn');
-        
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                navigator.vibrate(50); // Light vibration for 50ms
-            });
-        });
-        
-        // Add stronger feedback for successful actions
-        const originalShowMessage = showMessage;
-        showMessage = function(elementId, message, isError = false) {
-            originalShowMessage(elementId, message, isError);
-            if (!isError) {
-                navigator.vibrate([100, 50, 100]); // Success vibration pattern
-            } else {
-                navigator.vibrate(200); // Error vibration
-            }
-        };
-    }
-}
-
-// Optimize scrolling for mobile
-function optimizeMobileScrolling() {
-    // Smooth scrolling for better mobile experience
-    document.documentElement.style.scrollBehavior = 'smooth';
-    
-    // Prevent bounce scrolling on iOS
-    document.body.addEventListener('touchmove', function(e) {
-        if (e.target.closest('.modules-wrapper, .lecturers-wrapper, .timetable-wrapper')) {
-            // Allow scrolling within tables
-            return;
-        }
-        e.preventDefault();
-    }, { passive: false });
-    
-    // Add momentum scrolling to tables
-    const scrollableElements = document.querySelectorAll('.modules-wrapper, .lecturers-wrapper, .timetable-wrapper');
-    scrollableElements.forEach(element => {
-        element.style.webkitOverflowScrolling = 'touch';
-        element.style.overflowY = 'auto';
-    });
-}
-
-// Add pull-to-refresh functionality
-function addPullToRefresh() {
-    let startY = 0;
-    let isPulling = false;
-    const pullThreshold = 100;
-    
-    document.addEventListener('touchstart', function(e) {
-        if (window.scrollY === 0) {
-            startY = e.touches[0].pageY;
-            isPulling = true;
-        }
-    });
-    
-    document.addEventListener('touchmove', function(e) {
-        if (!isPulling) return;
-        
-        const currentY = e.touches[0].pageY;
-        const pullDistance = currentY - startY;
-        
-        if (pullDistance > 0 && pullDistance < pullThreshold) {
-            // Show pull indicator
-            showPullIndicator(pullDistance / pullThreshold);
-        }
-    });
-    
-    document.addEventListener('touchend', function(e) {
-        if (!isPulling) return;
-        
-        const currentY = e.changedTouches[0].pageY;
-        const pullDistance = currentY - startY;
-        
-        if (pullDistance > pullThreshold) {
-            // Trigger refresh
-            refreshDashboard();
-            showRefreshIndicator();
-        }
-        
-        hidePullIndicator();
-        isPulling = false;
-    });
-}
-
-// Show pull-to-refresh indicator
-function showPullIndicator(progress) {
-    let indicator = document.getElementById('pull-indicator');
-    if (!indicator) {
-        indicator = document.createElement('div');
-        indicator.id = 'pull-indicator';
-        indicator.style.cssText = `
-            position: fixed;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(52,152,219,0.4);
-        `;
-        document.body.appendChild(indicator);
-    }
-    
-    indicator.style.top = `${-50 + (progress * 60)}px`;
-    indicator.innerHTML = progress > 0.8 ? '🔄 Release to refresh' : '📱 Pull to refresh';
-}
-
-// Hide pull-to-refresh indicator
-function hidePullIndicator() {
-    const indicator = document.getElementById('pull-indicator');
-    if (indicator) {
-        indicator.style.top = '-50px';
-    }
-}
-
-// Show refresh indicator
-function showRefreshIndicator() {
-    const indicator = document.getElementById('pull-indicator');
-    if (indicator) {
-        indicator.innerHTML = '✅ Refreshing...';
-        indicator.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-        
-        setTimeout(() => {
-            hidePullIndicator();
-        }, 2000);
-    }
-}
-
-// Add mobile-specific animations
-function addMobileAnimations() {
-    // Animate elements as they come into view
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUp 0.6s ease-out';
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-    
-    // Observe cards and tables
-    const elementsToAnimate = document.querySelectorAll('.card, .modules-wrapper, .lecturers-wrapper, .timetable-wrapper');
-    elementsToAnimate.forEach(element => {
-        observer.observe(element);
-    });
-}
-
 // Initialize everything
 function initialize() {
     console.log('Initializing application...');
-    
-    // Initialize smartphone-specific enhancements
-    initSmartphoneEnhancements();
-    
-    // Add mobile animations
-    addMobileAnimations();
     
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
