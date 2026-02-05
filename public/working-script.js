@@ -927,14 +927,14 @@ async function loadTimetable() {
         console.log('🔍 Loading timetable...');
         const response = await apiCall('/timetable');
         console.log('🔍 Timetable API response:', response);
-        const timetableList = document.getElementById('timetable-list');
+        const timetableBody = document.getElementById('timetable-body');
         
-        if (timetableList && response.success) {
+        if (timetableBody && response.success) {
             console.log('🔍 Timetable data received:', response.data);
             if (response.data.length === 0) {
-                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+                timetableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
             } else {
-                timetableList.innerHTML = response.data.map((entry, index) => `
+                timetableBody.innerHTML = response.data.map((entry, index) => `
                     <tr>
                         <td>${entry.test}</td>
                         <td>${entry.module}</td>
@@ -950,9 +950,9 @@ async function loadTimetable() {
         }
     } catch (error) {
         console.error('❌ Error loading timetable:', error);
-        const timetableList = document.getElementById('timetable-list');
-        if (timetableList) {
-            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+        const timetableBody = document.getElementById('timetable-body');
+        if (timetableBody) {
+            timetableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
         }
     }
 }
@@ -1938,21 +1938,19 @@ function logout() {
 
                 console.log('🔍 Timetable API response:', response);
 
-                const timetableList = document.getElementById('timetable-list');
-
+                const timetableBody = document.getElementById('timetable-body');
                 
-
-                if (timetableList && response.success) {
+                if (timetableBody && response.success) {
 
                     console.log('🔍 Timetable data received:', response.data);
 
                     if (response.data.length === 0) {
 
-                        timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+                        timetableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
 
                     } else {
 
-                        timetableList.innerHTML = response.data.map((entry, index) => `
+                        timetableBody.innerHTML = response.data.map((entry, index) => `
 
                             <tr>
 
@@ -1984,11 +1982,11 @@ function logout() {
 
                 console.error('❌ Error loading timetable:', error);
 
-                const timetableList = document.getElementById('timetable-list');
+                const timetableBody = document.getElementById('timetable-body');
 
-                if (timetableList) {
+                if (timetableBody) {
 
-                    timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+                    timetableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
 
                 }
 
