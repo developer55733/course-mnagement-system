@@ -196,8 +196,10 @@ async function query(sql, params = []) {
     console.error('   Error Message:', error.message);
     
     // If AUTO_INCREMENT error, force table recreation
-    if (error.code === 'ER_NO_DEFAULT_FOR_FIELD' && error.message.includes("Field 'id' doesn't have a default value")) {
+    if (error.code === 'ER_NO_DEFAULT_FOR_FIELD' || (error.message && error.message.includes("Field 'id' doesn't have a default value"))) {
       console.log('🔄 AUTO_INCREMENT error detected, forcing table recreation...');
+      console.log(`   Error Code: ${error.code}`);
+      console.log(`   Error Message: ${error.message}`);
       try {
         await initializeDatabase();
         console.log('✅ Tables recreated successfully, retrying query...');
