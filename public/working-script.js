@@ -183,16 +183,27 @@ function updateDashboard() {
         dashboardUsername.textContent = currentUser.name;
     }
 
+    // Update user avatar with user's initial
+    const userAvatar = document.getElementById('user-avatar');
+    if (userAvatar && currentUser.name) {
+        const initial = currentUser.name.charAt(0).toUpperCase();
+        userAvatar.textContent = initial;
+    }
+
     // Update profile popup
     const popupName = document.getElementById('popup-name');
     const popupEmail = document.getElementById('popup-email');
     const popupStudentId = document.getElementById('popup-student-id');
+    const popupRegNo = document.getElementById('popup-reg-no');
     const popupAccountType = document.getElementById('popup-account-type');
+    const popupAccountTypeDetail = document.getElementById('popup-account-type-detail');
     
     if (popupName) popupName.textContent = currentUser.name;
     if (popupEmail) popupEmail.textContent = currentUser.email;
     if (popupStudentId) popupStudentId.textContent = currentUser.studentId || 'N/A';
+    if (popupRegNo) popupRegNo.textContent = currentUser.studentId || 'N/A'; // Use studentId as registration number
     if (popupAccountType) popupAccountType.textContent = currentUser.role || 'Student';
+    if (popupAccountTypeDetail) popupAccountTypeDetail.textContent = currentUser.role || 'Student';
 
     // Show dashboard elements
     const userProfileHeader = document.getElementById('user-profile-header');
@@ -464,6 +475,68 @@ function initialize() {
     const logoutBtnTest = document.getElementById('logout-btn');
     console.log('Logout button element found on init:', !!logoutBtnTest);
     console.log('Logout button HTML:', logoutBtnTest ? logoutBtnTest.outerHTML : 'NOT FOUND');
+    
+    // User avatar click functionality
+    const userAvatar = document.getElementById('user-avatar');
+    const userPopup = document.getElementById('user-details-popup');
+    
+    if (userAvatar && userPopup) {
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('User avatar clicked');
+            
+            // Toggle popup
+            if (userPopup.classList.contains('show')) {
+                userPopup.classList.remove('show');
+            } else {
+                userPopup.classList.add('show');
+            }
+        });
+        
+        // Close popup when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!userAvatar.contains(e.target) && !userPopup.contains(e.target)) {
+                userPopup.classList.remove('show');
+            }
+        });
+    }
+    
+    // Profile picture upload functionality
+    const profilePictureContainer = document.querySelector('.profile-picture-container');
+    const profilePictureInput = document.getElementById('profile-picture-input');
+    const profilePicture = document.getElementById('profile-picture');
+    
+    if (profilePictureContainer && profilePictureInput && profilePicture) {
+        profilePictureContainer.addEventListener('click', function() {
+            console.log('Profile picture container clicked');
+            profilePictureInput.click();
+        });
+        
+        profilePictureInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                console.log('Profile picture selected:', file.name);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePicture.src = e.target.result;
+                    console.log('Profile picture updated');
+                    
+                    // Save to localStorage for persistence
+                    localStorage.setItem('userProfilePicture', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.error('Invalid file type selected');
+            }
+        });
+    }
+    
+    // Load saved profile picture
+    const savedProfilePicture = localStorage.getItem('userProfilePicture');
+    if (savedProfilePicture && profilePicture) {
+        profilePicture.src = savedProfilePicture;
+    }
     
     // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
     document.addEventListener('keydown', (e) => {

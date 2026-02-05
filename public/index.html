@@ -19,23 +19,37 @@
             <div class="user-profile-header hidden" id="user-profile-header">
                 <div class="user-avatar" id="user-avatar">U</div>
                 <div class="user-details-popup" id="user-details-popup">
-                    <div class="user-detail-item">
-                        <span class="user-detail-label">Full Name:</span>
-                        <span class="user-detail-value" id="popup-name">John Doe</span>
+                    <div class="user-profile-header-popup">
+                        <div class="profile-picture-container">
+                            <img id="profile-picture" src="https://picsum.photos/seed/default-avatar/100/100.jpg" alt="Profile Picture" class="profile-picture">
+                            <div class="profile-picture-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Photo</span>
+                            </div>
+                            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="profile-name-section">
+                            <h3 id="popup-name">John Doe</h3>
+                            <span id="popup-account-type" class="account-type-badge">Student</span>
+                        </div>
                     </div>
                     <div class="user-detail-item">
-                        <span class="user-detail-label">Student ID:</span>
-                        <span class="user-detail-value" id="popup-student-id">IT2023001</span>
+                        <span class="user-detail-label"><i class="fas fa-id-card"></i> Registration No:</span>
+                        <span class="user-detail-value" id="popup-reg-no">IT2023001</span>
                     </div>
                     <div class="user-detail-item">
-                        <span class="user-detail-label">Email:</span>
+                        <span class="user-detail-label"><i class="fas fa-envelope"></i> Gmail:</span>
                         <span class="user-detail-value" id="popup-email">john@student.edu</span>
                     </div>
                     <div class="user-detail-item">
-                        <span class="user-detail-label">Account Type:</span>
-                        <span class="user-detail-value" id="popup-account-type">Student</span>
+                        <span class="user-detail-label"><i class="fas fa-graduation-cap"></i> Student ID:</span>
+                        <span class="user-detail-value" id="popup-student-id">IT2023001</span>
                     </div>
                     <div class="user-detail-item">
+                        <span class="user-detail-label"><i class="fas fa-user-tag"></i> Account Type:</span>
+                        <span class="user-detail-value" id="popup-account-type-detail">Student</span>
+                    </div>
+                    <div class="user-detail-actions">
                         <button class="logout-btn" onclick="logout()" title="Logout (Ctrl+L)" aria-label="Logout from the system">
                             <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
                         </button>
