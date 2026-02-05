@@ -48,8 +48,23 @@
                     <div class="user-detail-item">
                         <span class="user-detail-label"><i class="fas fa-user-tag"></i> Account Type:</span>
                         <span class="user-detail-value" id="popup-account-type-detail">Student</span>
+                        <span class="status-indicator" id="admin-status">
+                            <span class="status-dot active"></span>
+                            <span class="status-text">Active</span>
+                        </span>
                     </div>
-                    <div class="user-detail-actions">
+                    <div class="user-detail-actions" id="admin-actions" style="display: none;">
+                        <button class="admin-action-btn edit-btn" onclick="editProfile()">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button class="admin-action-btn delete-btn" onclick="deleteAccount()">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                        <button class="logout-btn" onclick="logout()" title="Logout (Ctrl+L)" aria-label="Logout from the system">
+                            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                        </button>
+                    </div>
+                    <div class="user-detail-actions" id="user-actions">
                         <button class="logout-btn" onclick="logout()" title="Logout (Ctrl+L)" aria-label="Logout from the system">
                             <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
                         </button>

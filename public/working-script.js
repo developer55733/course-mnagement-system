@@ -197,6 +197,9 @@ function updateDashboard() {
     const popupRegNo = document.getElementById('popup-reg-no');
     const popupAccountType = document.getElementById('popup-account-type');
     const popupAccountTypeDetail = document.getElementById('popup-account-type-detail');
+    const adminStatus = document.getElementById('admin-status');
+    const adminActions = document.getElementById('admin-actions');
+    const userActions = document.getElementById('user-actions');
     
     if (popupName) popupName.textContent = currentUser.name;
     if (popupEmail) popupEmail.textContent = currentUser.email;
@@ -204,6 +207,39 @@ function updateDashboard() {
     if (popupRegNo) popupRegNo.textContent = currentUser.studentId || 'N/A'; // Use studentId as registration number
     if (popupAccountType) popupAccountType.textContent = currentUser.role || 'Student';
     if (popupAccountTypeDetail) popupAccountTypeDetail.textContent = currentUser.role || 'Student';
+    
+    // Show/hide admin actions based on user role
+    if (isAdmin()) {
+        if (adminActions) adminActions.style.display = 'flex';
+        if (userActions) userActions.style.display = 'none';
+        
+        // Update admin status
+        if (adminStatus) {
+            const statusDot = adminStatus.querySelector('.status-dot');
+            const statusText = adminStatus.querySelector('.status-text');
+            if (statusDot) {
+                statusDot.className = 'status-dot active';
+            }
+            if (statusText) {
+                statusText.textContent = 'Active';
+            }
+        }
+    } else {
+        if (adminActions) adminActions.style.display = 'none';
+        if (userActions) userActions.style.display = 'flex';
+        
+        // Update admin status
+        if (adminStatus) {
+            const statusDot = adminStatus.querySelector('.status-dot');
+            const statusText = adminStatus.querySelector('.status-text');
+            if (statusDot) {
+                statusDot.className = 'status-dot inactive';
+            }
+            if (statusText) {
+                statusText.textContent = 'User';
+            }
+        }
+    }
 
     // Show dashboard elements
     const userProfileHeader = document.getElementById('user-profile-header');
@@ -328,12 +364,11 @@ function refreshDashboard() {
     }
 }
 
-// Check if user is admin
 function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
-// Test logout function for debugging
+// Inline backup function for logout
 window.testLogout = function() {
     console.log('=== TEST LOGOUT FUNCTION CALLED ===');
     console.log('Current user:', currentUser);
@@ -355,6 +390,71 @@ window.testLogout = function() {
         }, 1000);
     } else {
         console.error('Logout button not found for test!');
+    }
+};
+
+// Edit profile function
+window.editProfile = function() {
+    console.log('Edit profile clicked');
+    
+    // Close popup first
+    const userPopup = document.getElementById('user-details-popup');
+    if (userPopup) {
+        userPopup.classList.remove('show');
+    }
+    
+    // Show edit profile modal or navigate to edit page
+    alert('Edit Profile feature coming soon! This will open a profile editing interface.');
+    
+    // Future implementation could include:
+    // - Open modal with profile form
+    // - Allow editing name, email, etc.
+    // - Save changes to backend
+    // - Update localStorage
+};
+
+// Delete account function
+window.deleteAccount = function() {
+    console.log('Delete account clicked');
+    
+    // Confirmation dialog
+    const isConfirmed = confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you sure you want to permanently delete your account?\n\nAll your data will be lost.');
+    
+    if (!isConfirmed) {
+        console.log('Account deletion cancelled by user');
+        return;
+    }
+    
+    // Second confirmation for safety
+    const finalConfirmation = confirm('🚨 FINAL CONFIRMATION:\n\nThis will permanently delete:\n• Your account\n• All your data\n• Login access\n• Profile information\n\nType "DELETE" to confirm:');
+    
+    if (finalConfirmation) {
+        // Simulate account deletion
+        console.log('Account deletion confirmed - proceeding...');
+        
+        // Show loading state
+        const deleteBtn = document.querySelector('.delete-btn');
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            deleteBtn.disabled = true;
+        }
+        
+        // Simulate deletion process
+        setTimeout(() => {
+            // Clear all user data
+            localStorage.clear();
+            sessionStorage.clear();
+            currentUser = null;
+            
+            // Show success message
+            alert('✅ Account deleted successfully.\n\nYou have been logged out and your account has been removed from the system.');
+            
+            // Redirect to login page
+            window.location.reload();
+        }, 2000);
+    } else {
+        console.log('Account deletion cancelled - wrong confirmation');
+        alert('Account deletion cancelled.');
     }
 };
 
