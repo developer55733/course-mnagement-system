@@ -170,10 +170,12 @@ function updateDashboard() {
     const popupName = document.getElementById('popup-name');
     const popupEmail = document.getElementById('popup-email');
     const popupStudentId = document.getElementById('popup-student-id');
+    const popupAccountType = document.getElementById('popup-account-type');
     
     if (popupName) popupName.textContent = currentUser.name;
     if (popupEmail) popupEmail.textContent = currentUser.email;
     if (popupStudentId) popupStudentId.textContent = currentUser.studentId || 'N/A';
+    if (popupAccountType) popupAccountType.textContent = currentUser.role || 'Student';
 
     // Show dashboard elements
     const userProfileHeader = document.getElementById('user-profile-header');
@@ -181,6 +183,126 @@ function updateDashboard() {
     
     if (userProfileHeader) userProfileHeader.classList.remove('hidden');
     if (dashboardTab) dashboardTab.classList.remove('hidden');
+
+    // Show/hide admin controls based on user role
+    const lecturerAdminControls = document.getElementById('lecturer-admin-controls');
+    const adminLecturerActionHeader = document.getElementById('admin-lecturer-action-header');
+    const devadminTab = document.getElementById('devadmin-tab');
+    
+    if (isAdmin()) {
+        if (lecturerAdminControls) lecturerAdminControls.classList.remove('hidden');
+        if (adminLecturerActionHeader) adminLecturerActionHeader.classList.remove('hidden');
+        if (devadminTab) devadminTab.classList.remove('hidden');
+    } else {
+        if (lecturerAdminControls) lecturerAdminControls.classList.add('hidden');
+        if (adminLecturerActionHeader) adminLecturerActionHeader.classList.add('hidden');
+        if (devadminTab) devadminTab.classList.add('hidden');
+    }
+
+    // Load dashboard data
+    loadModules();
+    loadLecturers();
+    loadTimetable();
+}
+
+// Load modules
+async function loadModules() {
+    try {
+        const response = await apiCall('/modules');
+        const modulesList = document.getElementById('modules-list');
+        
+        if (modulesList && response.success) {
+            if (response.data.length === 0) {
+                modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">No modules available</td></tr>';
+            } else {
+                modulesList.innerHTML = response.data.map(module => `
+                    <tr>
+                        <td>${module.code}</td>
+                        <td>${module.name}</td>
+                        <td>3</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading modules:', error);
+        const modulesList = document.getElementById('modules-list');
+        if (modulesList) {
+            modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
+        }
+    }
+}
+
+// Load lecturers
+async function loadLecturers() {
+    try {
+        const response = await apiCall('/lecturers');
+        const lecturersList = document.getElementById('lecturers-list');
+        
+        if (lecturersList && response.success) {
+            if (response.data.length === 0) {
+                lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">No lecturers available</td></tr>';
+            } else {
+                lecturersList.innerHTML = response.data.map(lecturer => `
+                    <tr>
+                        <td>${lecturer.name}</td>
+                        <td>${lecturer.module}</td>
+                        <td>${lecturer.phone || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading lecturers:', error);
+        const lecturersList = document.getElementById('lecturers-list');
+        if (lecturersList) {
+            lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
+        }
+    }
+}
+
+// Load timetable
+async function loadTimetable() {
+    try {
+        const response = await apiCall('/timetable');
+        const timetableList = document.getElementById('timetable-list');
+        
+        if (timetableList && response.success) {
+            if (response.data.length === 0) {
+                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+            } else {
+                timetableList.innerHTML = response.data.map(entry => `
+                    <tr>
+                        <td>${entry.test}</td>
+                        <td>${entry.module}</td>
+                        <td>${entry.date}</td>
+                        <td>${entry.time}</td>
+                        <td>${entry.venue}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading timetable:', error);
+        const timetableList = document.getElementById('timetable-list');
+        if (timetableList) {
+            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+        }
+    }
+}
+
+// Refresh dashboard data
+function refreshDashboard() {
+    if (currentUser) {
+        loadModules();
+        loadLecturers();
+        loadTimetable();
+    }
+}
+
+// Check if user is admin
+function isAdmin() {
+    return currentUser && currentUser.role === 'admin';
 }
 
 // Initialize everything
