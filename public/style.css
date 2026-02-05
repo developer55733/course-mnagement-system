@@ -154,6 +154,36 @@
             font-weight: 500;
         }
 
+        .remove-photo-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .remove-photo-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .remove-photo-btn i {
+            font-size: 8px;
+            margin: 0;
+        }
+
         .profile-name-section h3 {
             margin: 0;
             font-size: 18px;

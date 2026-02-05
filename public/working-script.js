@@ -530,12 +530,51 @@ function initialize() {
                 console.error('Invalid file type selected');
             }
         });
+        
+        // Add remove photo functionality
+        const removePhotoBtn = document.createElement('button');
+        removePhotoBtn.className = 'remove-photo-btn';
+        removePhotoBtn.innerHTML = '<i class="fas fa-times"></i> Remove Photo';
+        removePhotoBtn.onclick = function(e) {
+            e.stopPropagation();
+            console.log('Remove photo clicked');
+            
+            // Remove from localStorage
+            localStorage.removeItem('userProfilePicture');
+            
+            // Reset to default icon
+            const defaultIcons = {
+                'admin': 'https://picsum.photos/seed/admin-avatar/100/100.jpg',
+                'student': 'https://picsum.photos/seed/student-avatar/100/100.jpg',
+                'lecturer': 'https://picsum.photos/seed/lecturer-avatar/100/100.jpg'
+            };
+            profilePicture.src = defaultIcons[currentUser?.role?.toLowerCase()] || defaultIcons.student;
+            
+            // Remove the remove button temporarily
+            removePhotoBtn.style.display = 'none';
+            setTimeout(() => {
+                removePhotoBtn.style.display = 'block';
+            }, 3000);
+        };
+        
+        // Add remove button to profile picture container
+        profilePictureContainer.appendChild(removePhotoBtn);
     }
     
-    // Load saved profile picture
+    // Load saved profile picture or use default icon
     const savedProfilePicture = localStorage.getItem('userProfilePicture');
-    if (savedProfilePicture && profilePicture) {
-        profilePicture.src = savedProfilePicture;
+    if (profilePicture) {
+        if (savedProfilePicture) {
+            profilePicture.src = savedProfilePicture;
+        } else {
+            // Use default icon based on user role
+            const defaultIcons = {
+                'admin': 'https://picsum.photos/seed/admin-avatar/100/100.jpg',
+                'student': 'https://picsum.photos/seed/student-avatar/100/100.jpg',
+                'lecturer': 'https://picsum.photos/seed/lecturer-avatar/100/100.jpg'
+            };
+            profilePicture.src = defaultIcons[currentUser?.role?.toLowerCase()] || defaultIcons.student;
+        }
     }
     
     // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
