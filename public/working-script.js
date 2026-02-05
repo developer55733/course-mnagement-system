@@ -970,12 +970,6 @@ async function loadTimetable() {
         }
     }
 }
-
-
-// Refresh dashboard data
-
-function refreshDashboard() {
-
     if (currentUser) {
 
         loadModules();
@@ -986,6 +980,17 @@ function refreshDashboard() {
 
     }
 
+}
+
+
+
+function refreshDashboard() {
+    if (currentUser) {
+        loadModules();
+        loadLecturers();
+        loadTimetable();
+        loadUserNotes();
+    }
 }
 
 
