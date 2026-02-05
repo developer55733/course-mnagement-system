@@ -36,6 +36,8 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
     try {
 
+        console.log(`🔍 Making API call: ${method} ${endpoint}`);
+        
         const options = {
 
             method,
@@ -58,9 +60,16 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
 
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        const fullUrl = `${API_BASE_URL}${endpoint}`;
+        console.log(`🔍 Full API URL: ${fullUrl}`);
+        
+        const response = await fetch(fullUrl, options);
+
+        console.log(`🔍 Response status: ${response.status} ${response.statusText}`);
 
         const result = await response.json();
+
+        console.log(`🔍 Response data:`, result);
 
 
 
@@ -76,7 +85,13 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
     } catch (error) {
 
-        console.error('API Error:', error);
+        console.error('❌ API Error:', error);
+        console.error('❌ Error details:', {
+            endpoint,
+            method,
+            message: error.message,
+            stack: error.stack
+        });
 
         throw error;
 
