@@ -268,36 +268,43 @@
   // Load timetables on page load
   window.addEventListener('load', loadTimetables);
 
-  // Logout button handler
+  // Logout button handler - simplified and more robust
   const btnLogout = document.getElementById('btnLogout');
   console.log('Logout button found:', !!btnLogout); // Debug log
   
   if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
+    // Remove any existing listeners to prevent duplicates
+    btnLogout.replaceWith(btnLogout.cloneNode(true));
+    
+    // Add fresh event listener
+    btnLogout.addEventListener('click', function(e) {
+      e.preventDefault();
       console.log('Logout button clicked'); // Debug log
       
       // Show confirmation dialog
       const isConfirmed = confirm('Are you sure you want to logout from the admin panel?');
       console.log('User confirmed:', isConfirmed); // Debug log
       
-      if (!isConfirmed) return;
+      if (!isConfirmed) {
+        console.log('Logout cancelled by user');
+        return;
+      }
       
-      // Show loading state
+      // Show loading state immediately
       btnLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
       btnLogout.disabled = true;
       console.log('Loading state activated'); // Debug log
       
-      // Simulate logout process for better UX
-      setTimeout(() => {
-        console.log('Starting logout process'); // Debug log
-        
+      // Perform logout synchronously
+      try {
         // Clear admin secret
         ADMIN_SECRET = '';
         console.log('Admin secret cleared'); // Debug log
         
         // Hide panel and show login card
-        panel.style.display = 'none';
-        document.getElementById('loginCard').style.display = 'block';
+        if (panel) panel.style.display = 'none';
+        const loginCard = document.getElementById('loginCard');
+        if (loginCard) loginCard.style.display = 'block';
         console.log('Panel hidden, login card shown'); // Debug log
         
         // Hide logout button
@@ -305,31 +312,41 @@
         console.log('Logout button hidden'); // Debug log
         
         // Clear login form
-        secretInput.value = '';
-        loginMsg.textContent = '';
-        console.log('Login form cleared'); // Debug log
+        if (secretInput) secretInput.value = '';
+        if (loginMsg) {
+          loginMsg.textContent = 'Logged out successfully!';
+          loginMsg.style.color = '#28a745';
+        }
+        console.log('Login form updated'); // Debug log
         
         // Clear output
-        outPre.textContent = 'Use buttons above to perform admin actions.';
+        if (outPre) outPre.textContent = 'Use buttons above to perform admin actions.';
         console.log('Output cleared'); // Debug log
         
-        // Reset logout button
-        btnLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-        btnLogout.disabled = false;
-        console.log('Logout button reset'); // Debug log
-        
-        // Show success message
-        loginMsg.textContent = 'Logged out successfully!';
-        loginMsg.style.color = '#28a745';
-        console.log('Success message shown'); // Debug log
-        
+        // Show success message briefly, then clear it
         setTimeout(() => {
-          loginMsg.textContent = '';
-          loginMsg.style.color = '';
+          if (loginMsg) {
+            loginMsg.textContent = '';
+            loginMsg.style.color = '';
+          }
           console.log('Success message cleared'); // Debug log
         }, 3000);
-      }, 800); // Simulate logout process
+        
+        console.log('Logout process completed successfully'); // Debug log
+        
+      } catch (error) {
+        console.error('Error during logout:', error);
+        // Reset button state on error
+        btnLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        btnLogout.disabled = false;
+        if (loginMsg) {
+          loginMsg.textContent = 'Error during logout. Please try again.';
+          loginMsg.style.color = '#dc3545';
+        }
+      }
     });
+    
+    console.log('Logout button event listener attached successfully');
   } else {
     console.error('Logout button element not found!');
   }
@@ -343,4 +360,60 @@
       }
     }
   });
+
+  // Inline backup function for logout
+  window.handleAdminLogout = function() {
+    console.log('Inline logout function called');
+    
+    const isConfirmed = confirm('Are you sure you want to logout from the admin panel?');
+    if (!isConfirmed) {
+      console.log('Logout cancelled by user');
+      return;
+    }
+    
+    const logoutBtn = document.getElementById('btnLogout');
+    if (logoutBtn) {
+      logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+      logoutBtn.disabled = true;
+    }
+    
+    // Perform logout
+    try {
+      ADMIN_SECRET = '';
+      if (panel) panel.style.display = 'none';
+      const loginCard = document.getElementById('loginCard');
+      if (loginCard) loginCard.style.display = 'block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (secretInput) secretInput.value = '';
+      if (loginMsg) {
+        loginMsg.textContent = 'Logged out successfully!';
+        loginMsg.style.color = '#28a745';
+      }
+      if (outPre) outPre.textContent = 'Use buttons above to perform admin actions.';
+      
+      console.log('Logout completed via inline function');
+      
+      // Reset button
+      if (logoutBtn) {
+        setTimeout(() => {
+          logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+          logoutBtn.disabled = false;
+          
+          if (loginMsg) {
+            setTimeout(() => {
+              loginMsg.textContent = '';
+              loginMsg.style.color = '';
+            }, 3000);
+          }
+        }, 500);
+      }
+      
+    } catch (error) {
+      console.error('Error in inline logout:', error);
+      if (logoutBtn) {
+        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        logoutBtn.disabled = false;
+      }
+    }
+  };
 })();
