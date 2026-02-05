@@ -305,9 +305,204 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
+// Check if device is mobile
+function isMobile() {
+    return window.innerWidth <= 480;
+}
+
+// Mobile navigation toggle
+function toggleMobileNav() {
+    const navToggle = document.getElementById('mobile-nav-toggle');
+    const tabs = document.querySelector('.tabs');
+    
+    if (navToggle && tabs) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            tabs.classList.toggle('mobile-expanded');
+        });
+    }
+}
+
+// Enhanced mobile form interactions
+function enhanceMobileForms() {
+    if (!isMobile()) return;
+    
+    // Add touch feedback to form inputs
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('touchstart', () => {
+            input.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('touchend', () => {
+            input.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add ripple effect to buttons
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!isMobile()) return;
+            
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+}
+
+// Mobile tab switching with animations
+function switchToTab(tabId) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+        
+        // Add animation for mobile
+        if (isMobile()) {
+            selectedTab.style.animation = 'none';
+            setTimeout(() => {
+                selectedTab.style.animation = 'slideInUp 0.4s ease';
+            }, 10);
+        }
+    }
+    
+    // Activate tab button
+    const tabButton = document.querySelector(`[data-tab="${tabId}"]`);
+    if (tabButton) {
+        tabButton.classList.add('active');
+        
+        // On mobile, close nav after selection
+        if (isMobile()) {
+            const navToggle = document.getElementById('mobile-nav-toggle');
+            const tabs = document.querySelector('.tabs');
+            if (navToggle && tabs) {
+                navToggle.classList.remove('active');
+                tabs.classList.remove('mobile-expanded');
+            }
+        }
+    }
+}
+
+// Show loading state on mobile
+function showLoading(elementId, message = 'Loading...') {
+    const element = document.getElementById(elementId);
+    if (element && isMobile()) {
+        element.innerHTML = `<span class="loading"></span>${message}`;
+    }
+}
+
+// Enhanced mobile message display
+function showMessage(elementId, message, isError = false) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = message;
+        element.style.color = isError ? '#e74c3c' : '#27ae60';
+        element.style.backgroundColor = isError ? 'rgba(231, 76, 60, 0.1)' : 'rgba(39, 174, 96, 0.1)';
+        element.style.border = `2px solid ${isError ? '#e74c3c' : '#27ae60'}`;
+        element.style.padding = '12px';
+        element.style.borderRadius = '20px';
+        element.style.margin = '10px 0';
+        
+        // Auto-hide on mobile after 3 seconds
+        setTimeout(() => {
+            element.textContent = '';
+            element.style.backgroundColor = '';
+            element.style.border = '';
+            element.style.padding = '';
+            element.style.borderRadius = '';
+            element.style.margin = '';
+        }, 3000);
+    }
+}
+
+// Mobile swipe gestures for navigation
+function addSwipeGestures() {
+    if (!isMobile()) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const container = document.querySelector('.container');
+    
+    container.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    container.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            const activeTab = document.querySelector('.tab-btn.active');
+            const allTabs = Array.from(document.querySelectorAll('.tab-btn:not(.hidden)'));
+            const currentIndex = allTabs.indexOf(activeTab);
+            
+            if (diff > 0 && currentIndex < allTabs.length - 1) {
+                // Swipe left - next tab
+                const nextTab = allTabs[currentIndex + 1];
+                switchToTab(nextTab.getAttribute('data-tab'));
+            } else if (diff < 0 && currentIndex > 0) {
+                // Swipe right - previous tab
+                const prevTab = allTabs[currentIndex - 1];
+                switchToTab(prevTab.getAttribute('data-tab'));
+            }
+        }
+    }
+}
+
+// Mobile viewport height fix for iOS
+function fixMobileViewport() {
+    if (!isMobile()) return;
+    
+    const setViewportHeight = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+}
+
 // Initialize everything
 function initialize() {
     console.log('Initializing application...');
+    
+    // Initialize mobile features first
+    toggleMobileNav();
+    enhanceMobileForms();
+    addSwipeGestures();
+    fixMobileViewport();
     
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -352,7 +547,7 @@ function initialize() {
         });
     }
 
-    // Check for existing session
+    // Check for stored user session
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
         try {
@@ -361,6 +556,31 @@ function initialize() {
             updateDashboard();
         } catch (error) {
             sessionStorage.removeItem('currentUser');
+        }
+    }
+
+    // Add mobile-specific enhancements
+    if (isMobile()) {
+        console.log('Mobile device detected - enabling mobile features');
+        
+        // Add mobile-specific event listeners
+        document.addEventListener('touchstart', () => {
+            document.body.classList.add('touch-active');
+        });
+        
+        document.addEventListener('touchend', () => {
+            setTimeout(() => {
+                document.body.classList.remove('touch-active');
+            }, 100);
+        });
+        
+        // Optimize scrolling for mobile
+        document.body.style.scrollBehavior = 'smooth';
+        
+        // Hide admin access on mobile for security
+        const adminAccessBox = document.querySelector('.admin-access-box');
+        if (adminAccessBox) {
+            adminAccessBox.style.display = 'none';
         }
     }
     
