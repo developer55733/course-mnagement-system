@@ -534,7 +534,8 @@ function initialize() {
         // Add remove photo functionality
         const removePhotoBtn = document.createElement('button');
         removePhotoBtn.className = 'remove-photo-btn';
-        removePhotoBtn.innerHTML = '<i class="fas fa-times"></i> Remove Photo';
+        removePhotoBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removePhotoBtn.title = 'Remove Photo';
         removePhotoBtn.onclick = function(e) {
             e.stopPropagation();
             console.log('Remove photo clicked');
@@ -550,11 +551,11 @@ function initialize() {
             };
             profilePicture.src = defaultIcons[currentUser?.role?.toLowerCase()] || defaultIcons.student;
             
-            // Remove the remove button temporarily
-            removePhotoBtn.style.display = 'none';
+            // Hide remove button temporarily for better UX
+            removePhotoBtn.style.opacity = '0';
             setTimeout(() => {
-                removePhotoBtn.style.display = 'block';
-            }, 3000);
+                removePhotoBtn.style.opacity = '';
+            }, 2000);
         };
         
         // Add remove button to profile picture container

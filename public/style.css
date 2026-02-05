@@ -156,32 +156,41 @@
 
         .remove-photo-btn {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: -8px;
+            right: -8px;
             background: #dc3545;
             color: white;
             border: 2px solid white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 12px;
             transition: all 0.3s ease;
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .profile-picture-container:hover .remove-photo-btn {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .remove-photo-btn:hover {
             background: #c82333;
             transform: scale(1.1);
+            box-shadow: 0 3px 12px rgba(220, 53, 69, 0.4);
         }
 
         .remove-photo-btn i {
-            font-size: 8px;
+            font-size: 12px;
             margin: 0;
+            line-height: 1;
         }
 
         .profile-name-section h3 {
