@@ -144,8 +144,8 @@ app.listen(PORT, () => {
     : `http://localhost:${PORT}`;
   
   // Enhanced database info for Railway
-  const dbHost = process.env.RAILWAY_TCP_PROXY_DOMAIN || process.env.MYSQLHOST || 'N/A';
-  const dbPort = process.env.RAILWAY_TCP_PROXY_PORT || process.env.MYSQLPORT || '3306';
+  const dbHost = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
+  const dbPort = process.env.RAILWAY_TCP_PROXY_PORT || '33264';
   const dbUser = process.env.MYSQLUSER || 'root';
   const dbInfo = `${dbUser}@${dbHost}:${dbPort}`;
   

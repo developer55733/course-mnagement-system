@@ -53,8 +53,7 @@ const getDatabaseConfig = () => {
     charset: 'utf8mb4',
     timezone: '+00:00',
     acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
+    connectTimeout: 30000,
     multipleStatements: true,
     // Disable strict mode to handle AUTO_INCREMENT properly
     connectionLimit: 10,
