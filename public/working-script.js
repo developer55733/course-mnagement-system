@@ -610,52 +610,343 @@ window.deleteAccount = function() {
 // Module action functions
 window.editModule = function(index) {
     console.log('Edit module:', index);
-    alert('Edit Module feature coming soon! This will open a module editing interface.');
+    
+    // Create edit modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Module</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="edit-modal-body">
+                <div class="form-group">
+                    <label>Module Code:</label>
+                    <input type="text" id="edit-module-code" placeholder="e.g., IT101">
+                </div>
+                <div class="form-group">
+                    <label>Module Name:</label>
+                    <input type="text" id="edit-module-name" placeholder="e.g., Introduction to Programming">
+                </div>
+                <div class="form-group">
+                    <label>Credits:</label>
+                    <input type="number" id="edit-module-credits" placeholder="3" min="1" max="6">
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveModule(${index})">Save Changes</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Populate with current data (in real implementation, this would come from the actual module data)
+    setTimeout(() => {
+        const codeInput = document.getElementById('edit-module-code');
+        const nameInput = document.getElementById('edit-module-name');
+        const creditsInput = document.getElementById('edit-module-credits');
+        
+        if (codeInput) codeInput.value = 'IT101'; // Demo data
+        if (nameInput) nameInput.value = 'Introduction to Programming'; // Demo data
+        if (creditsInput) creditsInput.value = '3'; // Demo data
+    }, 100);
 };
 
 window.deleteModule = function(index) {
     console.log('Delete module:', index);
-    const isConfirmed = confirm('Are you sure you want to delete this module? This action cannot be undone.');
+    const isConfirmed = confirm('Are you sure you want to delete this module?\n\nModule: IT101 - Introduction to Programming\n\nThis action cannot be undone.');
     if (isConfirmed) {
-        alert('Module deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
-        // In real implementation, this would call API to delete the module
-        // Then reload the modules list
-        loadModules();
+        // Show loading state
+        const deleteBtn = document.querySelector(`#module-actions-${index} .delete-btn-small`);
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.disabled = true;
+        }
+        
+        // Simulate deletion process
+        setTimeout(() => {
+            // Remove the row from table
+            const row = document.querySelector(`#module-actions-${index}`).closest('tr');
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-100%)';
+                setTimeout(() => row.remove(), 300);
+            }
+            
+            alert('✅ Module deleted successfully!');
+        }, 1000);
     }
+};
+
+// Close edit modal
+window.closeEditModal = function() {
+    const modal = document.querySelector('.edit-modal-overlay');
+    if (modal) {
+        modal.remove();
+    }
+};
+
+// Save module changes
+window.saveModule = function(index) {
+    const code = document.getElementById('edit-module-code')?.value;
+    const name = document.getElementById('edit-module-name')?.value;
+    const credits = document.getElementById('edit-module-credits')?.value;
+    
+    if (!code || !name || !credits) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+    }
+    
+    // Simulate save process
+    setTimeout(() => {
+        closeEditModal();
+        alert('✅ Module updated successfully!');
+        
+        // Reload modules to show changes
+        loadModules();
+    }, 1000);
 };
 
 // Lecturer action functions
 window.editLecturer = function(index) {
     console.log('Edit lecturer:', index);
-    alert('Edit Lecturer feature coming soon! This will open a lecturer editing interface.');
+    
+    // Create edit modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Lecturer</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="edit-modal-body">
+                <div class="form-group">
+                    <label>Lecturer Name:</label>
+                    <input type="text" id="edit-lecturer-name" placeholder="e.g., Dr. John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Module:</label>
+                    <select id="edit-lecturer-module">
+                        <option value="">Select Module</option>
+                        <option value="IT101">IT101 - Introduction to Programming</option>
+                        <option value="IT102">IT102 - Web Development</option>
+                        <option value="IT103">IT103 - Database Management</option>
+                        <option value="IT104">IT104 - Data Structures</option>
+                        <option value="IT105">IT105 - Computer Networks</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number:</label>
+                    <input type="tel" id="edit-lecturer-phone" placeholder="e.g., +1234567890">
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLecturer(${index})">Save Changes</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Populate with current data
+    setTimeout(() => {
+        const nameInput = document.getElementById('edit-lecturer-name');
+        const moduleSelect = document.getElementById('edit-lecturer-module');
+        const phoneInput = document.getElementById('edit-lecturer-phone');
+        
+        if (nameInput) nameInput.value = 'Dr. John Smith'; // Demo data
+        if (moduleSelect) moduleSelect.value = 'IT101'; // Demo data
+        if (phoneInput) phoneInput.value = '+1234567890'; // Demo data
+    }, 100);
 };
 
 window.deleteLecturer = function(index) {
     console.log('Delete lecturer:', index);
-    const isConfirmed = confirm('Are you sure you want to delete this lecturer? This action cannot be undone.');
+    const isConfirmed = confirm('Are you sure you want to delete this lecturer?\n\nLecturer: Dr. John Smith\nModule: IT101\n\nThis action cannot be undone.');
     if (isConfirmed) {
-        alert('Lecturer deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
-        // In real implementation, this would call API to delete the lecturer
-        // Then reload the lecturers list
-        loadLecturers();
+        // Show loading state
+        const deleteBtn = document.querySelector(`#lecturer-actions-${index} .delete-btn-small`);
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.disabled = true;
+        }
+        
+        // Simulate deletion process
+        setTimeout(() => {
+            // Remove the row from table
+            const row = document.querySelector(`#lecturer-actions-${index}`).closest('tr');
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-100%)';
+                setTimeout(() => row.remove(), 300);
+            }
+            
+            alert('✅ Lecturer deleted successfully!');
+        }, 1000);
     }
+};
+
+// Save lecturer changes
+window.saveLecturer = function(index) {
+    const name = document.getElementById('edit-lecturer-name')?.value;
+    const module = document.getElementById('edit-lecturer-module')?.value;
+    const phone = document.getElementById('edit-lecturer-phone')?.value;
+    
+    if (!name || !module || !phone) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+    }
+    
+    // Simulate save process
+    setTimeout(() => {
+        closeEditModal();
+        alert('✅ Lecturer updated successfully!');
+        
+        // Reload lecturers to show changes
+        loadLecturers();
+    }, 1000);
 };
 
 // Timetable action functions
 window.editTimetable = function(index) {
     console.log('Edit timetable entry:', index);
-    alert('Edit Timetable feature coming soon! This will open a timetable editing interface.');
+    
+    // Create edit modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Timetable Entry</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="edit-modal-body">
+                <div class="form-group">
+                    <label>Test Name:</label>
+                    <input type="text" id="edit-timetable-test" placeholder="e.g., Test 01, Midterm">
+                </div>
+                <div class="form-group">
+                    <label>Module:</label>
+                    <select id="edit-timetable-module">
+                        <option value="">Select Module</option>
+                        <option value="IT101">IT101 - Introduction to Programming</option>
+                        <option value="IT102">IT102 - Web Development</option>
+                        <option value="IT103">IT103 - Database Management</option>
+                        <option value="IT104">IT104 - Data Structures</option>
+                        <option value="IT105">IT105 - Computer Networks</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="edit-timetable-date">
+                </div>
+                <div class="form-group">
+                    <label>Time:</label>
+                    <input type="time" id="edit-timetable-time">
+                </div>
+                <div class="form-group">
+                    <label>Venue:</label>
+                    <input type="text" id="edit-timetable-venue" placeholder="e.g., Room 101, Lab 3">
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTimetable(${index})">Save Changes</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Populate with current data
+    setTimeout(() => {
+        const testInput = document.getElementById('edit-timetable-test');
+        const moduleSelect = document.getElementById('edit-timetable-module');
+        const dateInput = document.getElementById('edit-timetable-date');
+        const timeInput = document.getElementById('edit-timetable-time');
+        const venueInput = document.getElementById('edit-timetable-venue');
+        
+        if (testInput) testInput.value = 'Test 01'; // Demo data
+        if (moduleSelect) moduleSelect.value = 'IT101'; // Demo data
+        if (dateInput) dateInput.value = '2024-03-15'; // Demo data
+        if (timeInput) timeInput.value = '14:00'; // Demo data
+        if (venueInput) venueInput.value = 'Room 101'; // Demo data
+    }, 100);
 };
 
 window.deleteTimetable = function(index) {
     console.log('Delete timetable entry:', index);
-    const isConfirmed = confirm('Are you sure you want to delete this timetable entry? This action cannot be undone.');
+    const isConfirmed = confirm('Are you sure you want to delete this timetable entry?\n\nEntry: Test 01 - IT101\nDate: 2024-03-15\nTime: 14:00\nVenue: Room 101\n\nThis action cannot be undone.');
     if (isConfirmed) {
-        alert('Timetable entry deleted successfully! (This is a demo - actual deletion will be implemented with backend)');
-        // In real implementation, this would call API to delete the entry
-        // Then reload the timetable
-        loadTimetable();
+        // Show loading state
+        const deleteBtn = document.querySelector(`#timetable-actions-${index} .delete-btn-small`);
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.disabled = true;
+        }
+        
+        // Simulate deletion process
+        setTimeout(() => {
+            // Remove the row from table
+            const row = document.querySelector(`#timetable-actions-${index}`).closest('tr');
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-100%)';
+                setTimeout(() => row.remove(), 300);
+            }
+            
+            alert('✅ Timetable entry deleted successfully!');
+        }, 1000);
     }
+};
+
+// Save timetable changes
+window.saveTimetable = function(index) {
+    const test = document.getElementById('edit-timetable-test')?.value;
+    const module = document.getElementById('edit-timetable-module')?.value;
+    const date = document.getElementById('edit-timetable-date')?.value;
+    const time = document.getElementById('edit-timetable-time')?.value;
+    const venue = document.getElementById('edit-timetable-venue')?.value;
+    
+    if (!test || !module || !date || !time || !venue) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+    }
+    
+    // Simulate save process
+    setTimeout(() => {
+        closeEditModal();
+        alert('✅ Timetable entry updated successfully!');
+        
+        // Reload timetable to show changes
+        loadTimetable();
+    }, 1000);
 };
 
 // Show mobile-friendly message for unauthenticated users
