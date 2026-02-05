@@ -2,169 +2,6 @@
 const API_BASE_URL = window.location.origin + '/api';
 let currentUser = null;
 
-// Mobile Detection
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 767;
-
-// Enhanced Mobile Interactions
-if (isMobile) {
-    // Add touch feedback
-    document.addEventListener('touchstart', function(e) {
-        if (e.target.closest('.tab-btn, .btn, .card, tr')) {
-            e.target.closest('.tab-btn, .btn, .card, tr').style.transform = 'scale(0.98)';
-        }
-    });
-
-    document.addEventListener('touchend', function(e) {
-        if (e.target.closest('.tab-btn, .btn, .card, tr')) {
-            setTimeout(() => {
-                e.target.closest('.tab-btn, .btn, .card, tr').style.transform = '';
-            }, 150);
-        }
-    });
-
-    // Haptic feedback for mobile (if supported)
-    function triggerHaptic(type = 'light') {
-        if ('vibrate' in navigator) {
-            switch(type) {
-                case 'light':
-                    navigator.vibrate(10);
-                    break;
-                case 'medium':
-                    navigator.vibrate(25);
-                    break;
-                case 'heavy':
-                    navigator.vibrate([50, 30, 50]);
-                    break;
-            }
-        }
-    }
-
-    // Add swipe gestures for navigation
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    document.addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-
-    document.addEventListener('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-
-    function handleSwipe() {
-        const swipeThreshold = 50;
-        const diff = touchStartX - touchEndX;
-
-        if (Math.abs(diff) > swipeThreshold) {
-            const tabs = ['login', 'register', 'about', 'contact', 'dashboard'];
-            const currentTab = document.querySelector('.tab-btn.active').getAttribute('data-tab');
-            const currentIndex = tabs.indexOf(currentTab);
-
-            if (diff > 0 && currentIndex < tabs.length - 1) {
-                // Swipe left - next tab
-                switchToTab(tabs[currentIndex + 1]);
-                triggerHaptic('light');
-            } else if (diff < 0 && currentIndex > 0) {
-                // Swipe right - previous tab
-                switchToTab(tabs[currentIndex - 1]);
-                triggerHaptic('light');
-            }
-        }
-    }
-
-    // Add pull-to-refresh functionality
-    let pullStartY = 0;
-    let pullEndY = 0;
-    let isPulling = false;
-
-    document.addEventListener('touchstart', function(e) {
-        if (window.scrollY === 0) {
-            pullStartY = e.changedTouches[0].screenY;
-            isPulling = true;
-        }
-    });
-
-    document.addEventListener('touchmove', function(e) {
-        if (isPulling) {
-            pullEndY = e.changedTouches[0].screenY;
-            const pullDistance = pullEndY - pullStartY;
-            
-            if (pullDistance > 100) {
-                document.body.style.transform = `translateY(${Math.min(pullDistance * 0.5, 100)}px)`;
-            }
-        }
-    });
-
-    document.addEventListener('touchend', function(e) {
-        if (isPulling) {
-            const pullDistance = pullEndY - pullStartY;
-            document.body.style.transform = '';
-            
-            if (pullDistance > 150) {
-                triggerHaptic('medium');
-                refreshDashboard();
-                showMessage('dashboard-message', 'Refreshing data...', false);
-                setTimeout(() => {
-                    showMessage('dashboard-message', 'Data refreshed!', false);
-                }, 1000);
-            }
-            
-            isPulling = false;
-        }
-    });
-
-    // Add mobile-specific loading states
-    function showMobileLoading(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.innerHTML = '<div class="loading"></div> Loading...';
-        }
-    }
-
-    // Add mobile-specific error handling
-    function showMobileError(elementId, message) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.innerHTML = `<div style="color: #f44336; text-align: center; padding: 20px;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
-                ${message}<br>
-                <button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px;">
-                    Try Again
-                </button>
-            </div>`;
-            triggerHaptic('heavy');
-        }
-    }
-
-    // Enhanced mobile API calls with loading states
-    async function mobileApiCall(endpoint, method = 'GET', data = null, loadingElementId = null) {
-        try {
-            if (loadingElementId) {
-                showMobileLoading(loadingElementId);
-            }
-            
-            const result = await apiCall(endpoint, method, data);
-            
-            if (loadingElementId) {
-                // Clear loading state - actual content will be set by calling function
-            }
-            
-            triggerHaptic('light');
-            return result;
-        } catch (error) {
-            if (loadingElementId) {
-                showMobileError(loadingElementId, error.message);
-            }
-            throw error;
-        }
-    }
-
-    // Override API calls for mobile
-    const originalApiCall = window.apiCall;
-    window.apiCall = mobileApiCall;
-}
-
 // Show message function
 function showMessage(elementId, message, isError = false) {
     const element = document.getElementById(elementId);
@@ -371,7 +208,7 @@ function updateDashboard() {
 // Load modules
 async function loadModules() {
     try {
-        const response = await apiCall('/modules', 'GET', null, isMobile ? 'modules-list' : null);
+        const response = await apiCall('/modules');
         const modulesList = document.getElementById('modules-list');
         
         if (modulesList && response.success) {
@@ -389,13 +226,9 @@ async function loadModules() {
         }
     } catch (error) {
         console.error('Error loading modules:', error);
-        if (isMobile) {
-            showMobileError('modules-list', 'Failed to load modules');
-        } else {
-            const modulesList = document.getElementById('modules-list');
-            if (modulesList) {
-                modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
-            }
+        const modulesList = document.getElementById('modules-list');
+        if (modulesList) {
+            modulesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading modules</td></tr>';
         }
     }
 }
@@ -403,7 +236,7 @@ async function loadModules() {
 // Load lecturers
 async function loadLecturers() {
     try {
-        const response = await apiCall('/lecturers', 'GET', null, isMobile ? 'lecturers-list' : null);
+        const response = await apiCall('/lecturers');
         const lecturersList = document.getElementById('lecturers-list');
         
         if (lecturersList && response.success) {
@@ -421,13 +254,9 @@ async function loadLecturers() {
         }
     } catch (error) {
         console.error('Error loading lecturers:', error);
-        if (isMobile) {
-            showMobileError('lecturers-list', 'Failed to load lecturers');
-        } else {
-            const lecturersList = document.getElementById('lecturers-list');
-            if (lecturersList) {
-                lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
-            }
+        const lecturersList = document.getElementById('lecturers-list');
+        if (lecturersList) {
+            lecturersList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading lecturers</td></tr>';
         }
     }
 }
@@ -435,7 +264,7 @@ async function loadLecturers() {
 // Load timetable
 async function loadTimetable() {
     try {
-        const response = await apiCall('/timetable', 'GET', null, isMobile ? 'timetable-list' : null);
+        const response = await apiCall('/timetable');
         const timetableList = document.getElementById('timetable-list');
         
         if (timetableList && response.success) {
@@ -455,13 +284,9 @@ async function loadTimetable() {
         }
     } catch (error) {
         console.error('Error loading timetable:', error);
-        if (isMobile) {
-            showMobileError('timetable-list', 'Failed to load timetable');
-        } else {
-            const timetableList = document.getElementById('timetable-list');
-            if (timetableList) {
-                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
-            }
+        const timetableList = document.getElementById('timetable-list');
+        if (timetableList) {
+            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
         }
     }
 }
