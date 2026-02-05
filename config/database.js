@@ -195,6 +195,22 @@ async function query(sql, params = []) {
     console.error('   Error Code:', error.code);
     console.error('   Error Message:', error.message);
     
+    // If AUTO_INCREMENT error, force table recreation
+    if (error.code === 'ER_NO_DEFAULT_FOR_FIELD' && error.message.includes("Field 'id' doesn't have a default value")) {
+      console.log('🔄 AUTO_INCREMENT error detected, forcing table recreation...');
+      try {
+        await initializeDatabase();
+        console.log('✅ Tables recreated successfully, retrying query...');
+        // Retry the original query
+        const retryResult = await pool.query(sql, params);
+        const [retryRows] = retryResult;
+        return retryRows || [];
+      } catch (initError) {
+        console.error('❌ Failed to recreate tables:', initError.message);
+        throw error; // Throw original error if recreation fails
+      }
+    }
+    
     // If table doesn't exist, try to create it
     if (error.code === 'ER_NO_SUCH_TABLE') {
       console.log('🔄 Table does not exist, attempting to create database tables...');
