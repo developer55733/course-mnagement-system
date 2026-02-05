@@ -90,9 +90,11 @@ async function handleLogin(e) {
         if (response.success) {
             currentUser = response.data;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showMessage('login-message', 'Login successful!');
+            showMessage('login-message', 'Login successful! Redirecting to dashboard...');
             
+            // Hide all auth forms after successful login
             setTimeout(() => {
+                hideAllAuthForms();
                 switchToTab('dashboard');
                 updateDashboard();
             }, 1000);
@@ -143,11 +145,18 @@ async function handleRegister(e) {
         });
 
         if (response.success) {
-            showMessage('register-message', 'Registration successful! Please log in.');
+            showMessage('register-message', 'Registration successful! Please log in to access the system.');
             document.getElementById('register-form')?.reset();
             
             setTimeout(() => {
                 switchToTab('login');
+                // Show mobile-friendly login message
+                const loginMessage = document.getElementById('login-message');
+                if (loginMessage) {
+                    loginMessage.innerHTML = '✅ <strong>Registration Complete!</strong> Please log in with your new account';
+                    loginMessage.style.color = '#4caf50';
+                    loginMessage.style.fontSize = '14px';
+                }
             }, 1000);
         }
     } catch (error) {
@@ -158,7 +167,15 @@ async function handleRegister(e) {
 
 // Update dashboard
 function updateDashboard() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        // Show mobile auth message when not logged in
+        showMobileAuthMessage();
+        showAllAuthForms();
+        return;
+    }
+
+    // Hide all auth forms when logged in
+    hideAllAuthForms();
 
     // Update user info
     const dashboardUsername = document.getElementById('dashboard-username');
@@ -305,9 +322,95 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
+// Show mobile-friendly message for unauthenticated users
+function showMobileAuthMessage() {
+    // Check if on mobile
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile && !currentUser) {
+        const loginTab = document.querySelector('[data-tab="login"]');
+        const registerTab = document.querySelector('[data-tab="register"]');
+        
+        // Show register first on mobile for better UX
+        if (registerTab && loginTab) {
+            // Add mobile guidance
+            const loginMessage = document.getElementById('login-message');
+            if (loginMessage) {
+                loginMessage.innerHTML = '📱 <strong>New User?</strong> Please <a href="#" onclick="switchToTab(\'register\'); return false;">Register First</a> to access the system';
+                loginMessage.style.color = '#1976d2';
+                loginMessage.style.fontSize = '14px';
+            }
+        }
+    }
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    
+    // Hide dashboard and show auth forms
+    const userProfileHeader = document.getElementById('user-profile-header');
+    const dashboardTab = document.getElementById('dashboard-tab');
+    const devadminTab = document.getElementById('devadmin-tab');
+    
+    if (userProfileHeader) userProfileHeader.classList.add('hidden');
+    if (dashboardTab) dashboardTab.classList.add('hidden');
+    if (devadminTab) devadminTab.classList.add('hidden');
+    
+    // Switch to login tab and show login message
+    switchToTab('login');
+    
+    // Show logout success message
+    const loginMessage = document.getElementById('login-message');
+    if (loginMessage) {
+        loginMessage.innerHTML = '✅ <strong>Logged out successfully!</strong> Please log in again to continue';
+        loginMessage.style.color = '#4caf50';
+        loginMessage.style.fontSize = '14px';
+    }
+    
+    // Clear all forms
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (loginForm) loginForm.reset();
+    if (registerForm) registerForm.reset();
+    
+    // Show mobile auth message
+    showMobileAuthMessage();
+}
+
+// Hide all forms when logged in
+function hideAllAuthForms() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (loginForm) {
+        loginForm.style.display = 'none';
+    }
+    if (registerForm) {
+        registerForm.style.display = 'none';
+    }
+}
+
+// Show all forms when logged out
+function showAllAuthForms() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (loginForm) {
+        loginForm.style.display = 'block';
+    }
+    if (registerForm) {
+        registerForm.style.display = 'block';
+    }
+}
+
 // Initialize everything
 function initialize() {
     console.log('Initializing application...');
+    
+    // Show mobile auth message on startup if not logged in
+    showMobileAuthMessage();
     
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
