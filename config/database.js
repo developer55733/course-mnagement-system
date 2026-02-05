@@ -237,7 +237,7 @@ async function initializeDatabase() {
   await recreateTablesWithAutoIncrement();
   
   const createTables = [
-    `CREATE TABLE IF NOT EXISTS users (
+    `CREATE TABLE users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
@@ -248,7 +248,7 @@ async function initializeDatabase() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
-    `CREATE TABLE IF NOT EXISTS modules (
+    `CREATE TABLE modules (
       id INT AUTO_INCREMENT PRIMARY KEY,
       code VARCHAR(50) UNIQUE NOT NULL,
       name VARCHAR(100) NOT NULL,
@@ -256,7 +256,7 @@ async function initializeDatabase() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
-    `CREATE TABLE IF NOT EXISTS lecturers (
+    `CREATE TABLE lecturers (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       module VARCHAR(100) NOT NULL,
@@ -265,7 +265,7 @@ async function initializeDatabase() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
-    `CREATE TABLE IF NOT EXISTS timetable (
+    `CREATE TABLE timetable (
       id INT AUTO_INCREMENT PRIMARY KEY,
       test VARCHAR(100) NOT NULL,
       module VARCHAR(100) NOT NULL,
@@ -276,7 +276,7 @@ async function initializeDatabase() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     
-    `CREATE TABLE IF NOT EXISTS settings (
+    `CREATE TABLE settings (
       id INT AUTO_INCREMENT PRIMARY KEY,
       academic_year VARCHAR(20),
       semester INT,
