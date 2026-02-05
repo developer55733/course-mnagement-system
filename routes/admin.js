@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
-const pool = require('../config/database');
+const { query } = require('../config/database');
 
 // Render admin UI - Protected (only for authenticated admin users)
 router.get('/', adminAuth, (req, res) => {
@@ -23,7 +23,7 @@ router.get('/info', adminAuth, async (req, res) => {
     const results = {};
     for (const [key, q] of Object.entries(queries)) {
       try {
-        const result = await pool.query(q);
+        const result = await query(q);
         const [rows] = result;
         results[key] = (rows && rows[0]) ? rows[0].count : 0;
       } catch (e) {
@@ -40,13 +40,13 @@ router.get('/info', adminAuth, async (req, res) => {
 // Get all notes for admin
 router.get('/notes', adminAuth, async (req, res) => {
   try {
-    const query = `
+    const result = await query(`
       SELECT n.*, u.name as created_by_name 
       FROM notes n 
       LEFT JOIN users u ON n.created_by = u.id 
       ORDER BY n.created_at DESC
-    `;
-    const [notes] = await pool.execute(query);
+    `);
+    const [notes] = result;
     
     res.json({
       success: true,
@@ -91,7 +91,7 @@ router.post('/notes', adminAuth, async (req, res) => {
 
     // Check if notes table exists
     try {
-      await pool.execute('SELECT 1 FROM notes LIMIT 1');
+      await query('SELECT 1 FROM notes LIMIT 1');
       console.log('✅ Notes table exists');
     } catch (tableError) {
       console.log('❌ Notes table does not exist, creating it...');
@@ -116,16 +116,17 @@ router.post('/notes', adminAuth, async (req, res) => {
           INDEX idx_created_by (created_by)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
       `;
-      await pool.execute(createTableQuery);
+      await query(createTableQuery);
       console.log('✅ Notes table created successfully');
     }
 
     // Get admin user ID
-    const [adminUsers] = await pool.execute('SELECT id FROM users WHERE role = "admin" LIMIT 1');
+    const adminResult = await query('SELECT id FROM users WHERE role = "admin" LIMIT 1');
+    const [adminUsers] = adminResult;
     const createdBy = adminUsers.length > 0 ? adminUsers[0].id : 1;
     console.log('✅ Admin user ID:', createdBy);
 
-    const query = `
+    const insertQuery = `
       INSERT INTO notes (title, content, formatted_content, module_code, module_name, type, tags, visibility, created_by)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
@@ -142,7 +143,7 @@ router.post('/notes', adminAuth, async (req, res) => {
       createdBy
     ]);
     
-    const [result] = await pool.execute(query, [
+    const result = await query(insertQuery, [
       title,
       content,
       formatted_content || content,
@@ -154,12 +155,12 @@ router.post('/notes', adminAuth, async (req, res) => {
       createdBy
     ]);
 
-    console.log('✅ Note created successfully with ID:', result.insertId);
+    console.log('✅ Note created successfully with ID:', result[0]?.insertId || 'Unknown');
 
     res.status(201).json({
       success: true,
       data: {
-        id: result.insertId,
+        id: result[0]?.insertId || 'Unknown',
         title,
         content,
         formatted_content: formatted_content || content,
@@ -203,7 +204,8 @@ router.put('/notes/:id', adminAuth, async (req, res) => {
     } = req.body;
 
     // Check if note exists
-    const [existingNotes] = await pool.execute('SELECT * FROM notes WHERE id = ?', [id]);
+    const existingResult = await query('SELECT * FROM notes WHERE id = ?', [id]);
+    const [existingNotes] = existingResult;
     if (existingNotes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -211,13 +213,13 @@ router.put('/notes/:id', adminAuth, async (req, res) => {
       });
     }
 
-    const query = `
+    const updateQuery = `
       UPDATE notes 
       SET title = ?, content = ?, formatted_content = ?, module_code = ?, module_name = ?, type = ?, tags = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
     
-    await pool.execute(query, [
+    await query(updateQuery, [
       title,
       content,
       formatted_content || content,
@@ -248,7 +250,8 @@ router.delete('/notes/:id', adminAuth, async (req, res) => {
     const { id } = req.params;
 
     // Check if note exists
-    const [existingNotes] = await pool.execute('SELECT * FROM notes WHERE id = ?', [id]);
+    const existingResult = await query('SELECT * FROM notes WHERE id = ?', [id]);
+    const [existingNotes] = existingResult;
     if (existingNotes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -256,7 +259,7 @@ router.delete('/notes/:id', adminAuth, async (req, res) => {
       });
     }
 
-    await pool.execute('DELETE FROM notes WHERE id = ?', [id]);
+    await query('DELETE FROM notes WHERE id = ?', [id]);
 
     res.json({
       success: true,
@@ -283,19 +286,19 @@ router.post('/action', adminAuth, async (req, res) => {
     let result;
     switch (actionType) {
       case 'clearUsers':
-        await pool.query('DELETE FROM users WHERE role != "admin"');
+        await query('DELETE FROM users WHERE role != "admin"');
         result = { message: 'Non-admin users cleared successfully' };
         break;
       case 'clearModules':
-        await pool.query('DELETE FROM modules');
+        await query('DELETE FROM modules');
         result = { message: 'Modules cleared successfully' };
         break;
       case 'clearTimetable':
-        await pool.query('DELETE FROM timetable');
+        await query('DELETE FROM timetable');
         result = { message: 'Timetable cleared successfully' };
         break;
       case 'clearNotes':
-        await pool.query('DELETE FROM notes');
+        await query('DELETE FROM notes');
         result = { message: 'Notes cleared successfully' };
         break;
       case 'backup':
