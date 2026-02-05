@@ -305,9 +305,252 @@ function isAdmin() {
     return currentUser && currentUser.role === 'admin';
 }
 
+// Smartphone-specific enhancements
+function initSmartphoneEnhancements() {
+    // Check if on smartphone (max-width: 575px)
+    const isSmartphone = window.innerWidth <= 575;
+    
+    if (isSmartphone) {
+        console.log('📱 Smartphone mode activated');
+        
+        // Add touch feedback for buttons
+        addTouchFeedback();
+        
+        // Add swipe gestures for tabs
+        addSwipeGestures();
+        
+        // Add haptic feedback (if supported)
+        addHapticFeedback();
+        
+        // Optimize scrolling for mobile
+        optimizeMobileScrolling();
+        
+        // Add pull-to-refresh for dashboard
+        addPullToRefresh();
+    }
+}
+
+// Add touch feedback for interactive elements
+function addTouchFeedback() {
+    const interactiveElements = document.querySelectorAll('.tab-btn, .btn, .card, tr');
+    
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        element.addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+}
+
+// Add swipe gestures for tab navigation
+function addSwipeGestures() {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const tabContainer = document.querySelector('.tabs');
+    if (!tabContainer) return;
+    
+    tabContainer.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    tabContainer.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            const tabs = ['login', 'register', 'about', 'contact', 'dashboard'];
+            const currentTab = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
+            const currentIndex = tabs.indexOf(currentTab);
+            
+            if (diff > 0 && currentIndex < tabs.length - 1) {
+                // Swipe left - next tab
+                switchToTab(tabs[currentIndex + 1]);
+            } else if (diff < 0 && currentIndex > 0) {
+                // Swipe right - previous tab
+                switchToTab(tabs[currentIndex - 1]);
+            }
+        }
+    }
+}
+
+// Add haptic feedback for better user experience
+function addHapticFeedback() {
+    if ('vibrate' in navigator) {
+        const buttons = document.querySelectorAll('.btn, .tab-btn');
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                navigator.vibrate(50); // Light vibration for 50ms
+            });
+        });
+        
+        // Add stronger feedback for successful actions
+        const originalShowMessage = showMessage;
+        showMessage = function(elementId, message, isError = false) {
+            originalShowMessage(elementId, message, isError);
+            if (!isError) {
+                navigator.vibrate([100, 50, 100]); // Success vibration pattern
+            } else {
+                navigator.vibrate(200); // Error vibration
+            }
+        };
+    }
+}
+
+// Optimize scrolling for mobile
+function optimizeMobileScrolling() {
+    // Smooth scrolling for better mobile experience
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Prevent bounce scrolling on iOS
+    document.body.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.modules-wrapper, .lecturers-wrapper, .timetable-wrapper')) {
+            // Allow scrolling within tables
+            return;
+        }
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Add momentum scrolling to tables
+    const scrollableElements = document.querySelectorAll('.modules-wrapper, .lecturers-wrapper, .timetable-wrapper');
+    scrollableElements.forEach(element => {
+        element.style.webkitOverflowScrolling = 'touch';
+        element.style.overflowY = 'auto';
+    });
+}
+
+// Add pull-to-refresh functionality
+function addPullToRefresh() {
+    let startY = 0;
+    let isPulling = false;
+    const pullThreshold = 100;
+    
+    document.addEventListener('touchstart', function(e) {
+        if (window.scrollY === 0) {
+            startY = e.touches[0].pageY;
+            isPulling = true;
+        }
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (!isPulling) return;
+        
+        const currentY = e.touches[0].pageY;
+        const pullDistance = currentY - startY;
+        
+        if (pullDistance > 0 && pullDistance < pullThreshold) {
+            // Show pull indicator
+            showPullIndicator(pullDistance / pullThreshold);
+        }
+    });
+    
+    document.addEventListener('touchend', function(e) {
+        if (!isPulling) return;
+        
+        const currentY = e.changedTouches[0].pageY;
+        const pullDistance = currentY - startY;
+        
+        if (pullDistance > pullThreshold) {
+            // Trigger refresh
+            refreshDashboard();
+            showRefreshIndicator();
+        }
+        
+        hidePullIndicator();
+        isPulling = false;
+    });
+}
+
+// Show pull-to-refresh indicator
+function showPullIndicator(progress) {
+    let indicator = document.getElementById('pull-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'pull-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52,152,219,0.4);
+        `;
+        document.body.appendChild(indicator);
+    }
+    
+    indicator.style.top = `${-50 + (progress * 60)}px`;
+    indicator.innerHTML = progress > 0.8 ? '🔄 Release to refresh' : '📱 Pull to refresh';
+}
+
+// Hide pull-to-refresh indicator
+function hidePullIndicator() {
+    const indicator = document.getElementById('pull-indicator');
+    if (indicator) {
+        indicator.style.top = '-50px';
+    }
+}
+
+// Show refresh indicator
+function showRefreshIndicator() {
+    const indicator = document.getElementById('pull-indicator');
+    if (indicator) {
+        indicator.innerHTML = '✅ Refreshing...';
+        indicator.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+        
+        setTimeout(() => {
+            hidePullIndicator();
+        }, 2000);
+    }
+}
+
+// Add mobile-specific animations
+function addMobileAnimations() {
+    // Animate elements as they come into view
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    // Observe cards and tables
+    const elementsToAnimate = document.querySelectorAll('.card, .modules-wrapper, .lecturers-wrapper, .timetable-wrapper');
+    elementsToAnimate.forEach(element => {
+        observer.observe(element);
+    });
+}
+
 // Initialize everything
 function initialize() {
     console.log('Initializing application...');
+    
+    // Initialize smartphone-specific enhancements
+    initSmartphoneEnhancements();
+    
+    // Add mobile animations
+    addMobileAnimations();
     
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
