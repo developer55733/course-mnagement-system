@@ -30,15 +30,12 @@ class Timetable {
 
   static async create(test, module, date, time, venue) {
 
-    const [result] = await pool.execute(
-
+    const result = await pool.query(
       'INSERT INTO timetable (test, module, date, time, venue) VALUES (?, ?, ?, ?, ?)',
-
       [test, module, date, time, venue]
-
     );
-
-    return { id: result.insertId, test, module, date, time, venue };
+    const [insertResult] = result;
+    return { id: insertResult.insertId, test, module, date, time, venue };
 
   }
 
@@ -46,15 +43,12 @@ class Timetable {
 
   static async update(id, test, module, date, time, venue) {
 
-    const [result] = await pool.execute(
-
+    const result = await pool.query(
       'UPDATE timetable SET test = ?, module = ?, date = ?, time = ?, venue = ? WHERE id = ?',
-
       [test, module, date, time, venue, id]
-
     );
-
-    return result.affectedRows > 0;
+    const [updateResult] = result;
+    return updateResult.affectedRows > 0;
 
   }
 
@@ -62,9 +56,9 @@ class Timetable {
 
   static async delete(id) {
 
-    const [result] = await pool.execute('DELETE FROM timetable WHERE id = ?', [id]);
-
-    return result.affectedRows > 0;
+    const result = await pool.query('DELETE FROM timetable WHERE id = ?', [id]);
+    const [deleteResult] = result;
+    return deleteResult.affectedRows > 0;
 
   }
 
