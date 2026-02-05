@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-// Simple and robust Railway MySQL configuration using Railway's web service variables
+// Simple and robust Railway MySQL configuration - Force TCP proxy for reliability
 const getDatabaseConfig = () => {
   console.log('🔗 Railway Database Configuration:');
   console.log('-------------------------------');
@@ -18,11 +18,11 @@ const getDatabaseConfig = () => {
   console.log('   SSL: enabled');
   console.log('-------------------------------');
 
-  // Skip Railway URLs and go directly to TCP proxy for reliability
+  // Force TCP proxy connection for Railway reliability
   console.log('🔗 Using direct TCP proxy connection for reliability:');
   console.log('-------------------------------');
 
-  // Fallback to individual environment variables or hardcoded TCP proxy
+  // Use Railway TCP proxy environment variables if available, otherwise fallback
   const user = process.env.MYSQLUSER || 'root';
   const password = process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'TBTdIyRIUxlOnTBZRSgWKVeaMfUWRvVY';
   const database = process.env.MYSQLDATABASE || 'railway';
