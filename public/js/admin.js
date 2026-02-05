@@ -786,8 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
           await loadDatabaseStats();
         } else {
           console.log('❌ API response failed:', res);
-          const errorMessage = res?.error || res?.message || 'Unknown error occurred';
-          showMessage('noteMsg', 'Failed to add note: ' + errorMessage, true);
+          showMessage('noteMsg', 'Failed to add note: ' + (res?.error || 'Unknown error'), true);
         }
       } catch (error) {
         console.error('❌ Error adding note:', error);
@@ -796,15 +795,7 @@ document.addEventListener('DOMContentLoaded', function() {
           response: error.response?.data,
           status: error.response?.status
         });
-        
-        let errorMessage = error.message;
-        if (error.response?.data?.error) {
-          errorMessage = error.response.data.error;
-        } else if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-        
-        showMessage('noteMsg', 'Error adding note: ' + errorMessage, true);
+        showMessage('noteMsg', 'Error adding note: ' + error.message, true);
       }
 
       setTimeout(() => {

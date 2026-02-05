@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
 const { query } = require('../config/database');
-const pool = require('../config/database').pool;
 
 // Render admin UI - Protected (only for authenticated admin users)
 router.get('/', adminAuth, (req, res) => {
@@ -132,7 +131,7 @@ router.post('/notes', adminAuth, async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
-    console.log('🔍 Executing INSERT query with params:', [
+    console.log('🔍 Executing query with params:', [
       title,
       content?.substring(0, 50) + '...',
       formatted_content?.substring(0, 50) + '...' || content?.substring(0, 50) + '...',
@@ -144,8 +143,7 @@ router.post('/notes', adminAuth, async (req, res) => {
       createdBy
     ]);
     
-    // Use pool directly for INSERT to get insertId
-    const [result] = await pool.query(insertQuery, [
+    const result = await query(insertQuery, [
       title,
       content,
       formatted_content || content,
@@ -157,12 +155,12 @@ router.post('/notes', adminAuth, async (req, res) => {
       createdBy
     ]);
 
-    console.log('✅ Note created successfully with ID:', result.insertId);
+    console.log('✅ Note created successfully with ID:', result[0]?.insertId || 'Unknown');
 
     res.status(201).json({
       success: true,
       data: {
-        id: result.insertId,
+        id: result[0]?.insertId || 'Unknown',
         title,
         content,
         formatted_content: formatted_content || content,
