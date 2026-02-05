@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const { query } = require('../config/database');
 
 
 
@@ -6,7 +6,7 @@ class Timetable {
 
   static async getAll() {
 
-    const result = await pool.query('SELECT id, test, module, date, time, venue, created_at FROM timetable ORDER BY date, time');
+    const result = await query('SELECT id, test, module, date, time, venue, created_at FROM timetable ORDER BY date, time');
 
     const [rows] = result;
 
@@ -18,7 +18,7 @@ class Timetable {
 
   static async getById(id) {
 
-    const result = await pool.query('SELECT * FROM timetable WHERE id = ?', [id]);
+    const result = await query('SELECT * FROM timetable WHERE id = ?', [id]);
 
     const [rows] = result;
 
@@ -30,12 +30,12 @@ class Timetable {
 
   static async create(test, module, date, time, venue) {
 
-    const result = await pool.query(
+    const result = await query(
       'INSERT INTO timetable (test, module, date, time, venue) VALUES (?, ?, ?, ?, ?)',
       [test, module, date, time, venue]
     );
     const [insertResult] = result;
-    return { id: insertResult.insertId, test, module, date, time, venue };
+    return { id: insertResult?.insertId, test, module, date, time, venue };
 
   }
 
@@ -43,12 +43,12 @@ class Timetable {
 
   static async update(id, test, module, date, time, venue) {
 
-    const result = await pool.query(
+    const result = await query(
       'UPDATE timetable SET test = ?, module = ?, date = ?, time = ?, venue = ? WHERE id = ?',
       [test, module, date, time, venue, id]
     );
     const [updateResult] = result;
-    return updateResult.affectedRows > 0;
+    return updateResult?.affectedRows > 0;
 
   }
 
@@ -56,9 +56,9 @@ class Timetable {
 
   static async delete(id) {
 
-    const result = await pool.query('DELETE FROM timetable WHERE id = ?', [id]);
+    const result = await query('DELETE FROM timetable WHERE id = ?', [id]);
     const [deleteResult] = result;
-    return deleteResult.affectedRows > 0;
+    return deleteResult?.affectedRows > 0;
 
   }
 
@@ -66,7 +66,7 @@ class Timetable {
 
   static async getByModule(module) {
 
-    const result = await pool.query('SELECT * FROM timetable WHERE module = ? ORDER BY date, time', [module]);
+    const result = await query('SELECT * FROM timetable WHERE module = ? ORDER BY date, time', [module]);
 
     const [rows] = result;
 

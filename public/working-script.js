@@ -921,6 +921,42 @@ async function loadLecturers() {
 }
 
 
+// Load timetable
+async function loadTimetable() {
+    try {
+        console.log('🔍 Loading timetable...');
+        const response = await apiCall('/timetable');
+        console.log('🔍 Timetable API response:', response);
+        const timetableList = document.getElementById('timetable-list');
+        
+        if (timetableList && response.success) {
+            console.log('🔍 Timetable data received:', response.data);
+            if (response.data.length === 0) {
+                timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
+            } else {
+                timetableList.innerHTML = response.data.map((entry, index) => `
+                    <tr>
+                        <td>${entry.test}</td>
+                        <td>${entry.module}</td>
+                        <td>${entry.date}</td>
+                        <td>${entry.time}</td>
+                        <td>${entry.venue}</td>
+                    </tr>
+                `).join('');
+                console.log('✅ Timetable rendered successfully');
+            }
+        } else {
+            console.log('❌ Timetable API response failed:', response);
+        }
+    } catch (error) {
+        console.error('❌ Error loading timetable:', error);
+        const timetableList = document.getElementById('timetable-list');
+        if (timetableList) {
+            timetableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading timetable</td></tr>';
+        }
+    }
+}
+
 
 // Refresh dashboard data
 
@@ -1896,13 +1932,19 @@ function logout() {
 
             try {
 
+                console.log('🔍 Loading timetable...');
+
                 const response = await apiCall('/timetable');
+
+                console.log('🔍 Timetable API response:', response);
 
                 const timetableList = document.getElementById('timetable-list');
 
                 
 
                 if (timetableList && response.success) {
+
+                    console.log('🔍 Timetable data received:', response.data);
 
                     if (response.data.length === 0) {
 
@@ -1928,13 +1970,19 @@ function logout() {
 
                         `).join('');
 
+                        console.log('✅ Timetable rendered successfully');
+
                     }
+
+                } else {
+
+                    console.log('❌ Timetable API response failed:', response);
 
                 }
 
             } catch (error) {
 
-                console.error('Error loading timetable:', error);
+                console.error('❌ Error loading timetable:', error);
 
                 const timetableList = document.getElementById('timetable-list');
 
@@ -1948,7 +1996,7 @@ function logout() {
 
         }
 
-
+        loadTimetable();
 
         // Hide dashboard and show auth forms
 
