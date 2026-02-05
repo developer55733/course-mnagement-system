@@ -57,103 +57,277 @@ function switchToTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
 }
 
-// Login handler
+// Enhanced login handler with better flow
 async function handleLogin(e) {
     e.preventDefault();
-    console.log('Login function called');
     
-    const loginEmail = document.getElementById('login-email')?.value;
-    const loginPassword = document.getElementById('login-password')?.value;
-
-    if (!loginEmail || !loginPassword) {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const messageEl = document.getElementById('login-message');
+    
+    if (!email || !password) {
         showMessage('login-message', 'Please fill in all fields', true);
         return;
     }
-
+    
+    showLoading('login-message', 'Logging in...');
+    
     try {
-        showMessage('login-message', 'Logging in...');
+        const response = await fetch(`${API_BASE_URL}/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
         
-        let loginData = {
-            password: loginPassword
-        };
-
-        if (loginEmail.includes('@')) {
-            loginData.email = loginEmail;
-        } else {
-            loginData.studentId = loginEmail;
-        }
-
-        console.log('Making login API call...');
-        const response = await apiCall('/users/login', 'POST', loginData);
-        console.log('Login response:', response);
-
-        if (response.success) {
-            currentUser = response.data;
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentUser = data.user;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showMessage('login-message', 'Login successful!');
             
+            showMessage('login-message', 'Login successful! Redirecting...', false);
+            
+            // Hide login and register forms, show account details
             setTimeout(() => {
+                hideAuthForms();
+                showUserAccount();
                 switchToTab('dashboard');
                 updateDashboard();
-            }, 1000);
+            }, 1500);
+        } else {
+            showMessage('login-message', data.message || 'Login failed', true);
         }
     } catch (error) {
         console.error('Login error:', error);
-        showMessage('login-message', error.message, true);
+        showMessage('login-message', 'Network error. Please try again.', true);
     }
 }
 
-// Register handler
+// Enhanced register handler with better flow
 async function handleRegister(e) {
     e.preventDefault();
-    console.log('Register function called');
     
-    const regName = document.getElementById('reg-name')?.value;
-    const regEmail = document.getElementById('reg-email')?.value;
-    const regStudentId = document.getElementById('reg-student-id')?.value;
-    const regPassword = document.getElementById('reg-password')?.value;
-    const regConfirmPassword = document.getElementById('reg-confirm-password')?.value;
-
-    if (!regName || !regEmail || !regStudentId || !regPassword || !regConfirmPassword) {
+    const fullName = document.getElementById('register-fullname').value;
+    const email = document.getElementById('register-email').value;
+    const studentId = document.getElementById('register-student-id').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    const messageEl = document.getElementById('register-message');
+    
+    if (!fullName || !email || !studentId || !password || !confirmPassword) {
         showMessage('register-message', 'Please fill in all fields', true);
         return;
     }
-
-    // Validate Student ID format
-    const studentIdPattern = /^[A-Z]+\/[A-Z]+\/[0-9]{4}\/[0-9]{4}$/;
-    if (!studentIdPattern.test(regStudentId)) {
-        showMessage('register-message', 'Invalid Student ID format. Use: NIT/CICT/YEAR/FOUR-DIGITS', true);
-        return;
-    }
-
-    if (regPassword !== regConfirmPassword) {
+    
+    if (password !== confirmPassword) {
         showMessage('register-message', 'Passwords do not match', true);
         return;
     }
-
+    
+    if (password.length < 6) {
+        showMessage('register-message', 'Password must be at least 6 characters', true);
+        return;
+    }
+    
+    showLoading('register-message', 'Creating account...');
+    
     try {
-        showMessage('register-message', 'Registering...');
-        
-        const response = await apiCall('/users/register', 'POST', {
-            name: regName,
-            email: regEmail,
-            password: regPassword,
-            confirmPassword: regConfirmPassword,
-            studentId: regStudentId
+        const response = await fetch(`${API_BASE_URL}/users/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                fullName, 
+                email, 
+                studentId, 
+                password,
+                role: 'student'
+            })
         });
-
-        if (response.success) {
-            showMessage('register-message', 'Registration successful! Please log in.');
-            document.getElementById('register-form')?.reset();
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentUser = data.user;
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             
+            showMessage('register-message', 'Registration successful! Redirecting...', false);
+            
+            // Hide login and register forms, show account details
             setTimeout(() => {
-                switchToTab('login');
-            }, 1000);
+                hideAuthForms();
+                showUserAccount();
+                switchToTab('dashboard');
+                updateDashboard();
+            }, 1500);
+        } else {
+            showMessage('register-message', data.message || 'Registration failed', true);
         }
     } catch (error) {
-        console.error('Register error:', error);
-        showMessage('register-message', error.message, true);
+        console.error('Registration error:', error);
+        showMessage('register-message', 'Network error. Please try again.', true);
     }
+}
+
+// Hide authentication forms
+function hideAuthForms() {
+    const loginTab = document.getElementById('login');
+    const registerTab = document.getElementById('register');
+    const loginTabBtn = document.querySelector('[data-tab="login"]');
+    const registerTabBtn = document.querySelector('[data-tab="register"]');
+    
+    // Hide tabs
+    loginTab.style.display = 'none';
+    registerTab.style.display = 'none';
+    loginTabBtn.style.display = 'none';
+    registerTabBtn.style.display = 'none';
+    
+    // Show login/register switch message
+    showAuthSwitchMessage();
+}
+
+// Show authentication switch message
+function showAuthSwitchMessage() {
+    const tabsContainer = document.querySelector('.tabs');
+    const existingMessage = document.getElementById('auth-switch-message');
+    
+    if (!existingMessage) {
+        const switchMessage = document.createElement('div');
+        switchMessage.id = 'auth-switch-message';
+        switchMessage.className = 'auth-switch-message';
+        switchMessage.innerHTML = `
+            <p>Already have an account? <a href="#" onclick="showLoginForm()">Login here</a></p>
+            <p>Don't have an account? <a href="#" onclick="showRegisterForm()">Register here</a></p>
+        `;
+        tabsContainer.appendChild(switchMessage);
+    }
+}
+
+// Show login form
+function showLoginForm() {
+    const loginTab = document.getElementById('login');
+    const registerTab = document.getElementById('register');
+    const loginTabBtn = document.querySelector('[data-tab="login"]');
+    const registerTabBtn = document.querySelector('[data-tab="register"]');
+    
+    loginTab.style.display = 'block';
+    registerTab.style.display = 'none';
+    loginTabBtn.style.display = 'block';
+    registerTabBtn.style.display = 'block';
+    
+    switchToTab('login');
+    
+    // Remove switch message
+    const switchMessage = document.getElementById('auth-switch-message');
+    if (switchMessage) {
+        switchMessage.remove();
+    }
+}
+
+// Show register form
+function showRegisterForm() {
+    const loginTab = document.getElementById('login');
+    const registerTab = document.getElementById('register');
+    const loginTabBtn = document.querySelector('[data-tab="login"]');
+    const registerTabBtn = document.querySelector('[data-tab="register"]');
+    
+    loginTab.style.display = 'block';
+    registerTab.style.display = 'block';
+    loginTabBtn.style.display = 'block';
+    registerTabBtn.style.display = 'block';
+    
+    switchToTab('register');
+    
+    // Remove switch message
+    const switchMessage = document.getElementById('auth-switch-message');
+    if (switchMessage) {
+        switchMessage.remove();
+    }
+}
+
+// Show user account details
+function showUserAccount() {
+    const dashboardTab = document.getElementById('dashboard');
+    const existingAccount = document.getElementById('user-account-details');
+    
+    if (!existingAccount && currentUser) {
+        const accountDetails = document.createElement('div');
+        accountDetails.id = 'user-account-details';
+        accountDetails.className = 'user-account-details';
+        accountDetails.innerHTML = `
+            <div class="account-header">
+                <h2><i class="fas fa-user-circle"></i> Your Account Details</h2>
+                <p class="account-subtitle">View your personal information</p>
+            </div>
+            <div class="account-info-grid">
+                <div class="account-info-item">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <div class="account-value">${currentUser.fullName}</div>
+                </div>
+                <div class="account-info-item">
+                    <label><i class="fas fa-id-card"></i> Student ID</label>
+                    <div class="account-value">${currentUser.studentId}</div>
+                </div>
+                <div class="account-info-item">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <div class="account-value">${currentUser.email}</div>
+                </div>
+                <div class="account-info-item">
+                    <label><i class="fas fa-user-tag"></i> Account Type</label>
+                    <div class="account-value">${currentUser.role || 'Student'}</div>
+                </div>
+            </div>
+            <div class="account-actions">
+                <button class="btn btn-logout" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        `;
+        
+        // Insert at the beginning of dashboard
+        dashboardTab.insertBefore(accountDetails, dashboardTab.firstChild);
+    }
+}
+
+// Enhanced logout handler
+function handleLogout() {
+    currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    
+    // Show login/register forms again
+    const loginTab = document.getElementById('login');
+    const registerTab = document.getElementById('register');
+    const loginTabBtn = document.querySelector('[data-tab="login"]');
+    const registerTabBtn = document.querySelector('[data-tab="register"]');
+    
+    loginTab.style.display = 'block';
+    registerTab.style.display = 'block';
+    loginTabBtn.style.display = 'block';
+    registerTabBtn.style.display = 'block';
+    
+    // Remove account details
+    const accountDetails = document.getElementById('user-account-details');
+    if (accountDetails) {
+        accountDetails.remove();
+    }
+    
+    // Remove switch message
+    const switchMessage = document.getElementById('auth-switch-message');
+    if (switchMessage) {
+        switchMessage.remove();
+    }
+    
+    // Clear forms
+    document.getElementById('login-form').reset();
+    document.getElementById('register-form').reset();
+    
+    // Switch to login tab
+    switchToTab('login');
+    
+    showMessage('login-message', 'You have been logged out successfully', false);
 }
 
 // Update dashboard
