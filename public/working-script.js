@@ -122,7 +122,7 @@ async function handleLogin(e) {
 
     e.preventDefault();
 
-    console.log('Login function called');
+    console.log('🔍 Login function called');
 
     
 
@@ -130,15 +130,18 @@ async function handleLogin(e) {
 
     const loginPassword = document.getElementById('login-password')?.value;
 
+    console.log('🔍 Login input:', { email: loginEmail, password: loginPassword ? '***' : 'empty' });
+
+
 
 
     if (!loginEmail || !loginPassword) {
 
+        console.log('❌ Missing login fields');
         showMessage('login-message', 'Please fill in all fields', true);
-
         return;
-
     }
+
 
 
 
@@ -159,20 +162,20 @@ async function handleLogin(e) {
         if (loginEmail.includes('@')) {
 
             loginData.email = loginEmail;
-
+            console.log('🔍 Using email login');
         } else {
 
             loginData.studentId = loginEmail;
-
+            console.log('🔍 Using student ID login');
         }
 
 
 
-        console.log('Making login API call...');
+        console.log('🔍 Making login API call...', loginData);
 
         const response = await apiCall('/users/login', 'POST', loginData);
 
-        console.log('Login response:', response);
+        console.log('🔍 Login API response:', response);
 
 
 
@@ -182,6 +185,7 @@ async function handleLogin(e) {
 
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
 
+            console.log('✅ Login successful:', currentUser);
             showMessage('login-message', 'Login successful! Redirecting to dashboard...');
 
             
@@ -200,6 +204,7 @@ async function handleLogin(e) {
 
         } else {
 
+            console.log('❌ Login failed:', response);
             // Fallback for testing - check if admin credentials
 
             if (loginEmail === 'admin@course.edu' && loginPassword === 'admin123') {
