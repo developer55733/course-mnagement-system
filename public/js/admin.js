@@ -124,9 +124,48 @@
         document.getElementById('moduleLecturer').value = '';
         document.getElementById('modulePhone').value = '';
         showOutput(res);
+        // Refresh main dashboard if it exists
+        if (typeof refreshDashboard === 'function') {
+          refreshDashboard();
+        }
       } else {
         const errorMsg = (res?.error && res.error.error) ? res.error.error : (res?.error?.message || 'Error creating module');
         showMessage('moduleMsg', errorMsg, true);
+        showOutput(res);
+      }
+    });
+  }
+
+  // Add Lecturer handler
+  const btnAddLecturer = document.getElementById('btnAddLecturer');
+  if (btnAddLecturer) {
+    btnAddLecturer.addEventListener('click', async () => {
+      const name = document.getElementById('lecturer-name').value.trim();
+      const module = document.getElementById('lecturer-module').value.trim();
+      const phone = document.getElementById('lecturer-phone').value.trim();
+
+      hideMessage('lecturerMsg');
+      if (!name || !module) {
+        showMessage('lecturerMsg', 'Name and Module are required.', true);
+        return;
+      }
+
+      showMessage('lecturerMsg', 'Adding lecturer...', false);
+      const res = await request('post', '/api/lecturers', { name, module, phone });
+      
+      if (res && res.success) {
+        showMessage('lecturerMsg', res.message || 'Lecturer successfully added!', false);
+        document.getElementById('lecturer-name').value = '';
+        document.getElementById('lecturer-module').value = '';
+        document.getElementById('lecturer-phone').value = '';
+        showOutput(res);
+        // Refresh main dashboard if it exists
+        if (typeof refreshDashboard === 'function') {
+          refreshDashboard();
+        }
+      } else {
+        const errorMsg = (res?.error && res.error.error) ? res.error.error : (res?.error?.message || 'Error adding lecturer');
+        showMessage('lecturerMsg', errorMsg, true);
         showOutput(res);
       }
     });
@@ -189,6 +228,10 @@
         showOutput(res);
         // Reload timetable list
         loadTimetables();
+        // Refresh main dashboard if it exists
+        if (typeof refreshDashboard === 'function') {
+          refreshDashboard();
+        }
       } else {
         const errorMsg = (res?.error && res.error.error) ? res.error.error : (res?.error?.message || 'Error adding test timetable');
         showMessage('timetableMsg', errorMsg, true);
