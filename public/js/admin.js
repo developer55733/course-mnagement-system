@@ -458,7 +458,7 @@
     }
     
     // Show loading state
-    const saveBtn = document.querySelector('.btn-primary');
+    const saveBtn = document.querySelector('.edit-modal-footer .btn-primary');
     if (saveBtn) {
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
       saveBtn.disabled = true;
@@ -466,16 +466,36 @@
     
     // Simulate save process
     setTimeout(() => {
-      closeAdminEditModal();
-      alert('✅ Admin profile updated successfully!');
-      
-      // If secret was changed, update the current secret
-      if (secret) {
-        ADMIN_SECRET = secret;
-        const secretInput = document.getElementById('adminSecret');
-        if (secretInput) {
-          secretInput.value = secret;
+      try {
+        // Reset button state before closing modal
+        const saveBtn = document.querySelector('.edit-modal-footer .btn-primary');
+        if (saveBtn) {
+          saveBtn.innerHTML = 'Save Changes';
+          saveBtn.disabled = false;
         }
+        
+        closeAdminEditModal();
+        alert('✅ Admin profile updated successfully!');
+        
+        // If secret was changed, update the current secret
+        if (secret) {
+          ADMIN_SECRET = secret;
+          const secretInput = document.getElementById('adminSecret');
+          if (secretInput) {
+            secretInput.value = secret;
+          }
+        }
+      } catch (error) {
+        console.error('Error saving admin profile:', error);
+        
+        // Reset button state on error
+        const saveBtn = document.querySelector('.edit-modal-footer .btn-primary');
+        if (saveBtn) {
+          saveBtn.innerHTML = 'Save Changes';
+          saveBtn.disabled = false;
+        }
+        
+        alert('❌ Error saving admin profile. Please try again.');
       }
     }, 1000);
   };
