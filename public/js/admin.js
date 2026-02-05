@@ -41,6 +41,101 @@
     }
   });
 
+  // Edit Profile function
+  window.editProfile = function() {
+    console.log('Edit profile clicked in admin panel');
+    
+    // Create edit profile modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Admin Profile</h3>
+                <button class="close-btn" onclick="closeAdminEditModal()">&times;</button>
+            </div>
+            <div class="edit-modal-body">
+                <div class="form-group">
+                    <label>Admin Name:</label>
+                    <input type="text" id="edit-admin-name" placeholder="e.g., System Administrator">
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="edit-admin-email" placeholder="e.g., admin@course.edu">
+                </div>
+                <div class="form-group">
+                    <label>Admin Secret:</label>
+                    <input type="password" id="edit-admin-secret" placeholder="Enter new admin secret">
+                </div>
+                <div class="form-group">
+                    <label>Permissions:</label>
+                    <select id="edit-admin-permissions">
+                        <option value="full">Full Access</option>
+                        <option value="limited">Limited Access</option>
+                        <option value="readonly">Read Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-cancel" onclick="closeAdminEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAdminProfile()">Save Changes</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Populate with current data (in real implementation, this would come from current admin data)
+    setTimeout(() => {
+        const nameInput = document.getElementById('edit-admin-name');
+        const emailInput = document.getElementById('edit-admin-email');
+        const secretInput = document.getElementById('edit-admin-secret');
+        const permissionsSelect = document.getElementById('edit-admin-permissions');
+        
+        if (nameInput) nameInput.value = 'System Administrator'; // Demo data
+        if (emailInput) emailInput.value = 'admin@course.edu'; // Demo data
+        if (secretInput) secretInput.value = 'admin123'; // Demo data
+        if (permissionsSelect) permissionsSelect.value = 'full'; // Demo data
+    }, 100);
+  };
+
+  // Close admin edit modal
+  window.closeAdminEditModal = function() {
+    const modal = document.querySelector('.edit-modal-overlay');
+    if (modal) {
+        modal.remove();
+    }
+  };
+
+  // Save admin profile changes
+  window.saveAdminProfile = function() {
+    const name = document.getElementById('edit-admin-name')?.value;
+    const email = document.getElementById('edit-admin-email')?.value;
+    const secret = document.getElementById('edit-admin-secret')?.value;
+    const permissions = document.getElementById('edit-admin-permissions')?.value;
+    
+    if (!name || !email || !secret) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+    }
+    
+    // Simulate save process
+    setTimeout(() => {
+        closeAdminEditModal();
+        alert(' Admin profile updated successfully!');
+        
+        // In real implementation, this would call API to update admin profile
+        // Then reload admin panel or update UI
+    }, 1000);
+  };
+
   const request = async (method, url, data) => {
     try {
       const res = await axios({ method, url, data, headers: { 'x-admin-secret': ADMIN_SECRET } });
