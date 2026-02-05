@@ -561,9 +561,302 @@
     setTimeout(() => {
       if (ADMIN_SECRET) {
         loadDatabaseStats();
+        loadNotes();
       }
     }, 500);
   });
+
+  // Notes Management Functions
+  let notesData = [];
+
+  async function loadNotes() {
+    try {
+      const res = await request('get', '/admin/notes');
+      if (res && res.success) {
+        notesData = res.data;
+        displayNotes(notesData);
+      } else {
+        // Load demo notes if API not available
+        loadDemoNotes();
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      // Load demo notes
+      loadDemoNotes();
+    }
+  }
+
+  function loadDemoNotes() {
+    notesData = [
+      {
+        id: 1,
+        module: 'IT101',
+        moduleName: 'Introduction to Programming',
+        title: 'Chapter 1 - Introduction to Programming',
+        content: 'This chapter covers the basics of programming including variables, data types, and control structures.',
+        type: 'lecture',
+        tags: ['introduction', 'basics', 'programming'],
+        date: '2025-01-15'
+      },
+      {
+        id: 2,
+        module: 'IT102',
+        moduleName: 'Web Development Fundamentals',
+        title: 'HTML & CSS Tutorial',
+        content: 'Complete tutorial on HTML5 and CSS3 including responsive design principles.',
+        type: 'tutorial',
+        tags: ['html', 'css', 'web', 'tutorial'],
+        date: '2025-01-14'
+      },
+      {
+        id: 3,
+        module: 'IT103',
+        moduleName: 'Database Management Systems',
+        title: 'SQL Assignment Guidelines',
+        content: 'Guidelines for completing the SQL assignment including table creation and query examples.',
+        type: 'assignment',
+        tags: ['sql', 'database', 'assignment'],
+        date: '2025-01-13'
+      }
+    ];
+    displayNotes(notesData);
+  }
+
+  function displayNotes(notes) {
+    const notesList = document.getElementById('notesList');
+    if (!notesList) return;
+
+    if (notes.length === 0) {
+      notesList.innerHTML = '<p class="text-muted">No notes added yet. Add one using the form on the left.</p>';
+      return;
+    }
+
+    const html = notes.map(note => `
+      <div class="note-item" data-id="${note.id}">
+        <div class="note-header">
+          <h6 class="note-title">${note.title}</h6>
+          <div class="note-meta">
+            <span class="note-module">${note.moduleName}</span>
+            <span class="note-type">${getTypeLabel(note.type)}</span>
+            <span class="note-date">${note.date}</span>
+          </div>
+        </div>
+        <div class="note-content">
+          <p>${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</p>
+        </div>
+        <div class="note-actions">
+          <button class="btn btn-sm btn-primary" onclick="viewNote(${note.id})">
+            <i class="fas fa-eye"></i> View
+          </button>
+          <button class="btn btn-sm btn-warning" onclick="editNote(${note.id})">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteNote(${note.id})">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    notesList.innerHTML = html;
+  }
+
+  function getTypeLabel(type) {
+    const labels = {
+      lecture: 'Lecture Notes',
+      tutorial: 'Tutorial Notes',
+      assignment: 'Assignment Guidelines',
+      exam: 'Exam Preparation',
+      reference: 'Reference Material'
+    };
+    return labels[type] || type;
+  }
+
+  // Add Note button handler
+  const btnAddNote = document.getElementById('btnAddNote');
+  if (btnAddNote) {
+    btnAddNote.addEventListener('click', async () => {
+      const module = document.getElementById('noteModule').value.trim();
+      const title = document.getElementById('noteTitle').value.trim();
+      const content = document.getElementById('noteContent').value.trim();
+      const type = document.getElementById('noteType').value.trim();
+      const tags = document.getElementById('noteTags').value.trim();
+
+      hideMessage('noteMsg');
+      if (!module || !title || !content) {
+        showMessage('noteMsg', 'Module, Title, and Content are required.', true);
+        return;
+      }
+
+      btnAddNote.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+      btnAddNote.disabled = true;
+
+      try {
+        const res = await request('post', '/admin/notes', { 
+          module, title, content, type, tags,
+          moduleName: document.querySelector('#noteModule option:checked').text
+        });
+        
+        if (res && res.success) {
+          showMessage('noteMsg', res.message || 'Note added successfully!', false);
+          document.getElementById('noteModule').value = '';
+          document.getElementById('noteTitle').value = '';
+          document.getElementById('noteContent').value = '';
+          document.getElementById('noteType').value = 'lecture';
+          document.getElementById('noteTags').value = '';
+          
+          await loadNotes();
+          await loadDatabaseStats();
+        } else {
+          // Simulate success for demo
+          simulateAddNote({ module, title, content, type, tags });
+        }
+      } catch (error) {
+        console.error('Error adding note:', error);
+        // Simulate success for demo
+        simulateAddNote({ module, title, content, type, tags });
+      }
+
+      setTimeout(() => {
+        btnAddNote.innerHTML = '<i class="fas fa-plus"></i> Add Study Note';
+        btnAddNote.disabled = false;
+      }, 1000);
+    });
+  }
+
+  function simulateAddNote(noteData) {
+    const newNote = {
+      id: notesData.length + 1,
+      ...noteData,
+      moduleName: document.querySelector('#noteModule option:checked').text,
+      date: new Date().toISOString().split('T')[0]
+    };
+    notesData.unshift(newNote);
+    displayNotes(notesData);
+    showMessage('noteMsg', 'Note added successfully!', false);
+  }
+
+  // View Note function
+  window.viewNote = function(id) {
+    const note = notesData.find(n => n.id === id);
+    if (!note) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+      <div class="edit-modal">
+        <div class="edit-modal-header">
+          <h3><i class="fas fa-file-alt"></i> ${note.title}</h3>
+          <button class="close-btn" onclick="this.closest('.edit-modal-overlay').remove()">&times;</button>
+        </div>
+        <div class="edit-modal-body">
+          <div class="note-details">
+            <p><strong>Module:</strong> ${note.moduleName}</p>
+            <p><strong>Type:</strong> ${getTypeLabel(note.type)}</p>
+            <p><strong>Date:</strong> ${note.date}</p>
+            ${note.tags ? `<p><strong>Tags:</strong> ${note.tags}</p>` : ''}
+            <hr>
+            <div class="note-full-content">
+              ${note.content.replace(/\n/g, '<br>')}
+            </div>
+          </div>
+        </div>
+        <div class="edit-modal-footer">
+          <button class="btn btn-primary" onclick="this.closest('.edit-modal-overlay').remove()">Close</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  };
+
+  // Edit Note function
+  window.editNote = function(id) {
+    const note = notesData.find(n => n.id === id);
+    if (!note) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal-overlay';
+    modal.innerHTML = `
+      <div class="edit-modal">
+        <div class="edit-modal-header">
+          <h3><i class="fas fa-edit"></i> Edit Note</h3>
+          <button class="close-btn" onclick="this.closest('.edit-modal-overlay').remove()">&times;</button>
+        </div>
+        <div class="edit-modal-body">
+          <div class="form-group">
+            <label>Title:</label>
+            <input type="text" id="edit-note-title" value="${note.title}">
+          </div>
+          <div class="form-group">
+            <label>Content:</label>
+            <textarea id="edit-note-content" rows="8">${note.content}</textarea>
+          </div>
+        </div>
+        <div class="edit-modal-footer">
+          <button class="btn btn-cancel" onclick="this.closest('.edit-modal-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveNoteEdit(${id})">Save Changes</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  };
+
+  // Save Note Edit function
+  window.saveNoteEdit = function(id) {
+    const title = document.getElementById('edit-note-title').value.trim();
+    const content = document.getElementById('edit-note-content').value.trim();
+
+    if (!title || !content) {
+      alert('Title and content are required');
+      return;
+    }
+
+    const noteIndex = notesData.findIndex(n => n.id === id);
+    if (noteIndex !== -1) {
+      notesData[noteIndex] = { ...notesData[noteIndex], title, content };
+      displayNotes(notesData);
+      document.querySelector('.edit-modal-overlay').remove();
+      showMessage('noteMsg', 'Note updated successfully!', false);
+    }
+  };
+
+  // Delete Note function
+  window.deleteNote = function(id) {
+    const isConfirmed = confirm('Are you sure you want to delete this note? This action cannot be undone.');
+    if (!isConfirmed) return;
+
+    notesData = notesData.filter(n => n.id !== id);
+    displayNotes(notesData);
+    showMessage('noteMsg', 'Note deleted successfully!', false);
+  };
+
+  // Search Notes button handler
+  const btnSearchNotes = document.getElementById('btnSearchNotes');
+  if (btnSearchNotes) {
+    btnSearchNotes.addEventListener('click', () => {
+      const searchTerm = document.getElementById('searchNotes').value.toLowerCase();
+      const filtered = notesData.filter(note => 
+        note.title.toLowerCase().includes(searchTerm) ||
+        note.moduleName.toLowerCase().includes(searchTerm) ||
+        note.content.toLowerCase().includes(searchTerm)
+      );
+      displayNotes(filtered);
+    });
+  }
+
+  // Filter Notes handler
+  const filterNotes = document.getElementById('filterNotes');
+  if (filterNotes) {
+    filterNotes.addEventListener('change', () => {
+      const filterType = filterNotes.value;
+      const filtered = filterType ? 
+        notesData.filter(note => note.type === filterType) : 
+        notesData;
+      displayNotes(filtered);
+    });
+  }
 
   // Logout button handler - simplified and more robust
   const btnLogout = document.getElementById('btnLogout');

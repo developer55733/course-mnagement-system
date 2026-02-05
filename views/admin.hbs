@@ -151,6 +151,87 @@
           </div>
         </div>
 
+        <!-- Notes Management Section -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-purple text-white">
+                <h5 class="mb-0">Add Study Notes</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Module</label>
+                  <select id="noteModule" class="form-control">
+                    <option value="">Select Module</option>
+                    <option value="IT101">IT101 - Introduction to Programming</option>
+                    <option value="IT102">IT102 - Web Development Fundamentals</option>
+                    <option value="IT103">IT103 - Database Management Systems</option>
+                    <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                    <option value="IT105">IT105 - Computer Networks</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Note Title</label>
+                  <input id="noteTitle" class="form-control" placeholder="e.g. Chapter 1 - Introduction">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Note Content</label>
+                  <textarea id="noteContent" class="form-control" rows="8" placeholder="Enter the study notes content here..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Note Type</label>
+                  <select id="noteType" class="form-control">
+                    <option value="lecture">Lecture Notes</option>
+                    <option value="tutorial">Tutorial Notes</option>
+                    <option value="assignment">Assignment Guidelines</option>
+                    <option value="exam">Exam Preparation</option>
+                    <option value="reference">Reference Material</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Tags (comma separated)</label>
+                  <input id="noteTags" class="form-control" placeholder="e.g. introduction, basics, fundamentals">
+                </div>
+                <button id="btnAddNote" class="btn btn-purple w-100">
+                  <i class="fas fa-plus"></i> Add Study Note
+                </button>
+                <div id="noteMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-purple text-white">
+                <h5 class="mb-0">Manage Study Notes</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <div class="input-group">
+                    <input type="text" id="searchNotes" class="form-control" placeholder="Search notes by title or module...">
+                    <button class="btn btn-outline-secondary" type="button" id="btnSearchNotes">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <select id="filterNotes" class="form-control">
+                    <option value="">All Notes</option>
+                    <option value="lecture">Lecture Notes</option>
+                    <option value="tutorial">Tutorial Notes</option>
+                    <option value="assignment">Assignment Guidelines</option>
+                    <option value="exam">Exam Preparation</option>
+                    <option value="reference">Reference Material</option>
+                  </select>
+                </div>
+                <div id="notesList" style="max-height: 400px; overflow-y: auto;">
+                  <p class="text-muted">No notes added yet. Add one using the form on the left.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Database Management Section -->
         <div class="row">
           <div class="col-md-6">

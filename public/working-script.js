@@ -460,50 +460,6 @@ async function loadLecturers() {
     }
 }
 
-// Load timetable
-async function loadTimetable() {
-    try {
-        const response = await apiCall('/timetable');
-        const timetableList = document.getElementById('timetable-body');
-        
-        if (timetableList && response.success) {
-            if (response.data.length === 0) {
-                timetableList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No timetable entries available</td></tr>';
-            } else {
-                timetableList.innerHTML = response.data.map((entry, index) => `
-                    <tr>
-                        <td>${entry.test}</td>
-                        <td>${entry.module}</td>
-                        <td>${entry.date}</td>
-                        <td>${entry.time}</td>
-                        <td>${entry.venue}</td>
-                        <td class="admin-only" id="timetable-actions-${index}" style="display: none;">
-                            <div class="action-buttons">
-                                <button class="action-btn edit-btn-small" onclick="editTimetable(${index})" title="Edit Entry">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn delete-btn-small" onclick="deleteTimetable(${index})" title="Delete Entry">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <span class="status-badge scheduled">Scheduled</span>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            
-            // Call helper to show admin actions
-            showAdminActions();
-        }
-    } catch (error) {
-        console.error('Error loading timetable:', error);
-        const timetableList = document.getElementById('timetable-body');
-        if (timetableList) {
-            timetableList.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading timetable</td></tr>';
-        }
-    }
-}
-
 // Refresh dashboard data
 function refreshDashboard() {
     if (currentUser) {

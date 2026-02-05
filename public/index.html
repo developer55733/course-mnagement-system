@@ -417,7 +417,7 @@
                     
                     <!-- Admin Controls for Timetable (Only visible to admins) -->
                     <div class="admin-controls" id="timetable-admin-controls">
-                        <h4><i class="fas fa-user-shield"></i> Admin: Manage Timetable</h4>
+                        <h4><i class="fas fa-user-shield"></i> Admin: Manage Test Timetable</h4>
                         <form id="add-timetable-form">
                             <div class="form-group">
                                 <label for="timetable-test">Test Name</label>
@@ -448,6 +448,33 @@
                             </div>
                             <button type="submit" class="btn btn-admin">Add Test</button>
                         </form>
+                    </div>
+                </div>
+                
+                <!-- Study Notes Card -->
+                <div class="card card-notes">
+                    <h3><i class="fas fa-file-alt"></i> Study Notes</h3>
+                    <div class="notes-wrapper">
+                        <div class="notes-controls">
+                            <div class="search-filter-group">
+                                <input type="text" id="user-search-notes" placeholder="Search notes by title or module...">
+                                <select id="user-filter-notes">
+                                    <option value="">All Types</option>
+                                    <option value="lecture">Lecture Notes</option>
+                                    <option value="tutorial">Tutorial Notes</option>
+                                    <option value="assignment">Assignment Guidelines</option>
+                                    <option value="exam">Exam Preparation</option>
+                                    <option value="reference">Reference Material</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="notes-list" id="user-notes-list">
+                            <div class="no-notes-message">
+                                <i class="fas fa-file-alt"></i>
+                                <p>No study notes available yet.</p>
+                                <p>Admin will add study materials for your courses.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
