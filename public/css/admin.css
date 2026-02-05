@@ -481,6 +481,79 @@ h1 {
   background-color: #6f42c1 !important;
 }
 
+/* Rich Text Editor Styles */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  align-items: center;
+}
+
+.editor-toolbar .btn-group {
+  display: flex;
+  gap: 2px;
+}
+
+.editor-toolbar .btn-sm {
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  border: 1px solid #ced4da !important;
+  background: white !important;
+  color: #495057 !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.editor-toolbar .btn-sm:hover {
+  background: #e9ecef !important;
+  border-color: #adb5bd !important;
+  transform: translateY(-1px);
+}
+
+.editor-toolbar .btn-sm:active {
+  background: #dee2e6 !important;
+  transform: translateY(0);
+}
+
+.editor-toolbar .form-select-sm,
+.editor-toolbar .form-control-sm {
+  border: 1px solid #ced4da !important;
+  background: white !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+}
+
+.rich-text-editor {
+  min-height: 200px !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 0 0 6px 6px !important;
+  padding: 15px !important;
+  background: white !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  transition: border-color 0.3s ease !important;
+}
+
+.rich-text-editor:focus {
+  outline: none !important;
+  border-color: #6f42c1 !important;
+  box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+}
+
+.rich-text-editor[contenteditable="true"]:empty:before {
+  content: attr(placeholder);
+  color: #6c757d;
+  pointer-events: none;
+}
+
 /* Notes List Styles */
 .note-item {
   background: white;

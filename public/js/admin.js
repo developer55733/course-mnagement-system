@@ -566,7 +566,74 @@
     }, 500);
   });
 
-  // Notes Management Functions
+  // Rich Text Editor Functions
+window.formatText = function(command) {
+  document.execCommand(command, false, null);
+  document.getElementById('noteContent').focus();
+  updateHiddenContent();
+};
+
+window.changeFontSize = function(size) {
+  if (size) {
+    document.execCommand('fontSize', false, size);
+    document.getElementById('noteContent').focus();
+  }
+  updateHiddenContent();
+};
+
+window.changeFontColor = function(color) {
+  document.execCommand('foreColor', false, color);
+  document.getElementById('noteContent').focus();
+  updateHiddenContent();
+};
+
+window.insertList = function(command) {
+  document.execCommand(command, false, null);
+  document.getElementById('noteContent').focus();
+  updateHiddenContent();
+};
+
+function updateHiddenContent() {
+  const editor = document.getElementById('noteContent');
+  const hiddenInput = document.getElementById('noteContentHidden');
+  if (editor && hiddenInput) {
+    hiddenInput.value = editor.innerHTML;
+  }
+}
+
+// Initialize rich text editor
+document.addEventListener('DOMContentLoaded', function() {
+  const noteContent = document.getElementById('noteContent');
+  if (noteContent) {
+    // Clear placeholder text on focus
+    noteContent.addEventListener('focus', function() {
+      if (this.innerHTML === 'Enter the study notes content here...') {
+        this.innerHTML = '';
+      }
+    });
+    
+    // Restore placeholder if empty on blur
+    noteContent.addEventListener('blur', function() {
+      if (this.innerHTML.trim() === '') {
+        this.innerHTML = 'Enter the study notes content here...';
+      }
+      updateHiddenContent();
+    });
+    
+    // Update hidden content on input
+    noteContent.addEventListener('input', updateHiddenContent);
+    
+    // Prevent line breaks on Enter key (creates new paragraph)
+    noteContent.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.execCommand('insertParagraph', false, null);
+      }
+    });
+  }
+});
+
+// Notes Management Functions
   let notesData = [];
 
   async function loadNotes() {
@@ -678,12 +745,13 @@
     btnAddNote.addEventListener('click', async () => {
       const module = document.getElementById('noteModule').value.trim();
       const title = document.getElementById('noteTitle').value.trim();
-      const content = document.getElementById('noteContent').value.trim();
+      const content = document.getElementById('noteContentHidden').value || document.getElementById('noteContent').innerHTML;
       const type = document.getElementById('noteType').value.trim();
+      const visibility = document.getElementById('noteVisibility').value.trim();
       const tags = document.getElementById('noteTags').value.trim();
 
       hideMessage('noteMsg');
-      if (!module || !title || !content) {
+      if (!module || !title || !content || content === 'Enter the study notes content here...') {
         showMessage('noteMsg', 'Module, Title, and Content are required.', true);
         return;
       }
@@ -693,28 +761,31 @@
 
       try {
         const res = await request('post', '/admin/notes', { 
-          module, title, content, type, tags,
+          module, title, content, type, visibility, tags,
           moduleName: document.querySelector('#noteModule option:checked').text
         });
         
         if (res && res.success) {
           showMessage('noteMsg', res.message || 'Note added successfully!', false);
+          // Clear form
           document.getElementById('noteModule').value = '';
           document.getElementById('noteTitle').value = '';
-          document.getElementById('noteContent').value = '';
+          document.getElementById('noteContent').innerHTML = 'Enter the study notes content here...';
+          document.getElementById('noteContentHidden').value = '';
           document.getElementById('noteType').value = 'lecture';
+          document.getElementById('noteVisibility').value = 'public';
           document.getElementById('noteTags').value = '';
           
           await loadNotes();
           await loadDatabaseStats();
         } else {
           // Simulate success for demo
-          simulateAddNote({ module, title, content, type, tags });
+          simulateAddNote({ module, title, content, type, visibility, tags });
         }
       } catch (error) {
         console.error('Error adding note:', error);
         // Simulate success for demo
-        simulateAddNote({ module, title, content, type, tags });
+        simulateAddNote({ module, title, content, type, visibility, tags });
       }
 
       setTimeout(() => {
@@ -729,7 +800,8 @@
       id: notesData.length + 1,
       ...noteData,
       moduleName: document.querySelector('#noteModule option:checked').text,
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      visibility: noteData.visibility || 'public'
     };
     notesData.unshift(newNote);
     displayNotes(notesData);
@@ -754,10 +826,11 @@
             <p><strong>Module:</strong> ${note.moduleName}</p>
             <p><strong>Type:</strong> ${getTypeLabel(note.type)}</p>
             <p><strong>Date:</strong> ${note.date}</p>
+            <p><strong>Visibility:</strong> ${note.visibility === 'public' ? '🌐 Public' : '🔒 Private'}</p>
             ${note.tags ? `<p><strong>Tags:</strong> ${note.tags}</p>` : ''}
             <hr>
             <div class="note-full-content">
-              ${note.content.replace(/\n/g, '<br>')}
+              ${note.content}
             </div>
           </div>
         </div>

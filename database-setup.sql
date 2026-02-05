@@ -64,6 +64,27 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Create notes table
+CREATE TABLE IF NOT EXISTS `notes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `formatted_content` TEXT,
+  `module_code` VARCHAR(50) NOT NULL,
+  `module_name` VARCHAR(100) NOT NULL,
+  `type` ENUM('lecture', 'tutorial', 'assignment', 'exam', 'reference') DEFAULT 'lecture',
+  `tags` VARCHAR(255),
+  `visibility` ENUM('public', 'private') DEFAULT 'public',
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module (module_code),
+  INDEX idx_type (type),
+  INDEX idx_visibility (visibility),
+  INDEX idx_created_by (created_by),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Insert default test users
 INSERT INTO `users` (`name`, `email`, `student_id`, `password`, `role`) VALUES
 ('John Smith', 'john@student.edu', 'IT2023001', '$2b$10$c6mYZv1Xleen2fqxaPyGAODQvGl.7BiCQcamQlsLBEJrkhU9wEBcW', 'user'),
