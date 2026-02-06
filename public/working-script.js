@@ -1036,12 +1036,14 @@ async function loadUserNotes() {
         }
         
         console.log('✅ user-notes-list element found');
-        console.log('🔍 Making API call to /api/notes/public...');
+        console.log('🔍 API_BASE_URL:', API_BASE_URL);
+        console.log('🔍 Making API call to /notes/public...');
+        console.log('🔍 Full URL will be:', API_BASE_URL + '/notes/public');
         
         // Show loading state
         notesList.innerHTML = '<div class="loading-message">Loading notes...</div>';
         
-        const response = await apiCall('/api/notes/public');
+        const response = await apiCall('/notes/public');
         console.log('🔍 API call completed');
         console.log('🔍 Full response:', JSON.stringify(response, null, 2));
         
