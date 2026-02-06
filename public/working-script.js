@@ -4,7 +4,70 @@ const API_BASE_URL = window.location.origin + '/api';
 
 let currentUser = null;
 
+// Mobile Navigation Functionality (Smartphone Only)
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileNavMenu = document.getElementById('mobile-nav-menu');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
 
+    // Toggle mobile menu
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            mobileNavMenu.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+        });
+    }
+
+    // Close mobile menu when clicking overlay
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', function() {
+            mobileMenuToggle.classList.remove('active');
+            mobileNavMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+        });
+    }
+
+    // Handle mobile navigation item clicks
+    mobileNavItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            
+            // Close mobile menu
+            mobileMenuToggle.classList.remove('active');
+            mobileNavMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            
+            // Switch to the selected tab
+            switchTab(tabId);
+        });
+    });
+});
+
+// Tab switching function for mobile
+function switchTab(tabId) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => tab.classList.remove('active'));
+    
+    // Remove active class from all nav items
+    const navItems = document.querySelectorAll('.mobile-nav-item');
+    navItems.forEach(item => item.classList.remove('active'));
+    
+    // Show selected tab
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to clicked nav item
+    const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
+    if (clickedNav) {
+        clickedNav.classList.add('active');
+    }
+}
 
 // Show message function
 
