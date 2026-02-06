@@ -1,6 +1,35 @@
 // Working IT Management System Script
 
-const API_BASE_URL = window.location.origin + '/api';
+// Dynamic API base URL configuration
+const getApiBaseUrl = () => {
+    const origin = window.location.origin;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    console.log('🔍 Current origin:', origin);
+    console.log('🔍 Current hostname:', hostname);
+    console.log('🔍 Current port:', port);
+    
+    // If accessing from localhost, try different ports
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Try common ports where server might be running
+        const possiblePorts = ['8080', '4000', '3000'];
+        const currentPort = port || '8080';
+        
+        // If current port is not 8080, try 8080
+        if (currentPort !== '8080') {
+            console.log('🔍 Trying port 8080 instead of', currentPort);
+            return `${window.location.protocol}//${hostname}:8080/api`;
+        }
+        
+        return `${origin}/api`;
+    }
+    
+    // For production or other domains
+    return `${origin}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 let currentUser = null;
 
