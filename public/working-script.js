@@ -1081,6 +1081,9 @@ async function loadUserNotes() {
                             <button class="btn btn-primary btn-small" onclick="downloadNote('${note.id}')">
                                 <i class="fas fa-download"></i> Download PDF
                             </button>
+                            <button class="btn btn-info btn-small" onclick="downloadEnhancedPDF('${note.id}')">
+                                <i class="fas fa-file-pdf"></i> Enhanced PDF
+                            </button>
                         </div>
                     </div>
                 `;
@@ -1196,57 +1199,20 @@ document.addEventListener('DOMContentLoaded', function() {
 // Download note function
 window.downloadNote = function(noteId) {
     try {
-        console.log('🔍 Downloading note:', noteId);
+        console.log('🔍 Downloading note as PDF:', noteId);
         console.log('🔍 API_BASE_URL:', API_BASE_URL);
         console.log('🔍 Full URL will be:', API_BASE_URL + `/notes/${noteId}`);
-        
-        // Create a temporary window to print the note
-        const printWindow = window.open('', '_blank');
         
         // Fetch the note details
         apiCall(`/notes/${noteId}`).then(response => {
             if (response.success && response.data) {
                 const note = response.data;
                 
-                // Create HTML content for printing
-                const htmlContent = `
-                    <html>
-                        <head>
-                            <title>${note.title} - Study Note</title>
-                            <style>
-                                body { font-family: Arial, sans-serif; margin: 20px; }
-                                h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-                                .meta { color: #666; margin: 10px 0; }
-                                .content { margin-top: 20px; line-height: 1.6; }
-                                @media print { body { margin: 10px; } }
-                            </style>
-                        </head>
-                        <body>
-                            <h1>${note.title}</h1>
-                            <div class="meta">
-                                <strong>Module:</strong> ${note.module_code} - ${note.module_name}<br>
-                                <strong>Type:</strong> ${note.type}<br>
-                                <strong>Created:</strong> ${new Date(note.created_at).toLocaleDateString()}
-                            </div>
-                            <div class="content">
-                                ${note.formatted_content || note.content}
-                            </div>
-                        </body>
-                    </html>
-                `;
-                
-                printWindow.document.write(htmlContent);
-                printWindow.document.close();
-                
-                // Wait for content to load, then print
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 500);
+                // Generate PDF using browser's print-to-PDF capability
+                generatePDF(note);
                 
             } else {
                 alert('Error loading note details');
-                printWindow.close();
             }
         }).catch(error => {
             console.error('❌ Error downloading note:', error);
@@ -1255,11 +1221,6 @@ window.downloadNote = function(noteId) {
                 stack: error.stack,
                 noteId: noteId
             });
-            
-            // Close print window if open
-            if (printWindow && !printWindow.closed) {
-                printWindow.close();
-            }
             
             // Show better error message
             alert(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
@@ -1270,6 +1231,366 @@ window.downloadNote = function(noteId) {
         alert('Error downloading note');
     }
 };
+
+// Generate PDF from note content
+function generatePDF(note) {
+    try {
+        console.log('🔍 Generating PDF for note:', note.title);
+        
+        // Create a new window for PDF generation
+        const pdfWindow = window.open('', '_blank', 'width=800,height=600');
+        
+        // Create HTML content for PDF
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>${note.title} - Study Note</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6;
+                            color: #333;
+                        }
+                        h1 { 
+                            color: #283593; 
+                            border-bottom: 3px solid #283593; 
+                            padding-bottom: 10px; 
+                            margin-bottom: 20px;
+                        }
+                        .meta { 
+                            background: #f8f9fa; 
+                            padding: 15px; 
+                            border-radius: 5px; 
+                            margin: 20px 0; 
+                            border-left: 4px solid #007bff;
+                        }
+                        .meta-item {
+                            margin: 5px 0;
+                            font-weight: bold;
+                        }
+                        .content { 
+                            margin-top: 20px; 
+                            white-space: pre-wrap;
+                            font-size: 14px;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            padding-top: 20px;
+                            border-top: 1px solid #ddd;
+                            text-align: center;
+                            color: #666;
+                            font-size: 12px;
+                        }
+                        @media print {
+                            body { margin: 10px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>${note.title}</h1>
+                    <div class="meta">
+                        <div class="meta-item"><strong>Module:</strong> ${note.module_code} - ${note.module_name}</div>
+                        <div class="meta-item"><strong>Type:</strong> ${note.type}</div>
+                        <div class="meta-item"><strong>Tags:</strong> ${note.tags || 'N/A'}</div>
+                        <div class="meta-item"><strong>Created:</strong> ${new Date(note.created_at).toLocaleDateString()}</div>
+                        <div class="meta-item"><strong>Created By:</strong> ${note.created_by_name || 'Admin'}</div>
+                    </div>
+                    <div class="content">
+                        ${note.formatted_content || note.content}
+                    </div>
+                    <div class="footer">
+                        <p>Generated from IT Course Management System</p>
+                        <p>Download Date: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div class="no-print">
+                        <p style="text-align: center; margin-top: 30px;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #283593; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                🖨️ Print to PDF
+                            </button>
+                        </p>
+                        <p style="text-align: center; color: #666; font-size: 12px;">
+                            💡 Use your browser's Print function and select "Save as PDF" to download the note as PDF
+                        </p>
+                    </div>
+                </body>
+            </html>
+        `;
+        
+        pdfWindow.document.write(htmlContent);
+        pdfWindow.document.close();
+        
+        // Wait for content to load, then trigger print dialog
+        setTimeout(() => {
+            pdfWindow.print();
+        }, 1000);
+        
+        console.log('✅ PDF generation window opened');
+        
+    } catch (error) {
+        console.error('❌ Error generating PDF:', error);
+        alert('Error generating PDF: ' + error.message);
+    }
+}
+
+// Enhanced PDF download function
+window.downloadEnhancedPDF = function(noteId) {
+    try {
+        console.log('🔍 Downloading enhanced PDF:', noteId);
+        
+        // Fetch the note details
+        apiCall(`/notes/${noteId}`).then(response => {
+            if (response.success && response.data) {
+                const note = response.data;
+                
+                // Create a more professional PDF layout
+                createProfessionalPDF(note);
+                
+            } else {
+                alert('Error loading note details');
+            }
+        }).catch(error => {
+            console.error('❌ Error downloading enhanced PDF:', error);
+            alert(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+        });
+        
+    } catch (error) {
+        console.error('Error in downloadEnhancedPDF:', error);
+        alert('Error downloading enhanced PDF');
+    }
+};
+
+// Create professional PDF with better formatting
+function createProfessionalPDF(note) {
+    try {
+        console.log('🔍 Creating professional PDF for:', note.title);
+        
+        // Create a new window for enhanced PDF generation
+        const pdfWindow = window.open('', '_blank', 'width=900,height=700');
+        
+        // Enhanced HTML content for professional PDF
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>${note.title} - Study Note</title>
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 2cm;
+                        }
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            margin: 0; 
+                            padding: 20px;
+                            line-height: 1.6;
+                            color: #2c3e50;
+                            background: #ffffff;
+                        }
+                        .header {
+                            text-align: center;
+                            border-bottom: 3px solid #283593;
+                            padding-bottom: 20px;
+                            margin-bottom: 30px;
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            padding: 20px;
+                            border-radius: 10px;
+                        }
+                        .header h1 {
+                            color: #283593;
+                            margin: 0;
+                            font-size: 28px;
+                            font-weight: 700;
+                        }
+                        .header .subtitle {
+                            color: #6c757d;
+                            font-size: 14px;
+                            margin-top: 10px;
+                        }
+                        .meta-section {
+                            background: #f8f9fa;
+                            border: 1px solid #e9ecef;
+                            border-radius: 8px;
+                            padding: 20px;
+                            margin: 20px 0;
+                        }
+                        .meta-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 15px;
+                        }
+                        .meta-item {
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        .meta-label {
+                            font-weight: 600;
+                            color: #495057;
+                            font-size: 12px;
+                            margin-bottom: 5px;
+                        }
+                        .meta-value {
+                            color: #2c3e50;
+                            font-size: 14px;
+                        }
+                        .content-section {
+                            margin: 30px 0;
+                            padding: 25px;
+                            background: #ffffff;
+                            border: 1px solid #e9ecef;
+                            border-radius: 8px;
+                        }
+                        .content-title {
+                            font-size: 18px;
+                            font-weight: 600;
+                            color: #283593;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #e9ecef;
+                            padding-bottom: 10px;
+                        }
+                        .content {
+                            white-space: pre-wrap;
+                            font-size: 14px;
+                            line-height: 1.8;
+                            text-align: justify;
+                        }
+                        .footer {
+                            margin-top: 40px;
+                            padding: 20px;
+                            background: #f8f9fa;
+                            border: 1px solid #e9ecef;
+                            border-radius: 8px;
+                            text-align: center;
+                        }
+                        .footer p {
+                            margin: 5px 0;
+                            color: #6c757d;
+                            font-size: 12px;
+                        }
+                        .action-buttons {
+                            text-align: center;
+                            margin: 30px 0;
+                            padding: 20px;
+                            background: #e3f2fd;
+                            border-radius: 8px;
+                        }
+                        .btn-print {
+                            background: linear-gradient(135deg, #283593 0%, #1a237e 100%);
+                            color: white;
+                            padding: 12px 30px;
+                            border: none;
+                            border-radius: 6px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            box-shadow: 0 4px 15px rgba(40, 58, 147, 0.3);
+                        }
+                        .btn-print:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(40, 58, 147, 0.4);
+                        }
+                        .instructions {
+                            background: #d1ecf1;
+                            border: 1px solid #bee5eb;
+                            border-radius: 6px;
+                            padding: 15px;
+                            margin: 20px 0;
+                        }
+                        .instructions h4 {
+                            color: #0c5460;
+                            margin: 0 0 10px 0;
+                        }
+                        @media print {
+                            .no-print { display: none !important; }
+                            .action-buttons { display: none !important; }
+                            .instructions { display: none !important; }
+                            body { margin: 0; padding: 10px; }
+                            .header { background: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>${note.title}</h1>
+                        <div class="subtitle">IT Course Management System - Study Notes</div>
+                    </div>
+                    
+                    <div class="meta-section">
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <div class="meta-label">Module Code</div>
+                                <div class="meta-value">${note.module_code}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Module Name</div>
+                                <div class="meta-value">${note.module_name}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Type</div>
+                                <div class="meta-value">${note.type}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Tags</div>
+                                <div class="meta-value">${note.tags || 'N/A'}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Created Date</div>
+                                <div class="meta-value">${new Date(note.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Created By</div>
+                                <div class="meta-value">${note.created_by_name || 'Admin'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <div class="content-title">📝 Content</div>
+                        <div class="content">
+                            ${note.formatted_content || note.content}
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-print" onclick="window.print()">
+                            🖨️ Save as PDF
+                        </button>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>📋 Instructions:</h4>
+                        <p><strong>1.</strong> Click the "Save as PDF" button above</p>
+                        <p><strong>2.</strong> In the print dialog, select "Save as PDF" or "Microsoft Print to PDF"</p>
+                        <p><strong>3.</strong> Choose your download location and save the file</p>
+                        <p><strong>4.</strong> The PDF will include all formatting and be ready for printing or sharing</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p><strong>Generated from:</strong> IT Course Management System</p>
+                        <p><strong>Download Date:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                </body>
+            </html>
+        `;
+        
+        pdfWindow.document.write(htmlContent);
+        pdfWindow.document.close();
+        
+        // Wait for content to load, then trigger print dialog
+        setTimeout(() => {
+            pdfWindow.print();
+        }, 1000);
+        
+        console.log('✅ Enhanced PDF generation window opened');
+        
+    } catch (error) {
+        console.error('❌ Error creating professional PDF:', error);
+        alert('Error creating professional PDF: ' + error.message);
+    }
+}
 
 // Refresh dashboard data
 
