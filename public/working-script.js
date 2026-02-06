@@ -1197,12 +1197,14 @@ document.addEventListener('DOMContentLoaded', function() {
 window.downloadNote = function(noteId) {
     try {
         console.log('🔍 Downloading note:', noteId);
+        console.log('🔍 API_BASE_URL:', API_BASE_URL);
+        console.log('🔍 Full URL will be:', API_BASE_URL + `/notes/${noteId}`);
         
         // Create a temporary window to print the note
         const printWindow = window.open('', '_blank');
         
         // Fetch the note details
-        apiCall(`/api/notes/${noteId}`).then(response => {
+        apiCall(`/notes/${noteId}`).then(response => {
             if (response.success && response.data) {
                 const note = response.data;
                 
@@ -1247,9 +1249,20 @@ window.downloadNote = function(noteId) {
                 printWindow.close();
             }
         }).catch(error => {
-            console.error('Error downloading note:', error);
-            alert('Error downloading note');
-            printWindow.close();
+            console.error('❌ Error downloading note:', error);
+            console.error('❌ Error details:', {
+                message: error.message,
+                stack: error.stack,
+                noteId: noteId
+            });
+            
+            // Close print window if open
+            if (printWindow && !printWindow.closed) {
+                printWindow.close();
+            }
+            
+            // Show better error message
+            alert(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
         });
         
     } catch (error) {
