@@ -2744,24 +2744,353 @@ function initialize() {
             currentUser = JSON.parse(storedUser);
 
             switchToTab('dashboard');
+}
 
-            updateDashboard();
+// Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
 
-        } catch (error) {
+document.addEventListener('keydown', (e) => {
 
-            sessionStorage.removeItem('currentUser');
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l' && currentUser) {
 
-        }
+        e.preventDefault();
+
+        console.log('Keyboard shortcut triggered, calling logout()');
+
+        logout();
 
     }
 
-    
+});
 
-    console.log('Initialization complete');
+// Tab switching
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+
+    btn.addEventListener('click', () => {
+
+        const tabId = btn.getAttribute('data-tab');
+
+        switchToTab(tabId);
+
+    });
+
+});
+
+// Form submissions
+
+const loginForm = document.getElementById('login-form');
+
+const registerForm = document.getElementById('register-form');
+
+console.log('Login form found:', !!loginForm);
+
+console.log('Register form found:', !!registerForm);
+
+if (loginForm) {
+
+    loginForm.addEventListener('submit', handleLogin);
+
+    console.log('Login listener attached');
 
 }
 
+if (registerForm) {
 
+    registerForm.addEventListener('submit', handleRegister);
+
+    console.log('Register listener attached');
+
+}
+
+// Navigation links
+
+const goToRegister = document.getElementById('go-to-register');
+
+const goToLogin = document.getElementById('go-to-login');
+
+if (goToRegister) {
+
+    goToRegister.addEventListener('click', (e) => {
+
+        e.preventDefault();
+
+        switchToTab('register');
+
+    });
+
+}
+
+if (goToLogin) {
+
+    goToLogin.addEventListener('click', (e) => {
+
+        e.preventDefault();
+
+        switchToTab('login');
+
+    });
+
+}
+
+// Check for existing session
+
+const storedUser = sessionStorage.getItem('currentUser');
+
+if (storedUser) {
+
+    try {
+
+        currentUser = JSON.parse(storedUser);
+
+        switchToTab('dashboard');
+
+        updateDashboard();
+
+    } catch (error) {
+
+        console.error('Error parsing stored user:', error);
+
+        sessionStorage.removeItem('currentUser');
+
+    }
+
+}
+
+// Meeting System Functions
+function initializeMeetingSystem() {
+    console.log(' Initializing meeting system...');
+
+    // Meeting form elements
+    const meetingForm = document.getElementById('meeting-form');
+    const meetingLink = document.getElementById('meeting-link');
+    const meetingName = document.getElementById('meeting-name');
+    const meetingPassword = document.getElementById('meeting-password');
+    const meetingMessage = document.getElementById('meeting-message');
+    const clearMeetingForm = document.getElementById('clear-meeting-form');
+
+    // Meeting room elements
+    const meetingRoom = document.getElementById('meeting-room');
+    const leaveMeeting = document.getElementById('leave-meeting');
+    const toggleVideo = document.getElementById('toggle-video');
+    const toggleAudio = document.getElementById('toggle-audio');
+    const shareScreen = document.getElementById('share-screen');
+    const meetingChat = document.getElementById('meeting-chat');
+    const closeChat = document.getElementById('close-chat');
+    const chatInput = document.getElementById('chat-input');
+    const sendChat = document.getElementById('send-chat');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Set default meeting name from current user
+    if (currentUser && currentUser.name && meetingName) {
+        meetingName.value = currentUser.name;
+    }
+
+    // Meeting form submission
+    if (meetingForm) {
+        meetingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const link = meetingLink.value.trim();
+            const name = meetingName.value.trim();
+            const password = meetingPassword.value.trim();
+
+            if (!link || !name) {
+                showMessage('meeting-message', 'Please enter meeting link and your name', true);
+                return;
+            }
+
+            // Validate Zoom link format
+            if (!link.includes('zoom.us/') && !link.includes('zoom.')) {
+                showMessage('meeting-message', 'Please enter a valid Zoom meeting link', true);
+                return;
+            }
+
+            console.log(' Joining meeting:', { link, name, hasPassword: !!password });
+
+            // Show loading message
+            showMessage('meeting-message', 'Joining meeting...', false);
+
+            // Simulate meeting join (in real implementation, this would connect to WebRTC)
+            setTimeout(() => {
+                joinMeetingRoom(link, name, password);
+            }, 1500);
+        });
+    }
+
+    // Clear form button
+    if (clearMeetingForm) {
+        clearMeetingForm.addEventListener('click', () => {
+            meetingForm.reset();
+            if (currentUser && currentUser.name && meetingName) {
+                meetingName.value = currentUser.name;
+            }
+            hideMessage('meeting-message');
+        });
+    }
+
+    // Leave meeting button
+    if (leaveMeeting) {
+        leaveMeeting.addEventListener('click', leaveMeetingRoom);
+    }
+
+    // Meeting controls
+    if (toggleVideo) {
+        toggleVideo.addEventListener('click', () => {
+            console.log(' Toggle video clicked');
+            // In real implementation, this would toggle video stream
+        });
+    }
+
+    if (toggleAudio) {
+        toggleAudio.addEventListener('click', () => {
+            console.log(' Toggle audio clicked');
+            // In real implementation, this would toggle audio stream
+        });
+    }
+
+    if (shareScreen) {
+        shareScreen.addEventListener('click', () => {
+            console.log(' Share screen clicked');
+            // In real implementation, this would start screen sharing
+        });
+    }
+
+    if (meetingChat) {
+        meetingChat.addEventListener('click', () => {
+            const chatPanel = document.getElementById('meeting-chat-panel');
+            if (chatPanel) {
+                chatPanel.classList.toggle('hidden');
+            }
+        });
+    }
+
+    if (closeChat) {
+        closeChat.addEventListener('click', () => {
+            const chatPanel = document.getElementById('meeting-chat-panel');
+            if (chatPanel) {
+                chatPanel.classList.add('hidden');
+            }
+        });
+    }
+
+    // Chat functionality
+    if (sendChat && chatInput && chatMessages) {
+        sendChat.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+    }
+}
+
+function joinMeetingRoom(link, name, password) {
+    console.log(' Entering meeting room...');
+
+    // Hide form and show meeting room
+    const meetingFormCard = document.querySelector('.meeting-form-card');
+    const meetingInfoCard = document.querySelector('.meeting-info-card');
+    const meetingRoom = document.getElementById('meeting-room');
+
+    if (meetingFormCard) meetingFormCard.classList.add('hidden');
+    if (meetingInfoCard) meetingInfoCard.classList.add('hidden');
+    if (meetingRoom) meetingRoom.classList.remove('hidden');
+
+    // Show success message
+    showMessage('meeting-message', `Successfully joined meeting as ${name}`, false);
+
+    // Add welcome message to chat
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        const welcomeMsg = document.createElement('div');
+        welcomeMsg.className = 'chat-message system';
+        welcomeMsg.innerHTML = `<i class="fas fa-info-circle"></i> Welcome to the meeting, ${name}!`;
+        chatMessages.appendChild(welcomeMsg);
+    }
+
+    // In real implementation, this would:
+    // 1. Extract meeting ID from Zoom link
+    // 2. Connect to WebRTC signaling server
+    // 3. Set up local video/audio streams
+    // 4. Join the meeting room
+    // 5. Handle remote participants
+
+    console.log(' Meeting room joined successfully');
+}
+
+function leaveMeetingRoom() {
+    console.log(' Leaving meeting room...');
+
+    // Show confirmation
+    if (confirm('Are you sure you want to leave the meeting?')) {
+        // Hide meeting room and show form
+        const meetingFormCard = document.querySelector('.meeting-form-card');
+        const meetingInfoCard = document.querySelector('.meeting-info-card');
+        const meetingRoom = document.getElementById('meeting-room');
+
+        if (meetingFormCard) meetingFormCard.classList.remove('hidden');
+        if (meetingInfoCard) meetingInfoCard.classList.remove('hidden');
+        if (meetingRoom) meetingRoom.classList.add('hidden');
+
+        // Clear messages
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            chatMessages.innerHTML = '';
+        }
+
+        console.log(' Left meeting room');
+    }
+}
+
+function sendChatMessage() {
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    if (!chatInput || !chatMessages) return;
+
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // Add message to chat
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message user';
+    const senderName = currentUser ? currentUser.name : 'Guest User';
+    messageDiv.innerHTML = `<strong>${senderName}:</strong> ${message}`;
+
+    chatMessages.appendChild(messageDiv);
+    chatInput.value = '';
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    console.log(' Chat message sent:', message);
+
+    // In real implementation, this would send message to other participants via WebRTC
+}
+
+// Update updateDashboard function to show meeting tab for logged-in users
+const originalUpdateDashboard = updateDashboard;
+updateDashboard = function() {
+    // Call original function
+    originalUpdateDashboard();
+
+    // Show meeting tab for logged-in users
+    const meetingTab = document.getElementById('meeting-tab');
+    if (meetingTab && currentUser) {
+        meetingTab.classList.remove('hidden');
+    }
+
+    // Initialize meeting system when dashboard is shown
+    if (currentUser) {
+        setTimeout(() => {
+            initializeMeetingSystem();
+        }, 1000);
+    }
+};
+
+console.log('Initialization complete');
+
+}
 
 // Start when DOM is ready
 
@@ -2774,4 +3103,3 @@ if (document.readyState === 'loading') {
     initialize();
 
 }
-

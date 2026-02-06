@@ -76,6 +76,7 @@
             <button class="tab-btn" data-tab="about">About</button>
             <button class="tab-btn" data-tab="contact">Contact</button>
             <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
+            <button class="tab-btn hidden" data-tab="meeting" id="meeting-tab">Video Meeting</button>
             <button class="tab-btn hidden" data-tab="devadmin" id="devadmin-tab">Dev & Admin</button>
         </div>
         
@@ -473,6 +474,146 @@
                                 <i class="fas fa-file-alt"></i>
                                 <p>No study notes available yet.</p>
                                 <p>Admin will add study materials for your courses.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Video Meeting Tab -->
+        <div class="tab-content" id="meeting">
+            <div class="page-container">
+                <h2 class="page-title"><i class="fas fa-video"></i> Video Meeting</h2>
+                
+                <div class="meeting-container">
+                    <div class="meeting-form-card">
+                        <h3><i class="fas fa-link"></i> Join Video Meeting</h3>
+                        <p class="meeting-description">Enter your Zoom meeting link below to join the video conference directly on our platform.</p>
+                        
+                        <div class="message" id="meeting-message"></div>
+                        
+                        <form id="meeting-form">
+                            <div class="form-group">
+                                <label for="meeting-link">Meeting Link</label>
+                                <input type="url" id="meeting-link" required 
+                                       placeholder="https://zoom.us/j/123456789" 
+                                       pattern="https://.*zoom\.us/.*|https://.*zoom\.us/.*|https://.*"
+                                       title="Enter a valid Zoom meeting link">
+                                <small class="format-hint">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Paste your Zoom meeting link here (e.g., https://zoom.us/j/123456789)
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="meeting-name">Your Name</label>
+                                <input type="text" id="meeting-name" required 
+                                       placeholder="Enter your name for the meeting" 
+                                       value="Guest User">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="meeting-password">Meeting Password (if required)</label>
+                                <input type="password" id="meeting-password" 
+                                       placeholder="Enter meeting password if required">
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    <i class="fas fa-video"></i> Join Meeting
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-full" id="clear-meeting-form">
+                                    <i class="fas fa-eraser"></i> Clear Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="meeting-info-card">
+                        <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+                        <div class="info-content">
+                            <div class="info-item">
+                                <i class="fas fa-external-link-alt"></i>
+                                <div>
+                                    <strong>Copy Zoom Link</strong>
+                                    <p>Copy the meeting link from your Zoom invitation or email</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-paste"></i>
+                                <div>
+                                    <strong>Paste Link Here</strong>
+                                    <p>Paste the Zoom link in the form above</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <div>
+                                    <strong>Join on Our Platform</strong>
+                                    <p>Click "Join Meeting" to open the video conference in our integrated system</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meeting-features">
+                            <h4><i class="fas fa-star"></i> Features</h4>
+                            <ul>
+                                <li><i class="fas fa-check text-success"></i> Integrated video calling</li>
+                                <li><i class="fas fa-check text-success"></i> Screen sharing support</li>
+                                <li><i class="fas fa-check text-success"></i> Chat functionality</li>
+                                <li><i class="fas fa-check text-success"></i> No software installation required</li>
+                                <li><i class="fas fa-check text-success"></i> Mobile-friendly interface</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Meeting Room (Hidden by default) -->
+                <div class="meeting-room hidden" id="meeting-room">
+                    <div class="meeting-header">
+                        <h3><i class="fas fa-video"></i> Video Meeting Room</h3>
+                        <button class="btn btn-danger" id="leave-meeting">
+                            <i class="fas fa-phone-slash"></i> Leave Meeting
+                        </button>
+                    </div>
+                    
+                    <div class="meeting-content">
+                        <div class="video-container">
+                            <video id="local-video" autoplay muted playsinline></video>
+                            <video id="remote-video" autoplay playsinline></video>
+                        </div>
+                        
+                        <div class="meeting-controls">
+                            <button class="btn btn-primary" id="toggle-video">
+                                <i class="fas fa-video"></i> Toggle Video
+                            </button>
+                            <button class="btn btn-primary" id="toggle-audio">
+                                <i class="fas fa-microphone"></i> Toggle Audio
+                            </button>
+                            <button class="btn btn-secondary" id="share-screen">
+                                <i class="fas fa-desktop"></i> Share Screen
+                            </button>
+                            <button class="btn btn-info" id="meeting-chat">
+                                <i class="fas fa-comments"></i> Chat
+                            </button>
+                        </div>
+                        
+                        <div class="meeting-chat hidden" id="meeting-chat-panel">
+                            <div class="chat-header">
+                                <h4><i class="fas fa-comments"></i> Meeting Chat</h4>
+                                <button class="btn btn-secondary" id="close-chat">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="chat-messages" id="chat-messages">
+                                <!-- Chat messages will appear here -->
+                            </div>
+                            <div class="chat-input">
+                                <input type="text" id="chat-input" placeholder="Type a message...">
+                                <button class="btn btn-primary" id="send-chat">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
