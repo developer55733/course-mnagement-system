@@ -75,6 +75,7 @@
             <button class="tab-btn" data-tab="register">Register</button>
             <button class="tab-btn" data-tab="about">About</button>
             <button class="tab-btn" data-tab="contact">Contact</button>
+            <button class="tab-btn" data-tab="zoom-meeting" id="zoom-tab">Zoom Meeting</button>
             <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
             <button class="tab-btn hidden" data-tab="devadmin" id="devadmin-tab">Dev & Admin</button>
         </div>
@@ -238,6 +239,65 @@
                                 <p>Saturday - Sunday: Closed</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zoom Meeting Tab -->
+        <div class="tab-content" id="zoom-meeting">
+            <div class="form-container">
+                <h2 class="form-title"><i class="fas fa-video"></i> Join Zoom Meeting</h2>
+                <div class="message" id="zoom-message"></div>
+                
+                <form id="zoom-meeting-form">
+                    <div class="form-group">
+                        <label for="zoom-link"><i class="fas fa-link"></i> Zoom Meeting Link</label>
+                        <input type="url" id="zoom-link" required placeholder="Paste your Zoom meeting link here">
+                        <small class="form-help">Copy the meeting link from Zoom website and paste it here</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-name"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="meeting-name" required placeholder="Enter your name for the meeting">
+                        <small class="form-help">This name will be displayed in the meeting</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-password"><i class="fas fa-lock"></i> Meeting Password (if required)</label>
+                        <input type="password" id="meeting-password" placeholder="Enter meeting password if required">
+                        <small class="form-help">Leave blank if no password is required</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-video"></i> Join Meeting
+                        </button>
+                        <button type="button" class="btn btn-info" id="test-zoom-btn">
+                            <i class="fas fa-cog"></i> Test Connection
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="zoom-info">
+                    <h3><i class="fas fa-info-circle"></i> How to Join:</h3>
+                    <ol>
+                        <li>Get the meeting link from your Zoom invitation or email</li>
+                        <li>Copy the full meeting URL (e.g., https://zoom.us/j/123456789)</li>
+                        <li>Paste the link in the field above</li>
+                        <li>Enter your name as you want it to appear in the meeting</li>
+                        <li>Enter the meeting password if one is required</li>
+                        <li>Click "Join Meeting" to open the meeting in your browser</li>
+                    </ol>
+                    
+                    <div class="zoom-tips">
+                        <h4><i class="fas fa-lightbulb"></i> Tips:</h4>
+                        <ul>
+                            <li>Make sure you have a stable internet connection</li>
+                            <li>Test your microphone and camera before joining</li>
+                            <li>Join the meeting 5-10 minutes early if possible</li>
+                            <li>Use a quiet environment for better meeting experience</li>
+                        </ul>
                     </div>
                 </div>
             </div>

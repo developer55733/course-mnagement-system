@@ -2731,37 +2731,152 @@ function initialize() {
 
     }
 
+}
 
+// Zoom Meeting Functionality
 
-    // Check for existing session
+const zoomMeetingForm = document.getElementById('zoom-meeting-form');
 
-    const storedUser = sessionStorage.getItem('currentUser');
+const zoomLinkInput = document.getElementById('zoom-link');
 
-    if (storedUser) {
+const meetingNameInput = document.getElementById('meeting-name');
 
-        try {
+const meetingPasswordInput = document.getElementById('meeting-password');
 
-            currentUser = JSON.parse(storedUser);
+const zoomMessage = document.getElementById('zoom-message');
 
-            switchToTab('dashboard');
+const testZoomBtn = document.getElementById('test-zoom-btn');
 
-            updateDashboard();
+// Handle Zoom meeting form submission
 
-        } catch (error) {
+if (zoomMeetingForm) {
 
-            sessionStorage.removeItem('currentUser');
+    zoomMeetingForm.addEventListener('submit', async (e) => {
+
+        e.preventDefault();
+
+        const zoomLink = zoomLinkInput.value.trim();
+
+        const meetingName = meetingNameInput.value.trim();
+
+        const meetingPassword = meetingPasswordInput.value.trim();
+
+        // Validation
+
+        if (!zoomLink) {
+
+            showMessage('zoom-message', 'Please enter a Zoom meeting link', true);
+
+            return;
 
         }
 
-    }
+        if (!meetingName) {
 
-    
+            showMessage('zoom-message', 'Please enter your name', true);
 
-    console.log('Initialization complete');
+            return;
+
+        }
+
+        // Validate Zoom link format
+
+        if (!isValidZoomLink(zoomLink)) {
+
+            showMessage('zoom-message', 'Please enter a valid Zoom meeting link', true);
+
+            return;
+
+        }
+
+        try {
+
+            // Construct Zoom meeting URL with parameters
+
+            const meetingUrl = constructZoomUrl(zoomLink, meetingName, meetingPassword);
+
+            // Show loading message
+
+            showMessage('zoom-message', 'Connecting to Zoom meeting...', false);
+
+            // Open Zoom meeting in new tab
+
+            setTimeout(() => {
+
+                window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+
+                showMessage('zoom-message', 'Opening Zoom meeting...', false);
+
+            }, 1000);
+
+        } catch (error) {
+
+            console.error('Error joining Zoom meeting:', error);
+
+            showMessage('zoom-message', 'Error joining meeting. Please check the link and try again.', true);
+
+        }
+
+    });
 
 }
 
+// Test Zoom connection button
+if (testZoomBtn) {
+    testZoomBtn.addEventListener('click', () => {
+        const zoomLink = zoomLinkInput.value.trim();
+        
+        if (!zoomLink) {
+            showMessage('zoom-message', 'Please enter a Zoom meeting link first', true);
+            return;
+        }
+        
+        if (isValidZoomLink(zoomLink)) {
+            showMessage('zoom-message', 'Zoom link format is valid!', false);
+        } else {
+            showMessage('zoom-message', 'Invalid Zoom link format. Please check the link.', true);
+        }
+    });
+}
 
+// Validate Zoom link format
+function isValidZoomLink(link) {
+    const zoomPatterns = [
+        /^https:\/\/zoom\.us\/j\//,
+        /^https:\/\/.*\.zoom\.us\/j\//,
+        /^https:\/\/zoom\.us\/my\//,
+        /^https:\/\/.*\.zoom\.us\//
+    ];
+    
+    return zoomPatterns.some(pattern => pattern.test(link));
+}
+
+// Construct Zoom URL with parameters
+function constructZoomUrl(baseUrl, name, password) {
+    try {
+        const url = new URL(baseUrl);
+        
+        // Add name parameter
+        if (name) {
+            url.searchParams.set('uname', encodeURIComponent(name));
+        }
+        
+        // Add password parameter if provided
+        if (password) {
+            url.searchParams.set('pwd', encodeURIComponent(password));
+        }
+        
+        return url.toString();
+    } catch (error) {
+        console.error('Error constructing Zoom URL:', error);
+        return baseUrl;
+    }
+}
+
+// Auto-fill user name if logged in
+if (meetingNameInput && currentUser && currentUser.name) {
+    meetingNameInput.value = currentUser.name;
+}
 
 // Start when DOM is ready
 
