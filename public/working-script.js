@@ -2729,21 +2729,6 @@ function initialize() {
 
         });
 
-    }
-
-
-
-    // Check for existing session
-
-    const storedUser = sessionStorage.getItem('currentUser');
-
-    if (storedUser) {
-
-        try {
-
-            currentUser = JSON.parse(storedUser);
-
-            switchToTab('dashboard');
 }
 
 // Add keyboard shortcut for logout (Ctrl+L or Cmd+L)
@@ -2772,98 +2757,27 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
         switchToTab(tabId);
 
-    });
-
-});
-
 // Form submissions
-
 const loginForm = document.getElementById('login-form');
-
 const registerForm = document.getElementById('register-form');
 
 console.log('Login form found:', !!loginForm);
-
 console.log('Register form found:', !!registerForm);
 
 if (loginForm) {
-
     loginForm.addEventListener('submit', handleLogin);
-
     console.log('Login listener attached');
-
 }
 
 if (registerForm) {
-
     registerForm.addEventListener('submit', handleRegister);
-
     console.log('Register listener attached');
-
-}
-
-// Navigation links
-
-const goToRegister = document.getElementById('go-to-register');
-
-const goToLogin = document.getElementById('go-to-login');
-
-if (goToRegister) {
-
-    goToRegister.addEventListener('click', (e) => {
-
-        e.preventDefault();
-
-        switchToTab('register');
-
-    });
-
-}
-
-if (goToLogin) {
-
-    goToLogin.addEventListener('click', (e) => {
-
-        e.preventDefault();
-
-        switchToTab('login');
-
-    });
-
-}
-
-// Check for existing session
-
-const storedUser = sessionStorage.getItem('currentUser');
-
-if (storedUser) {
-
-    try {
-
-        currentUser = JSON.parse(storedUser);
-
-        switchToTab('dashboard');
-
-        updateDashboard();
-
-    } catch (error) {
-
-        console.error('Error parsing stored user:', error);
-
-        sessionStorage.removeItem('currentUser');
-
-    }
-
-}
-
-// Meeting System Functions
-function initializeMeetingSystem() {
-    console.log(' Initializing meeting system...');
 
     // Meeting form elements
     const meetingForm = document.getElementById('meeting-form');
     const meetingLink = document.getElementById('meeting-link');
     const meetingName = document.getElementById('meeting-name');
+    // ... rest of the code remains the same ...
     const meetingPassword = document.getElementById('meeting-password');
     const meetingMessage = document.getElementById('meeting-message');
     const clearMeetingForm = document.getElementById('clear-meeting-form');
