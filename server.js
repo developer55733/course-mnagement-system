@@ -39,8 +39,6 @@ const settingsRoutes = require('./routes/settings');
 const timetableRoutes = require('./routes/timetable');
 const lecturerRoutes = require('./routes/lecturers');
 const notesRoutes = require('./routes/notes');
-const livestreamRoutes = require('./routes/livestream');
-const meetingRoutes = require('./routes/meeting');
 
 const app = express();
 
@@ -118,8 +116,6 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/notes', notesRoutes);
-app.use('/api/livestream', livestreamRoutes);
-app.use('/api/meeting', meetingRoutes);
 
 // 404 handler
 app.use((req, res) => {
