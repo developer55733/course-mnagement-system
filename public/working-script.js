@@ -2649,7 +2649,7 @@ function initialize() {
 
     // Tab switching
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.nav-tab').forEach(btn => {
 
         btn.addEventListener('click', () => {
 
@@ -2661,7 +2661,25 @@ function initialize() {
 
     });
 
+    // Create buttons
 
+    const createStreamBtn = document.getElementById('create-stream-btn');
+
+    const createMeetingBtn = document.getElementById('create-meeting-btn');
+
+    if (createStreamBtn) {
+
+        createStreamBtn.addEventListener('click', createStream);
+
+    }
+
+    if (createMeetingBtn) {
+
+        createMeetingBtn.addEventListener('click', createMeeting);
+
+    }
+
+    
 
     // Form submissions
 
@@ -2757,11 +2775,29 @@ function initialize() {
 
     
 
-    console.log('Initialization complete');
+            loadLecturers();
+
+            break;
+
+        case 'timetable':
+
+            loadTimetable();
+
+            break;
+
+        case 'admin':
+
+            if (isAdmin()) {
+
+                loadAdminData();
+
+            }
+
+            break;
+
+    }
 
 }
-
-
 
 // Start when DOM is ready
 
