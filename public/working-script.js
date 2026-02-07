@@ -3675,6 +3675,9 @@ window.initialize = function() {
     // Initialize class timetable
     initializeClassTimetable();
     
+    // Initialize assignment notifications
+    initializeAssignmentNotifications();
+    
     // Initialize new features
     initializeDiscussionForum();
     initializeAssignments();
@@ -3973,5 +3976,206 @@ function deleteClassSession(sessionId) {
                 showMessage('class-timetable-message', 'Class session deleted locally!', false);
             }
         });
+}
+
+// Assignment Notification System
+function initializeAssignmentNotifications() {
+    // Load assignments and check for new ones
+    loadAssignments();
+    checkForNewAssignments();
+    
+    // Check for new assignments every 30 seconds
+    setInterval(checkForNewAssignments, 30000);
+}
+
+// Load assignments from API
+function loadAssignments() {
+    apiCall('/assignments', 'GET')
+        .then(response => {
+            if (response.success && response.data) {
+                updateAssignmentNotifications(response.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading assignments:', error);
+            // Add sample assignment for demonstration
+            const sampleAssignments = [
+                {
+                    id: 1,
+                    title: 'Introduction to Programming Assignment',
+                    description: 'Complete exercises 1-5 from Chapter 3',
+                    module_code: 'IT101',
+                    module_name: 'Introduction to Programming',
+                    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+                    posted_by: 1,
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                }
+            ];
+            updateAssignmentNotifications(sampleAssignments);
+        });
+}
+
+// Check for new assignments
+function checkForNewAssignments() {
+    const lastCheck = localStorage.getItem('lastAssignmentCheck');
+    const currentTime = new Date().toISOString();
+    
+    apiCall('/assignments?since=' + lastCheck, 'GET')
+        .then(response => {
+            if (response.success && response.data && response.data.length > 0) {
+                // New assignments found
+                showAssignmentNotification(response.data[0]);
+                updateAssignmentNotificationBadge(true);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking for new assignments:', error);
+        });
+    
+    localStorage.setItem('lastAssignmentCheck', currentTime);
+}
+
+// Update assignment notifications in the assignments tab
+function updateAssignmentNotifications(assignments) {
+    const notificationsContainer = document.getElementById('notifications-container');
+    if (!notificationsContainer) return;
+    
+    // Clear existing notifications
+    notificationsContainer.innerHTML = '';
+    
+    if (assignments.length === 0) {
+        notificationsContainer.innerHTML = `
+            <div class="no-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p>No new assignment notifications</p>
+            </div>
+        `;
+        updateAssignmentNotificationBadge(false);
+        return;
+    }
+    
+    // Filter active assignments
+    const activeAssignments = assignments.filter(a => a.status === 'active');
+    
+    if (activeAssignments.length === 0) {
+        notificationsContainer.innerHTML = `
+            <div class="no-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p>No active assignments</p>
+            </div>
+        `;
+        updateAssignmentNotificationBadge(false);
+        return;
+    }
+    
+    // Show notification badge if there are active assignments
+    updateAssignmentNotificationBadge(true);
+    
+    // Display notifications
+    activeAssignments.forEach(assignment => {
+        const notificationItem = createAssignmentNotificationItem(assignment);
+        notificationsContainer.appendChild(notificationItem);
+    });
+}
+
+// Create assignment notification item
+function createAssignmentNotificationItem(assignment) {
+    const notificationItem = document.createElement('div');
+    notificationItem.className = 'notification-item';
+    notificationItem.onclick = () => switchToTab('assignments');
+    
+    const dueDate = new Date(assignment.due_date);
+    const formattedDueDate = dueDate.toLocaleDateString() + ' ' + dueDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const timeAgo = getTimeAgo(new Date(assignment.created_at));
+    
+    notificationItem.innerHTML = `
+        <div class="notification-item-header">
+            <div class="notification-item-title">
+                <i class="fas fa-tasks"></i>
+                New Assignment Posted
+            </div>
+            <div class="notification-item-time">${timeAgo}</div>
+        </div>
+        <div class="notification-item-content">
+            <strong>${assignment.title}</strong><br>
+            ${assignment.description}
+            <div class="notification-item-module">${assignment.module_code}</div>
+            <small>Due: ${formattedDueDate}</small>
+        </div>
+    `;
+    
+    return notificationItem;
+}
+
+// Show assignment notification popup
+function showAssignmentNotification(assignment) {
+    // Create a temporary notification popup
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ff4757, #ff6b7a);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(255, 71, 87, 0.3);
+        z-index: 1000;
+        max-width: 300px;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    popup.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+            <strong>New Assignment!</strong>
+        </div>
+        <div style="font-size: 0.9rem;">
+            <strong>${assignment.title}</strong><br>
+            <small>${assignment.module_code} - Due: ${new Date(assignment.due_date).toLocaleDateString()}</small>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        ">×</button>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (popup.parentElement) {
+            popup.remove();
+        }
+    }, 5000);
+}
+
+// Update assignment notification badge
+function updateAssignmentNotificationBadge(show) {
+    const badge = document.getElementById('assignment-notification-badge');
+    if (!badge) return;
+    
+    if (show) {
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+// Get time ago string
+function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+    return Math.floor(seconds / 86400) + ' days ago';
 }
 

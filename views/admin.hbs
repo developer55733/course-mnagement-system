@@ -151,6 +151,97 @@
           </div>
         </div>
 
+        <!-- Class Timetable Management Section -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-teal text-white">
+                <h5 class="mb-0">Add Class Timetable</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Module Code</label>
+                  <input id="classModuleCode" class="form-control" placeholder="e.g. IT101">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Module Name</label>
+                  <input id="classModuleName" class="form-control" placeholder="e.g. Introduction to Programming">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Lecturer Name</label>
+                  <input id="classLecturerName" class="form-control" placeholder="Enter lecturer's full name">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Venue</label>
+                  <input id="classVenue" class="form-control" placeholder="e.g. Room 101, Lab 3">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Day of Week</label>
+                  <select id="classDay" class="form-control">
+                    <option value="">Select Day</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Start Time</label>
+                      <input id="classStartTime" type="time" class="form-control">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">End Time</label>
+                      <input id="classEndTime" type="time" class="form-control">
+                    </div>
+                  </div>
+                </div>
+                <button id="btnAddClassTimetable" class="btn btn-teal w-100">Add Class Session</button>
+                <div id="classTimetableMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-teal text-white">
+                <h5 class="mb-0">Manage Class Timetables</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <div class="input-group">
+                    <input type="text" id="searchClassTimetables" class="form-control" placeholder="Search by module or lecturer...">
+                    <button class="btn btn-outline-secondary" type="button" id="btnSearchClassTimetables">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <select id="filterClassTimetables" class="form-control">
+                    <option value="">All Days</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+                <div id="classTimetableList" style="max-height: 400px; overflow-y: auto;">
+                  <p class="text-muted">No class timetables added yet. Add one using the form on the left.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Notes Management Section -->
         <div class="row">
           <div class="col-md-6">

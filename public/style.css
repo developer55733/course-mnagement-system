@@ -2859,3 +2859,97 @@
         gap: 10px;
     }
 }
+
+/* Assignment Notification Badge Styles */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #ff4757, #ff6b7a);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    animation: pulse 2s infinite;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    z-index: 10;
+}
+
+.notification-badge i {
+    font-size: 0.6rem;
+}
+
+.tab-btn {
+    position: relative;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 2px 12px rgba(255, 71, 87, 0.6);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    }
+}
+
+/* Assignment Notification Item Styles */
+.notification-item {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-left: 4px solid #ff4757;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    transform: translateX(5px);
+}
+
+.notification-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.notification-item-title {
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-item-time {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+.notification-item-content {
+    color: #34495e;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notification-item-module {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-top: 5px;
+}

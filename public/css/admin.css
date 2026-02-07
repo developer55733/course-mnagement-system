@@ -486,6 +486,23 @@ h1 {
   background-color: #fd7e14 !important;
 }
 
+/* Class Timetable Management Styles */
+.bg-teal {
+  background-color: #17a2b8 !important;
+}
+
+.btn-teal {
+  background-color: #17a2b8 !important;
+  border-color: #17a2b8 !important;
+  color: white !important;
+}
+
+.btn-teal:hover {
+  background-color: #138496 !important;
+  border-color: #138496 !important;
+  color: white !important;
+}
+
 .btn-orange {
   background-color: #fd7e14;
   border-color: #fd7e14;

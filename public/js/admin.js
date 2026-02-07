@@ -1418,4 +1418,138 @@ document.addEventListener('DOMContentLoaded', function() {
     observer.observe(panel, { attributes: true });
   }
 
+  // Class Timetable Management
+  const initClassTimetableManagement = () => {
+    const btnAddClassTimetable = document.getElementById('btnAddClassTimetable');
+    
+    if (btnAddClassTimetable) {
+      btnAddClassTimetable.addEventListener('click', async () => {
+        const moduleCode = document.getElementById('classModuleCode').value.trim();
+        const moduleName = document.getElementById('classModuleName').value.trim();
+        const lecturerName = document.getElementById('classLecturerName').value.trim();
+        const venue = document.getElementById('classVenue').value.trim();
+        const day = document.getElementById('classDay').value;
+        const startTime = document.getElementById('classStartTime').value;
+        const endTime = document.getElementById('classEndTime').value;
+        
+        if (!moduleCode || !moduleName || !lecturerName || !venue || !day || !startTime || !endTime) {
+          showMessage('classTimetableMsg', 'Please fill in all fields', true);
+          return;
+        }
+        
+        try {
+          const response = await axios.post('/api/class-timetable', {
+            module_code: moduleCode,
+            module_name: moduleName,
+            lecturer_name: lecturerName,
+            venue: venue,
+            day_of_week: day,
+            start_time: startTime,
+            end_time: endTime
+          });
+          
+          if (response.data.success) {
+            showMessage('classTimetableMsg', 'Class session added successfully!');
+            // Clear form
+            document.getElementById('classModuleCode').value = '';
+            document.getElementById('classModuleName').value = '';
+            document.getElementById('classLecturerName').value = '';
+            document.getElementById('classVenue').value = '';
+            document.getElementById('classDay').value = '';
+            document.getElementById('classStartTime').value = '';
+            document.getElementById('classEndTime').value = '';
+            loadClassTimetables();
+          } else {
+            showMessage('classTimetableMsg', response.data.message || 'Failed to add class session', true);
+          }
+        } catch (error) {
+          console.error('Error adding class timetable:', error);
+          showMessage('classTimetableMsg', 'Error adding class session', true);
+        }
+      });
+    }
+    
+    const loadClassTimetables = async () => {
+      try {
+        const response = await axios.get('/api/class-timetable');
+        const classTimetableList = document.getElementById('classTimetableList');
+        
+        if (response.data.success && response.data.data && response.data.data.length > 0) {
+          let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Module</th><th>Lecturer</th><th>Day</th><th>Time</th><th>Venue</th><th>Actions</th></tr></thead><tbody>';
+          
+          response.data.data.forEach(session => {
+            html += `
+              <tr>
+                <td><strong>${session.module_code}</strong><br><small>${session.module_name}</small></td>
+                <td>${session.lecturer_name}</td>
+                <td>${session.day_of_week}</td>
+                <td>${session.start_time} - ${session.end_time}</td>
+                <td>${session.venue}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" onclick="deleteClassTimetable(${session.id})">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+          
+          html += '</tbody></table></div>';
+          classTimetableList.innerHTML = html;
+        } else {
+          classTimetableList.innerHTML = '<p class="text-muted">No class timetables added yet.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading class timetables:', error);
+        document.getElementById('classTimetableList').innerHTML = '<p class="text-muted">Error loading class timetables.</p>';
+      }
+    };
+    
+    window.deleteClassTimetable = async (id) => {
+      if (!confirm('Are you sure you want to delete this class session?')) return;
+      
+      try {
+        const response = await axios.delete(`/api/class-timetable/${id}`);
+        if (response.data.success) {
+          loadClassTimetables();
+        }
+      } catch (error) {
+        console.error('Error deleting class timetable:', error);
+      }
+    };
+    
+    // Search and filter functionality
+    const searchClassTimetables = document.getElementById('searchClassTimetables');
+    const filterClassTimetables = document.getElementById('filterClassTimetables');
+    const btnSearchClassTimetables = document.getElementById('btnSearchClassTimetables');
+    
+    const performSearch = () => {
+      loadClassTimetables();
+    };
+    
+    if (btnSearchClassTimetables) btnSearchClassTimetables.addEventListener('click', performSearch);
+    if (searchClassTimetables) searchClassTimetables.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') performSearch();
+    });
+    if (filterClassTimetables) filterClassTimetables.addEventListener('change', performSearch);
+    
+    // Initial load
+    loadClassTimetables();
+  };
+
+  // Initialize class timetable management when panel is shown
+  if (panel) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          if (panel.style.display === 'block') {
+            initAssignmentManagement();
+            initClassTimetableManagement();
+          }
+        }
+      });
+    });
+    observer.observe(panel, { attributes: true });
+  }
+
 })();
