@@ -6,57 +6,6 @@
     <title>IT Course Management System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Mobile Detection and Redirect -->
-    <script>
-        // Check if device is mobile and redirect to mobile UI
-        function checkMobileDevice() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isSmallScreen = window.innerWidth <= 768;
-            
-            console.log('🔍 Device check:', {
-                isMobile,
-                isSmallScreen,
-                userAgent: navigator.userAgent,
-                pathname: window.location.pathname,
-                href: window.location.href
-            });
-            
-            // If mobile user accesses main interface on mobile device, redirect to mobile
-            if (isMobile && isSmallScreen && !window.location.pathname.includes('mobile.html')) {
-                console.log('📱 Mobile device detected, redirecting to mobile UI');
-                window.location.href = '/mobile.html';
-                return true;
-            }
-            
-            // If desktop user accesses mobile.html, redirect to main interface
-            if (!isMobile && window.location.pathname.includes('mobile.html')) {
-                console.log('🖥️ Desktop device detected, redirecting to main interface');
-                window.location.href = '/index.html';
-                return false;
-            }
-            
-            // If mobile user accesses mobile.html directly, stay there
-            if (isMobile && window.location.pathname.includes('mobile.html')) {
-                console.log('📱 Mobile user on mobile.html, staying on mobile UI');
-                return true;
-            }
-            
-            console.log('🖥️ Desktop device detected, staying on desktop UI');
-            return false;
-        }
-        
-        // Check immediately when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Page loaded, checking device...');
-            setTimeout(checkMobileDevice, 500); // Small delay to ensure page is ready
-        });
-        
-        // Also check on window resize
-        window.addEventListener('resize', function() {
-            setTimeout(checkMobileDevice, 100);
-        });
-    </script>
 </head>
 <body>
     <div class="container">
