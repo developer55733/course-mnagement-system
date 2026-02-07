@@ -433,34 +433,65 @@
         
         <!-- Register Tab -->
         <div class="tab-content" id="register">
-            <div class="form-container">
-                <h2 class="form-title">Student Registration</h2>
+            <div class="register-container">
+                <div class="register-header">
+                    <h2 class="register-title"><i class="fas fa-user-plus"></i> Student Registration</h2>
+                    <p class="register-subtitle">Create your account to access course materials</p>
+                </div>
                 <div class="message" id="register-message"></div>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="reg-name">Full Name</label>
-                        <input type="text" id="reg-name" required placeholder="Enter your full name">
+                <form id="register-form" class="register-form">
+                    <div class="register-grid">
+                        <!-- Left Column -->
+                        <div class="register-column">
+                            <div class="form-group">
+                                <label for="reg-name" class="form-label">
+                                    <i class="fas fa-user"></i> Full Name
+                                </label>
+                                <input type="text" id="reg-name" required placeholder="Enter your full name" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-email" class="form-label">
+                                    <i class="fas fa-envelope"></i> Email Address
+                                </label>
+                                <input type="email" id="reg-email" required placeholder="Enter your email" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-student-id" class="form-label">
+                                    <i class="fas fa-id-card"></i> Student ID
+                                </label>
+                                <input type="text" id="reg-student-id" required placeholder="NIT/CICT/2024/1434" 
+                                       pattern="[A-Z]+/[A-Z]+/[0-9]{4}/[0-9]{4}" class="form-input">
+                                <small class="format-hint">
+                                    <i class="fas fa-info-circle"></i> Format: NIT/CICT/YEAR/FOUR-DIGITS
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="register-column">
+                            <div class="form-group">
+                                <label for="reg-password" class="form-label">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                                <input type="password" id="reg-password" required placeholder="Create a password" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-confirm-password" class="form-label">
+                                    <i class="fas fa-lock"></i> Confirm Password
+                                </label>
+                                <input type="password" id="reg-confirm-password" required placeholder="Confirm your password" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-register">
+                                    <i class="fas fa-user-plus"></i> Create Account
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email Address</label>
-                        <input type="email" id="reg-email" required placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-student-id">Student ID</label>
-                        <input type="text" id="reg-student-id" required placeholder="e.g., NIT/CICT/2024/1434" pattern="[A-Z]+/[A-Z]+/[0-9]{4}/[0-9]{4}">
-                        <small class="format-hint"><i class="fas fa-info-circle"></i> Format: NIT/CICT/YEAR/FOUR-DIGITS (e.g., NIT/CICT/2024/1434)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Password</label>
-                        <input type="password" id="reg-password" required placeholder="Create a password">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-confirm-password">Confirm Password</label>
-                        <input type="password" id="reg-confirm-password" required placeholder="Confirm your password">
-                    </div>
-                    <button type="submit" class="btn">Register</button>
                 </form>
-                <p class="login-footer">Already have an account? <a href="#" id="go-to-login">Login here</a></p>
+                <div class="register-footer">
+                    <p>Already have an account? <a href="#" id="go-to-login" class="login-link">Login here</a></p>
+                </div>
             </div>
         </div>
         
