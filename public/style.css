@@ -1021,21 +1021,29 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            min-width: 400px;
+            min-width: 300px;
+            max-width: 100%;
+            font-size: 0.8rem;
+            line-height: 1.2;
         }
 
         .modules-table th {
             background-color: #3949ab;
             color: white;
-            padding: 15px;
+            padding: 8px 6px;
             text-align: left;
             font-weight: 700;
             white-space: nowrap;
+            font-size: 0.75rem;
+            height: 40px;
         }
 
         .modules-table td {
-            padding: 15px;
+            padding: 8px 6px;
             border-bottom: 1px solid #eee;
+            font-size: 0.75rem;
+            line-height: 1.1;
+            height: auto;
         }
 
         .modules-table tr:nth-child(even) {
@@ -1058,21 +1066,29 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            min-width: 500px;
+            min-width: 280px;
+            max-width: 100%;
+            font-size: 0.8rem;
+            line-height: 1.2;
         }
 
         .lecturers-table th {
             background-color: #3949ab;
             color: white;
-            padding: 15px;
+            padding: 8px 6px;
             text-align: left;
             font-weight: 700;
             white-space: nowrap;
+            font-size: 0.75rem;
+            height: 40px;
         }
 
         .lecturers-table td {
-            padding: 15px;
+            padding: 8px 6px;
             border-bottom: 1px solid #eee;
+            font-size: 0.75rem;
+            line-height: 1.1;
+            height: auto;
         }
 
         .lecturers-table tr:nth-child(even) {
@@ -1096,21 +1112,29 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            min-width: 600px;
+            min-width: 280px;
+            max-width: 100%;
+            font-size: 0.8rem;
+            line-height: 1.2;
         }
 
         .test-timetable th {
             background-color: #3949ab;
             color: white;
-            padding: 15px;
+            padding: 8px 6px;
             text-align: left;
             font-weight: 700;
             white-space: nowrap;
+            font-size: 0.75rem;
+            height: 40px;
         }
 
         .test-timetable td {
-            padding: 15px;
+            padding: 8px 6px;
             border-bottom: 1px solid #eee;
+            font-size: 0.75rem;
+            line-height: 1.1;
+            height: auto;
         }
 
         .test-timetable tr:nth-child(even) {
