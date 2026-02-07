@@ -194,6 +194,38 @@
                 </span>
             </button>
             <button class="tab-btn hidden" data-tab="devadmin" id="devadmin-tab">Dev & Admin</button>
+            <button class="tab-btn hidden" id="admin-panel-btn" onclick="requestAdminAccess()">
+                <i class="fas fa-shield-alt"></i> Admin Panel
+                <span class="admin-badge" id="admin-badge">SECURE</span>
+            </button>
+        </div>
+        
+        <!-- Admin Security Overlay -->
+        <div class="admin-security-overlay" id="admin-security-overlay">
+            <div class="admin-security-modal">
+                <h3><i class="fas fa-shield-alt"></i> Admin Access Required</h3>
+                <p>Please enter admin credentials to access the admin panel.</p>
+                <input type="password" class="admin-security-input" id="admin-security-input" placeholder="Enter admin password" maxlength="50">
+                <div class="admin-security-buttons">
+                    <button class="admin-security-btn admin-security-confirm" onclick="verifyAdminAccess()">
+                        <i class="fas fa-check"></i> Verify Access
+                    </button>
+                    <button class="admin-security-btn admin-security-cancel" onclick="cancelAdminAccess()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Smartphone Admin Access Message -->
+        <div class="admin-access-message" id="admin-access-message">
+            <i class="fas fa-mobile-alt"></i>
+            <h4>Admin Panel Access Restricted</h4>
+            <p>For security reasons, admin panel access is restricted on mobile devices.</p>
+            <p>Please use a desktop computer to access admin functions.</p>
+            <button class="btn btn-info" onclick="showAccessInfo()">
+                <i class="fas fa-info-circle"></i> Learn More
+            </button>
         </div>
         
         <!-- About Page -->
@@ -1359,6 +1391,7 @@
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     updateMobileNavTabs();
+                    checkAdminAccess();
                 }
             });
         });
@@ -1367,6 +1400,163 @@
         if (userProfileHeader) {
             observer.observe(userProfileHeader, { attributes: true });
         }
+        
+        // Admin Panel Security Functions
+        function requestAdminAccess() {
+            const isMobile = window.innerWidth <= 768;
+            const isAdmin = isAdmin();
+            
+            if (isMobile && !isAdmin) {
+                // Show restricted message on mobile
+                showAdminAccessMessage();
+                return;
+            }
+            
+            // Show security overlay for password verification
+            showAdminSecurityOverlay();
+        }
+        
+        function showAdminSecurityOverlay() {
+            const overlay = document.getElementById('admin-security-overlay');
+            const input = document.getElementById('admin-security-input');
+            
+            overlay.style.display = 'flex';
+            input.value = '';
+            input.focus();
+            
+            // Handle Enter key
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    verifyAdminAccess();
+                }
+            });
+            
+            // Handle Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    cancelAdminAccess();
+                }
+            });
+        }
+        
+        function verifyAdminAccess() {
+            const input = document.getElementById('admin-security-input');
+            const password = input.value.trim();
+            
+            // Simple admin password verification (you can change this)
+            const adminPasswords = ['admin123', 'Admin@2024', 'courseAdmin!'];
+            
+            if (adminPasswords.includes(password)) {
+                // Grant admin access
+                grantAdminAccess();
+            } else {
+                // Show error
+                input.style.borderColor = '#dc3545';
+                input.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    input.style.borderColor = '#ddd';
+                    input.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        function grantAdminAccess() {
+            const overlay = document.getElementById('admin-security-overlay');
+            const devadminTab = document.getElementById('devadmin-tab');
+            const adminPanelBtn = document.getElementById('admin-panel-btn');
+            const adminBadge = document.getElementById('admin-badge');
+            
+            // Hide security overlay
+            overlay.style.display = 'none';
+            
+            // Show admin tab
+            devadminTab.classList.remove('hidden');
+            adminPanelBtn.classList.add('hidden');
+            adminBadge.textContent = 'ACCESS';
+            adminBadge.style.backgroundColor = '#28a745';
+            
+            // Switch to admin tab
+            switchToTab('devadmin');
+            
+            // Show success message
+            showMessage('Admin access granted successfully!', 'success');
+        }
+        
+        function cancelAdminAccess() {
+            const overlay = document.getElementById('admin-security-overlay');
+            overlay.style.display = 'none';
+        }
+        
+        function showAdminAccessMessage() {
+            const message = document.getElementById('admin-access-message');
+            const devadminTab = document.getElementById('devadmin-tab');
+            const adminPanelBtn = document.getElementById('admin-panel-btn');
+            
+            // Hide admin tab and button
+            devadminTab.classList.add('hidden');
+            adminPanelBtn.classList.add('hidden');
+            
+            // Show restricted message
+            message.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000);
+        }
+        
+        function checkAdminAccess() {
+            const isMobile = window.innerWidth <= 768;
+            const isAdminUser = isAdmin();
+            const devadminTab = document.getElementById('devadmin-tab');
+            const adminPanelBtn = document.getElementById('admin-panel-btn');
+            
+            if (isMobile && !isAdminUser) {
+                // Hide admin panel on mobile for non-admin users
+                devadminTab.classList.add('hidden');
+                adminPanelBtn.classList.add('hidden');
+            } else if (!isMobile && isAdminUser) {
+                // Show admin panel on desktop for admin users
+                devadminTab.classList.remove('hidden');
+                adminPanelBtn.classList.remove('hidden');
+            } else if (!isMobile) {
+                // Show admin panel button on desktop for all users
+                adminPanelBtn.classList.remove('hidden');
+            }
+        }
+        
+        // Check device type on load and resize
+        function checkDeviceType() {
+            checkAdminAccess();
+        }
+        
+        // Add resize listener
+        window.addEventListener('resize', checkDeviceType);
+        
+        // Initial check
+        checkDeviceType();
+        
+        // Add admin panel button click handler
+        const adminPanelBtn = document.getElementById('admin-panel-btn');
+        if (adminPanelBtn) {
+            adminPanelBtn.addEventListener('click', requestAdminAccess);
+        }
+        
+        // Show access info function
+        function showAccessInfo() {
+            showMessage('Admin panel access is restricted on mobile devices for security reasons. Please use a desktop computer with admin privileges to access admin functions.', 'info');
+        }
+        
+        // Add shake animation for wrong password
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
    </script>
 </body>
 </html>

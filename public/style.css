@@ -1122,43 +1122,116 @@
             transition: background-color 0.2s ease;
         }
 
-        /* Responsive Table Styles */
+        /* Enhanced Responsive Table Styles */
         /* Tablets and below: 768px and smaller */
         @media (max-width: 768px) {
             .modules-table th,
             .modules-table td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
+                padding: 8px 6px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
             }
 
             .modules-table {
-                min-width: 350px;
+                min-width: 320px;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
             }
 
             .lecturers-table th,
             .lecturers-table td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
+                padding: 8px 6px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 140px;
             }
 
             .lecturers-table {
-                min-width: 400px;
+                min-width: 350px;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
             }
 
             .test-timetable th,
             .test-timetable td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
+                padding: 8px 4px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100px;
             }
 
             .test-timetable {
-                min-width: 550px;
+                min-width: 300px;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
             }
 
-            .modules-wrapper,
-            .lecturers-wrapper,
-            .timetable-wrapper {
-                border-radius: 5px;
+            /* Table headers stacking on mobile */
+            .modules-table th,
+            .lecturers-table th,
+            .test-timetable th {
+                position: relative;
+                padding-right: 20px;
+            }
+
+            .modules-table th::after,
+            .lecturers-table th::after,
+            .test-timetable th::after {
+                content: '\25BC';
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 0.7rem;
+                opacity: 0.7;
+            }
+
+            /* Action buttons for mobile */
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 4px;
+            }
+
+            .action-buttons button {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+                min-width: 80px;
+                border-radius: 4px;
+            }
+
+            /* Card responsiveness */
+            .card {
+                margin-bottom: 15px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .card-header {
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+
+            .card-body {
+                padding: 15px;
+                font-size: 0.85rem;
             }
         }
 
@@ -1166,23 +1239,19 @@
         @media (max-width: 575px) {
             .modules-table th,
             .modules-table td {
-                padding: 8px 6px;
+                padding: 6px 4px;
                 font-size: 0.75rem;
+                max-width: 80px;
             }
 
             .modules-table {
-                min-width: 300px;
-                font-size: 0.8rem;
+                min-width: 280px;
+                font-size: 0.75rem;
             }
 
             .lecturers-table th,
             .lecturers-table td {
-                padding: 8px 6px;
-                font-size: 0.75rem;
-            }
-
-            .lecturers-table {
-                min-width: 320px;
+                padding: 6px 4px;
                 font-size: 0.8rem;
             }
 
