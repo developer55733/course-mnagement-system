@@ -669,6 +669,28 @@ function updateDashboard() {
 
     }
 
+    // Show/hide admin panel button based on user role
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const adminBadge = document.getElementById('admin-badge');
+    
+    if (isAdmin()) {
+        // Show admin panel button and badge
+        if (adminPanelBtn) {
+            adminPanelBtn.classList.remove('hidden');
+        }
+        if (adminBadge) {
+            adminBadge.classList.remove('hidden');
+        }
+    } else {
+        // Hide admin panel button and badge
+        if (adminPanelBtn) {
+            adminPanelBtn.classList.add('hidden');
+        }
+        if (adminBadge) {
+            adminBadge.classList.add('hidden');
+        }
+    }
+
 
 
     // Show dashboard elements

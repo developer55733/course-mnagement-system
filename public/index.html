@@ -312,58 +312,99 @@
         
         <!-- Zoom Meeting Tab -->
         <div class="tab-content" id="zoom-meeting">
-            <div class="form-container">
-                <h2 class="form-title"><i class="fas fa-video"></i> Join Zoom Meeting</h2>
-                <div class="message" id="zoom-message"></div>
+            <div class="zoom-container">
+                <div class="zoom-header">
+                    <h2 class="page-title"><i class="fas fa-video"></i> Zoom Meeting</h2>
+                    <p class="zoom-subtitle">Quick access to your virtual classes</p>
+                </div>
                 
-                <form id="zoom-meeting-form">
-                    <div class="form-group">
-                        <label for="zoom-link"><i class="fas fa-link"></i> Zoom Meeting Link</label>
-                        <input type="url" id="zoom-link" required placeholder="Paste your Zoom meeting link here">
-                        <small class="form-help">Copy the meeting link from Zoom website and paste it here</small>
+                <div class="zoom-grid">
+                    <!-- Join Meeting Card -->
+                    <div class="zoom-card">
+                        <div class="card-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Join Meeting</h3>
+                            <form id="zoom-meeting-form" class="zoom-form">
+                                <div class="form-group">
+                                    <input type="url" id="zoom-link" required placeholder="Meeting link (https://zoom.us/j/...)" class="form-input">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" id="meeting-name" required placeholder="Your name" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" id="meeting-password" placeholder="Password (optional)" class="form-input">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-small">
+                                    <i class="fas fa-sign-in-alt"></i> Join Now
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="meeting-name"><i class="fas fa-user"></i> Your Name</label>
-                        <input type="text" id="meeting-name" required placeholder="Enter your name for the meeting">
-                        <small class="form-help">This name will be displayed in the meeting</small>
+
+                    <!-- Quick Tips Card -->
+                    <div class="zoom-card">
+                        <div class="card-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Quick Tips</h3>
+                            <ul class="tips-list">
+                                <li><i class="fas fa-wifi"></i> Stable internet</li>
+                                <li><i class="fas fa-microphone"></i> Test audio</li>
+                                <li><i class="fas fa-camera"></i> Check camera</li>
+                                <li><i class="fas fa-clock"></i> Join early</li>
+                            </ul>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="meeting-password"><i class="fas fa-lock"></i> Meeting Password (if required)</label>
-                        <input type="password" id="meeting-password" placeholder="Enter meeting password if required">
-                        <small class="form-help">Leave blank if no password is required</small>
+
+                    <!-- Meeting Info Card -->
+                    <div class="zoom-card">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>How to Join</h3>
+                            <ol class="steps-list">
+                                <li>Copy meeting link</li>
+                                <li>Paste in field above</li>
+                                <li>Enter your name</li>
+                                <li>Click "Join Now"</li>
+                            </ol>
+                        </div>
                     </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-video"></i> Join Meeting
-                        </button>
-                        <button type="button" class="btn btn-info" id="test-zoom-btn">
-                            <i class="fas fa-cog"></i> Test Connection
-                        </button>
+
+                    <!-- Support Card -->
+                    <div class="zoom-card">
+                        <div class="card-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Need Help?</h3>
+                            <p>Having trouble joining?</p>
+                            <button class="btn btn-outline-primary btn-small">
+                                <i class="fas fa-question-circle"></i> Get Support
+                            </button>
+                        </div>
                     </div>
-                </form>
-                
-                <div class="zoom-info">
-                    <h3><i class="fas fa-info-circle"></i> How to Join:</h3>
-                    <ol>
-                        <li>Get the meeting link from your Zoom invitation or email</li>
-                        <li>Copy the full meeting URL (e.g., https://zoom.us/j/123456789)</li>
-                        <li>Paste the link in the field above</li>
-                        <li>Enter your name as you want it to appear in the meeting</li>
-                        <li>Enter the meeting password if one is required</li>
-                        <li>Click "Join Meeting" to open the meeting in your browser</li>
-                    </ol>
-                    
-                    <div class="zoom-tips">
-                        <h4><i class="fas fa-lightbulb"></i> Tips:</h4>
-                        <ul>
-                            <li>Make sure you have a stable internet connection</li>
-                            <li>Test your microphone and camera before joining</li>
-                            <li>Join the meeting 5-10 minutes early if possible</li>
-                            <li>Use a quiet environment for better meeting experience</li>
-                        </ul>
+                </div>
+
+                <!-- Footer Info -->
+                <div class="zoom-footer">
+                    <div class="footer-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure connection</span>
+                    </div>
+                    <div class="footer-item">
+                        <i class="fas fa-users"></i>
+                        <span>Multiple participants</span>
+                    </div>
+                    <div class="footer-item">
+                        <i class="fas fa-desktop"></i>
+                        <span>Screen sharing available</span>
                     </div>
                 </div>
             </div>
@@ -385,12 +426,6 @@
                     </div>
                     <button type="submit" class="btn">Login</button>
                 </form>
-                
-                <div class="admin-access-box">
-                    <p class="admin-access-title"><strong>Administrator?</strong></p>
-                    <a href="/admin" class="btn btn-admin-access" rel="noopener">Access Admin Panel</a>
-                    <p class="admin-access-note"><i class="fas fa-lock"></i> Admin authentication required</p>
-                </div>
                 
                 <p class="login-footer">Don't have an account? <a href="#" id="go-to-register">Register here</a></p>
             </div>
@@ -436,7 +471,12 @@
                     Welcome, <span class="user-name" id="dashboard-username">Student Name</span>
                     <span id="admin-badge" class="admin-badge hidden">Admin</span>
                 </div>
-                <button class="logout-btn" id="logout-btn" onclick="testLogout()" title="Logout (Ctrl+L)" aria-label="Logout from system">Logout <i class="fas fa-sign-out-alt"></i></button>
+                <div class="header-actions">
+                    <button id="admin-panel-btn" class="btn btn-admin-panel hidden" onclick="window.open('/admin', '_blank')">
+                        <i class="fas fa-cog"></i> Admin Panel
+                    </button>
+                    <button class="logout-btn" id="logout-btn" onclick="testLogout()" title="Logout (Ctrl+L)" aria-label="Logout from system">Logout <i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </div>
             
             <div class="dashboard-grid">
