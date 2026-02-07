@@ -648,18 +648,47 @@
                 <!-- Modules Card -->
                 <div class="card card-modules">
                     <h3><i class="fas fa-book"></i> Course Modules</h3>
-                    <div class="modules-wrapper">
+                    <div class="table-container modules-wrapper">
                         <table class="modules-table">
                             <thead>
                                 <tr>
-                                    <th>Code</th>
-                                    <th>Module Name</th>
-                                    <th>Credits</th>
-                                    <th class="admin-only" id="module-action-header" style="display: none;">Actions</th>
+                                    <th data-priority="1">Code</th>
+                                    <th data-priority="2">Module Name</th>
+                                    <th data-priority="3">Credits</th>
+                                    <th data-priority="4">Lecturer</th>
                                 </tr>
                             </thead>
-                            <tbody id="modules-list">
-                                <!-- Modules will be loaded here -->
+                            <tbody id="modules-tbody">
+                                <tr>
+                                    <td data-label="Code:">IT101</td>
+                                    <td data-label="Module:">Introduction to Programming</td>
+                                    <td data-label="Credits:">3</td>
+                                    <td data-label="Lecturer:">Dr. Smith</td>
+                                </tr>
+                                <tr>
+                                    <td data-label="Code:">IT102</td>
+                                    <td data-label="Module:">Web Development Fundamentals</td>
+                                    <td data-label="Credits:">3</td>
+                                    <td data-label="Lecturer:">Dr. Johnson</td>
+                                </tr>
+                                <tr>
+                                    <td data-label="Code:">IT103</td>
+                                    <td data-label="Module:">Database Management Systems</td>
+                                    <td data-label="Credits:">3</td>
+                                    <td data-label="Lecturer:">Dr. Williams</td>
+                                </tr>
+                                <tr>
+                                    <td data-label="Code:">IT104</td>
+                                    <td data-label="Module:">Data Structures & Algorithms</td>
+                                    <td data-label="Credits:">3</td>
+                                    <td data-label="Lecturer:">Dr. Brown</td>
+                                </tr>
+                                <tr>
+                                    <td data-label="Code:">IT105</td>
+                                    <td data-label="Module:">Computer Networks</td>
+                                    <td data-label="Credits:">3</td>
+                                    <td data-label="Lecturer:">Dr. Davis</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -668,13 +697,13 @@
                 <!-- Lecturers Card -->
                 <div class="card card-lecturers">
                     <h3><i class="fas fa-chalkboard-teacher"></i> Course Lecturers</h3>
-                    <div class="lecturers-wrapper">
+                    <div class="table-container lecturers-wrapper">
                         <table class="lecturers-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Module</th>
-                                    <th>Phone</th>
+                                    <th data-priority="1">Name</th>
+                                    <th data-priority="2">Module</th>
+                                    <th data-priority="3">Phone</th>
                                     <th id="admin-lecturer-action-header" class="hidden">Action</th>
                                 </tr>
                             </thead>
