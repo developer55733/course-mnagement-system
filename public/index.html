@@ -1228,21 +1228,15 @@
                     mobileNav.style.display = 'none';
                     document.body.style.overflow = 'auto';
                     
-                    // Switch to the selected tab with error handling
-                    try {
-                        if (typeof switchToTab === 'function') {
-                            switchToTab(tabName);
-                        } else {
-                            // Fallback: trigger click on desktop tab
-                            const desktopTab = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
-                            if (desktopTab) {
-                                desktopTab.click();
-                            }
+                    // Switch to the selected tab using existing function
+                    if (typeof switchToTab === 'function') {
+                        switchToTab(tabName);
+                    } else {
+                        // Fallback: trigger click on desktop tab
+                        const desktopTab = document.querySelector(`[data-tab="${tabName}"]`);
+                        if (desktopTab) {
+                            desktopTab.click();
                         }
-                    } catch (error) {
-                        console.error('🚨 Mobile tab switching error:', error);
-                        // Show error message for mobile users
-                        showMobileError('Unable to switch tabs. Please refresh the page.');
                     }
                 });
             });
@@ -1265,9 +1259,6 @@
             
             // Update mobile nav tabs when user logs in/out
             updateMobileNavTabs();
-            
-            // Add mobile error handling
-            setupMobileErrorHandling();
         });
         
         // Update mobile navigation tabs based on login status
@@ -1296,104 +1287,6 @@
                     }
                 }
             });
-        }
-        
-        // Mobile error handling
-        function setupMobileErrorHandling() {
-            // Override console.error to show mobile-friendly errors
-            const originalError = console.error;
-            console.error = function(...args) {
-                originalError.apply(console, args);
-                
-                // Show mobile-friendly error message
-                const errorMessage = args.join(' ');
-                if (errorMessage.includes('route not found') || errorMessage.includes('404')) {
-                    showMobileError('Service temporarily unavailable. Please try again later.');
-                } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-                    showMobileError('Connection issue. Please check your internet connection.');
-                }
-            };
-            
-            // Override fetch to handle mobile API errors
-            const originalFetch = window.fetch;
-            window.fetch = async function(...args) {
-                try {
-                    const response = await originalFetch.apply(this, args);
-                    
-                    // Check for API errors
-                    if (args[0] && args[0].includes('/api/')) {
-                        response.then(async (res) => {
-                            if (!res.ok) {
-                                console.error(`🚨 API Error: ${res.status} ${res.statusText}`);
-                                if (res.status === 404) {
-                                    showMobileError('Service not found. Please try again later.');
-                                } else if (res.status >= 500) {
-                                    showMobileError('Server error. Please try again later.');
-                                }
-                            }
-                        }).catch(err => {
-                            console.error('🚨 Network Error:', err);
-                            showMobileError('Connection error. Please check your internet.');
-                        });
-                    }
-                    
-                    return response;
-                } catch (error) {
-                    console.error('🚨 Fetch Error:', error);
-                    showMobileError('Connection error. Please try again.');
-                    throw error;
-                }
-            };
-        }
-        
-        // Show mobile-friendly error message
-        function showMobileError(message) {
-            // Remove existing error messages
-            const existingErrors = document.querySelectorAll('.mobile-error-message');
-            existingErrors.forEach(err => err.remove());
-            
-            // Create new error message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'mobile-error-message';
-            errorDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #f44336;
-                color: white;
-                padding: 15px 20px;
-                border-radius: 8px;
-                z-index: 10000;
-                font-size: 14px;
-                max-width: 90%;
-                text-align: center;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                animation: slideDown 0.3s ease;
-            `;
-            errorDiv.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>${message}</span>
-                </div>
-                <button onclick="this.parentElement.remove()" style="
-                    background: none;
-                    border: none;
-                    color: white;
-                    font-size: 18px;
-                    margin-left: 15px;
-                    cursor: pointer;
-                ">×</button>
-            `;
-            
-            document.body.appendChild(errorDiv);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (errorDiv.parentElement) {
-                    errorDiv.remove();
-                }
-            }, 5000);
         }
         
         // Add touch gestures for mobile
@@ -1474,22 +1367,6 @@
         if (userProfileHeader) {
             observer.observe(userProfileHeader, { attributes: true });
         }
-        
-        // Add CSS animation for error messages
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translate(-50%, -20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translate(-50%, 0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
    </script>
 </body>
 </html>
