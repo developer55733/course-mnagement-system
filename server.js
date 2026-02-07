@@ -6,6 +6,8 @@ const config = require('./config/config');
 const database = require('./config/database'); // Use MySQL only
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/users');
+const IntegrationManager = require('./config/integrations');
+const { router: integrationRoutes, initIntegrationManager } = require('./routes/integrations');
 
 // Enhanced CORS middleware for Railway
 const cors = (req, res, next) => {
@@ -39,8 +41,15 @@ const settingsRoutes = require('./routes/settings');
 const timetableRoutes = require('./routes/timetable');
 const lecturerRoutes = require('./routes/lecturers');
 const notesRoutes = require('./routes/notes');
+const forumRoutes = require('./routes/forum');
+const assignmentRoutes = require('./routes/assignments');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
+
+// Initialize Integration Manager
+const integrationManager = new IntegrationManager(database);
+initIntegrationManager(integrationManager);
 
 // Middleware
 app.use(cors);
@@ -116,6 +125,10 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/integrations', integrationRoutes);
+app.use('/api/forum', forumRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -129,21 +142,30 @@ app.use(errorHandler);
 const PORT = process.env.PORT || config.port || 8080;
 
 // Graceful shutdown handling
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down gracefully');
+  if (integrationManager) {
+    await integrationManager.shutdown();
+  }
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('SIGINT received, shutting down gracefully');
+  if (integrationManager) {
+    await integrationManager.shutdown();
+  }
   process.exit(0);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction 
     ? `https://course-management-system.up.railway.app`
     : `http://localhost:${PORT}`;
+  
+  // Initialize Integration Manager
+  await integrationManager.initialize();
   
   // Enhanced database info for Railway
   const dbHost = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
@@ -155,15 +177,17 @@ app.listen(PORT, () => {
 ╔══════════════════════════════════════╗
 ║  Backend Server Started Successfully   ║
 ╠════════════════════════════════════════╣
-║ Port: ${PORT}                              
+║ Port: ${PORT}                               
 ║ Environment: ${process.env.NODE_ENV || 'development'}
 ║ Database: ${dbInfo}
 ║ API: ${apiUrl}
 ║ Health: ${apiUrl}/health
+║ Integrations: 🔗 Ready
 ╚════════════════════════════════════════╝
   `);
   
   console.log(`🚀 Server ready for Railway deployment`);
   console.log(`📊 Health check available at: ${apiUrl}/health`);
   console.log(`🔗 API documentation at: ${apiUrl}/api`);
+  console.log(`🔌 Integration system initialized`);
 });
