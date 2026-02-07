@@ -14,11 +14,26 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isSmallScreen = window.innerWidth <= 768;
             
-            // Only redirect to mobile if on mobile device AND small screen
-            if (isMobile && isSmallScreen) {
+            console.log('🔍 Device check:', {
+                isMobile,
+                isSmallScreen,
+                userAgent: navigator.userAgent,
+                pathname: window.location.pathname,
+                href: window.location.href
+            });
+            
+            // If mobile user accesses main interface on mobile device, redirect to mobile
+            if (isMobile && isSmallScreen && !window.location.pathname.includes('mobile.html')) {
                 console.log('📱 Mobile device detected, redirecting to mobile UI');
                 window.location.href = '/mobile.html';
                 return true;
+            }
+            
+            // If desktop user accesses mobile.html, redirect to main interface
+            if (!isMobile && window.location.pathname.includes('mobile.html')) {
+                console.log('🖥️ Desktop device detected, redirecting to main interface');
+                window.location.href = '/index.html';
+                return false;
             }
             
             // If mobile user accesses mobile.html directly, stay there
@@ -33,7 +48,8 @@
         
         // Check immediately when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            checkMobileDevice();
+            console.log('🚀 Page loaded, checking device...');
+            setTimeout(checkMobileDevice, 500); // Small delay to ensure page is ready
         });
         
         // Also check on window resize
