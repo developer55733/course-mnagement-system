@@ -224,7 +224,7 @@ class NewsAdsManager {
             <div class="ad-item" data-ad-id="${ad.id}">
                 <div class="ad-video-container">
                     ${thumbnailHTML}
-                    <video class="ad-video" ${isMuted ? 'muted' : ''} loop data-min-duration="5" data-max-duration="30">
+                    <video class="ad-video" ${isMuted ? 'muted' : ''} loop autoplay>
                         <source src="${ad.video_url}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -277,82 +277,13 @@ class NewsAdsManager {
             });
         });
 
-        // Video event listeners for enhanced tracking
+        // Video view tracking
         document.querySelectorAll('.ad-video').forEach(video => {
-            let hasTrackedView = false;
-            let playStartTime = null;
-            
             video.addEventListener('play', (e) => {
                 const adItem = e.target.closest('.ad-item');
                 const adId = parseInt(adItem.dataset.adId);
-                
-                // Set duration limits (5-30 seconds)
-                const minDuration = parseInt(e.target.dataset.minDuration) || 5;
-                const maxDuration = parseInt(e.target.dataset.maxDuration) || 30;
-                
-                // Track view only once per play session
-                if (!hasTrackedView) {
-                    this.trackAdView(adId);
-                    hasTrackedView = true;
-                }
-                
-                playStartTime = Date.now();
-                
-                // Set video duration limits
-                e.target.addEventListener('loadedmetadata', () => {
-                    if (e.target.duration < minDuration) {
-                        e.target.duration = minDuration;
-                    } else if (e.target.duration > maxDuration) {
-                        e.target.duration = maxDuration;
-                    }
-                });
-                
-                // Auto-pause at max duration
-                setTimeout(() => {
-                    if (!e.target.paused) {
-                        e.target.pause();
-                    }
-                }, maxDuration * 1000);
+                this.trackAdView(adId);
             });
-            
-            video.addEventListener('pause', (e) => {
-                const adItem = e.target.closest('.ad-item');
-                const adId = parseInt(adItem.dataset.adId);
-                
-                // Calculate watch time
-                if (playStartTime) {
-                    const watchTime = (Date.now() - playStartTime) / 1000;
-                    this.updateWatchTime(adId, watchTime);
-                }
-            });
-            
-            video.addEventListener('ended', (e) => {
-                const adItem = e.target.closest('.ad-item');
-                const adId = parseInt(adItem.dataset.adId);
-                
-                // Calculate total watch time
-                if (playStartTime) {
-                    const watchTime = (Date.now() - playStartTime) / 1000;
-                    this.updateWatchTime(adId, watchTime);
-                }
-                
-                // Reset for next play
-                hasTrackedView = false;
-                playStartTime = null;
-            });
-            
-            // Track when video comes into viewport
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !hasTrackedView) {
-                        const adId = parseInt(entry.target.dataset.adId);
-                        this.trackAdView(adId);
-                        hasTrackedView = true;
-                    }
-                });
-            }, { threshold: 0.5 });
-            
-            observer.observe(video);
         });
     }
 
@@ -386,7 +317,7 @@ class NewsAdsManager {
     // Track ad click
     async trackAdClick(adId) {
         try {
-            const response = await fetch('/api/ads/click', {
+            await fetch('/api/ads/click', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -394,8 +325,7 @@ class NewsAdsManager {
                 body: JSON.stringify({
                     ad_id: adId,
                     user_agent: navigator.userAgent,
-                    ip_address: await this.getClientIP(),
-                    timestamp: new Date().toISOString()
+                    ip_address: await this.getClientIP()
                 })
             });
 
@@ -410,10 +340,10 @@ class NewsAdsManager {
         }
     }
 
-    // Track ad view with enhanced data
+    // Track ad view
     async trackAdView(adId) {
         try {
-            const response = await fetch('/api/ads/view', {
+            await fetch('/api/ads/view', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -421,9 +351,7 @@ class NewsAdsManager {
                 body: JSON.stringify({
                     ad_id: adId,
                     user_agent: navigator.userAgent,
-                    ip_address: await this.getClientIP(),
-                    timestamp: new Date().toISOString(),
-                    viewport: `${window.innerWidth}x${window.innerHeight}`
+                    ip_address: await this.getClientIP()
                 })
             });
 
@@ -431,37 +359,10 @@ class NewsAdsManager {
             const ad = this.adsData.find(a => a.id === adId);
             if (ad) {
                 ad.view_count = (ad.view_count || 0) + 1;
-                ad.total_watch_time = (ad.total_watch_time || 0) + 0; // Will be updated by watch time
                 this.renderAds();
             }
         } catch (error) {
             console.error('Error tracking ad view:', error);
-        }
-    }
-
-    // Update watch time for analytics
-    async updateWatchTime(adId, watchTime) {
-        try {
-            const response = await fetch('/api/ads/watch-time', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ad_id: adId,
-                    watch_time: Math.round(watchTime),
-                    timestamp: new Date().toISOString()
-                })
-            });
-
-            // Update local data
-            const ad = this.adsData.find(a => a.id === adId);
-            if (ad) {
-                ad.total_watch_time = (ad.total_watch_time || 0) + Math.round(watchTime);
-                this.renderAds();
-            }
-        } catch (error) {
-            console.error('Error updating watch time:', error);
         }
     }
 
