@@ -3339,11 +3339,90 @@ async function viewDiscussion(discussionId) {
     try {
         const result = await apiCall(`/discussions/${discussionId}`);
         if (result.success) {
-            // For now, just show an alert. In a full implementation, this would open a modal
-            alert(`Discussion: ${result.data.discussion.title}\n\n${result.data.discussion.content}\n\nReplies: ${result.data.replies.length}`);
+            showDiscussionModal(result.data);
         }
     } catch (error) {
         console.error('Error viewing discussion:', error);
+        showMessage('forum-message', 'Failed to load discussion', true);
+    }
+}
+
+function showDiscussionModal(data) {
+    const modal = document.getElementById('discussion-modal');
+    const detailContent = document.getElementById('discussion-detail-content');
+    const repliesContainer = document.getElementById('replies-container');
+    
+    // Display discussion details
+    detailContent.innerHTML = `
+        <div class="discussion-detail">
+            <h4>${data.discussion.title}</h4>
+            <div class="discussion-detail-meta">
+                <span class="discussion-author">by ${data.discussion.author_name}</span>
+                <span class="discussion-date">${formatDate(data.discussion.created_at)}</span>
+                ${data.discussion.module_code ? `<span class="discussion-module">${data.discussion.module_code}</span>` : ''}
+            </div>
+            <div class="discussion-detail-content">
+                <p>${data.discussion.content}</p>
+            </div>
+        </div>
+    `;
+    
+    // Display replies
+    if (data.replies.length === 0) {
+        repliesContainer.innerHTML = '<div class="no-replies">No replies yet. Be the first to reply!</div>';
+    } else {
+        repliesContainer.innerHTML = data.replies.map(reply => `
+            <div class="reply-item">
+                <div class="reply-author">${reply.author_name}</div>
+                <div class="reply-date">${formatDate(reply.created_at)}</div>
+                <div class="reply-content">${reply.content}</div>
+            </div>
+        `).join('');
+    }
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
+    // Store discussion ID for reply form
+    modal.setAttribute('data-discussion-id', data.discussion.id);
+}
+
+function closeDiscussionModal() {
+    const modal = document.getElementById('discussion-modal');
+    modal.style.display = 'none';
+}
+
+async function postReply(e) {
+    e.preventDefault();
+    
+    if (!currentUser) {
+        alert('Please login to reply to discussions');
+        return;
+    }
+    
+    const modal = document.getElementById('discussion-modal');
+    const discussionId = modal.getAttribute('data-discussion-id');
+    const replyContent = document.getElementById('reply-content').value;
+    
+    try {
+        const result = await apiCall(`/discussions/${discussionId}/replies`, 'POST', {
+            content: replyContent,
+            created_by: currentUser.id
+        });
+        
+        if (result.success) {
+            // Clear form
+            document.getElementById('reply-form').reset();
+            
+            // Reload discussion to show new reply
+            const discussionResult = await apiCall(`/discussions/${discussionId}`);
+            if (discussionResult.success) {
+                showDiscussionModal(discussionResult.data);
+            }
+        }
+    } catch (error) {
+        console.error('Error posting reply:', error);
+        alert('Failed to post reply');
     }
 }
 
@@ -3520,6 +3599,13 @@ function initializeDiscussionForum() {
     if (createDiscussionForm) {
         createDiscussionForm.addEventListener('submit', createDiscussion);
     }
+    
+    // Add reply form event listener
+    const replyForm = document.getElementById('reply-form');
+    if (replyForm) {
+        replyForm.addEventListener('submit', postReply);
+    }
+    
     loadDiscussions();
 }
 
