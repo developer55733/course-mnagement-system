@@ -293,6 +293,9 @@ CREATE TABLE IF NOT EXISTS `ads` (
   `is_muted` BOOLEAN DEFAULT FALSE,
   `click_count` INT DEFAULT 0,
   `view_count` INT DEFAULT 0,
+  `total_watch_time` INT DEFAULT 0,
+  `min_duration` INT DEFAULT 5,
+  `max_duration` INT DEFAULT 30,
   `start_date` DATE,
   `end_date` DATE,
   `created_by` INT NOT NULL,
@@ -314,10 +317,28 @@ CREATE TABLE IF NOT EXISTS `ad_clicks` (
   `user_id` INT,
   `ip_address` VARCHAR(45),
   `user_agent` TEXT,
-  `clicked_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `viewport` VARCHAR(20),
+  `click_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_ad (ad_id),
   INDEX idx_user (user_id),
-  INDEX idx_clicked_at (clicked_at),
+  INDEX idx_click_timestamp (click_timestamp),
+  FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Create ad_views table for detailed view tracking
+CREATE TABLE IF NOT EXISTS `ad_views` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `ad_id` INT NOT NULL,
+  `user_id` INT,
+  `ip_address` VARCHAR(45),
+  `user_agent` TEXT,
+  `viewport` VARCHAR(20),
+  `watch_time` INT DEFAULT 0,
+  `view_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_ad (ad_id),
+  INDEX idx_user (user_id),
+  INDEX idx_view_timestamp (view_timestamp),
   FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
