@@ -257,6 +257,82 @@ CREATE TABLE IF NOT EXISTS `assignment_notifications` (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Create news table
+CREATE TABLE IF NOT EXISTS `news` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `summary` VARCHAR(500),
+  `category` ENUM('general', 'academic', 'event', 'announcement', 'urgent') DEFAULT 'general',
+  `priority` ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
+  `image_url` VARCHAR(500),
+  `is_featured` BOOLEAN DEFAULT FALSE,
+  `is_active` BOOLEAN DEFAULT TRUE,
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_category (category),
+  INDEX idx_priority (priority),
+  INDEX idx_is_active (is_active),
+  INDEX idx_is_featured (is_featured),
+  INDEX idx_created_at (created_at),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create ads table
+CREATE TABLE IF NOT EXISTS `ads` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `description` TEXT,
+  `video_url` VARCHAR(500) NOT NULL,
+  `thumbnail_url` VARCHAR(500),
+  `redirect_url` VARCHAR(500) NOT NULL,
+  `category` ENUM('general', 'education', 'technology', 'career', 'service') DEFAULT 'general',
+  `position` ENUM('header', 'sidebar', 'footer', 'content', 'popup') DEFAULT 'sidebar',
+  `is_active` BOOLEAN DEFAULT TRUE,
+  `is_muted` BOOLEAN DEFAULT FALSE,
+  `click_count` INT DEFAULT 0,
+  `view_count` INT DEFAULT 0,
+  `start_date` DATE,
+  `end_date` DATE,
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_category (category),
+  INDEX idx_position (position),
+  INDEX idx_is_active (is_active),
+  INDEX idx_start_date (start_date),
+  INDEX idx_end_date (end_date),
+  INDEX idx_created_at (created_at),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create ad_clicks table for tracking
+CREATE TABLE IF NOT EXISTS `ad_clicks` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `ad_id` INT NOT NULL,
+  `user_id` INT,
+  `ip_address` VARCHAR(45),
+  `user_agent` TEXT,
+  `clicked_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_ad (ad_id),
+  INDEX idx_user (user_id),
+  INDEX idx_clicked_at (clicked_at),
+  FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Insert default news entries
+INSERT INTO `news` (`title`, `content`, `summary`, `category`, `priority`, `is_featured`, `created_by`) VALUES
+('Welcome to IT Course Management System', 'We are excited to launch our new IT Course Management System. This platform provides comprehensive tools for students and lecturers to manage courses, assignments, and communication effectively.', 'Welcome to our new course management platform with enhanced features for better learning experience.', 'general', 'high', TRUE, 2),
+('New Academic Year 2024-2025', 'Registration for the new academic year is now open. Students can register for courses and access study materials through the platform.', 'Registration for 2024-2025 academic year is now open with new courses available.', 'academic', 'high', TRUE, 2),
+('System Maintenance Notice', 'Scheduled maintenance will occur this weekend. The system may be temporarily unavailable from 2 AM to 6 AM on Sunday.', 'System maintenance scheduled for this weekend with temporary downtime.', 'urgent', 'urgent', FALSE, 2);
+
+-- Insert default ads entries
+INSERT INTO `ads` (`title`, `description`, `video_url`, `thumbnail_url`, `redirect_url`, `category`, `position`, `created_by`) VALUES
+('Learn Programming Online', 'Start your journey in programming with our comprehensive online courses. Expert instructors, flexible schedules.', 'https://www.w3schools.com/html/mov_bbb.mp4', 'https://picsum.photos/seed/programming-ad/300/200.jpg', 'https://www.w3schools.com', 'education', 'sidebar', 2),
+('Career Opportunities in IT', 'Discover exciting career opportunities in the IT industry. Connect with top employers and find your dream job.', 'https://www.w3schools.com/html/movie.mp4', 'https://picsum.photos/seed/career-ad/300/200.jpg', 'https://www.linkedin.com/jobs', 'career', 'header', 2);
+
 -- Note: Default passwords for test accounts:
 -- Student (john@student.edu): password123
 -- Admin (admin@system.edu): admin123
