@@ -1312,7 +1312,15 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
+        }
+
+        /* Additional security for admin panel button */
+        #admin-panel-btn.hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         .admin-badge {

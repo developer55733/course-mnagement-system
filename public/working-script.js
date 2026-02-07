@@ -3654,10 +3654,32 @@ window.initialize = function() {
         originalInitialize();
     }
     
+    // Initialize security - hide admin panel button by default
+    initializeSecurity();
+    
     // Initialize new features
     initializeDiscussionForum();
     initializeAssignments();
 };
+
+// Security initialization function
+function initializeSecurity() {
+    // Always hide admin panel button on page load
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const adminBadge = document.getElementById('admin-badge');
+    
+    if (adminPanelBtn) {
+        adminPanelBtn.classList.add('hidden');
+    }
+    if (adminBadge) {
+        adminBadge.classList.add('hidden');
+    }
+    
+    // Re-check user role if already logged in
+    if (currentUser) {
+        updateDashboard();
+    }
+}
 
 // Start when DOM is ready
 
