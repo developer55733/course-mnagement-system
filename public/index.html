@@ -2,10 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>IT Course Management System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Mobile-specific optimizations -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="/icon-192.png">
+    <style>
+        /* Mobile-specific styles */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .mobile-nav-content {
+            background: white;
+            padding: 20px;
+            margin-top: 60px;
+        }
+        
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .mobile-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+        }
+        
+        .mobile-nav-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .mobile-nav-tab {
+            padding: 15px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-nav-tab:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .mobile-nav-tab.active {
+            background: #1976d2;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .container {
+                padding: 0;
+                border-radius: 0;
+                box-shadow: none;
+                min-height: 100vh;
+            }
+            
+            header {
+                padding: 15px;
+                flex-wrap: wrap;
+            }
+            
+            .tabs {
+                display: none;
+            }
+            
+            body {
+                padding: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,6 +118,11 @@
                 <h1><i class="fas fa-laptop-code"></i> IT Course Management System</h1>
                 <p>Student Portal for Modules, Tests, and Lecturer Contact</p>
             </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
             
             <!-- User Profile Header (shown when logged in) -->
             <div class="user-profile-header hidden" id="user-profile-header">
@@ -1047,8 +1156,217 @@
         </div>
         
     </div>
+    
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-header">
+                <h3><i class="fas fa-laptop-code"></i> IT Course Management</h3>
+                <button class="mobile-close-btn" id="mobile-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-tabs">
+                <button class="mobile-nav-tab" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="mobile-nav-tab" data-tab="register">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+                <button class="mobile-nav-tab" data-tab="about">
+                    <i class="fas fa-info-circle"></i> About
+                </button>
+                <button class="mobile-nav-tab" data-tab="contact">
+                    <i class="fas fa-envelope"></i> Contact
+                </button>
+                <button class="mobile-nav-tab" data-tab="zoom-meeting">
+                    <i class="fas fa-video"></i> Zoom Meeting
+                </button>
+                <button class="mobile-nav-tab hidden" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="mobile-nav-tab hidden" data-tab="discussion-forum">
+                    <i class="fas fa-comments"></i> Discussion Forum
+                </button>
+                <button class="mobile-nav-tab hidden" data-tab="assignments">
+                    <i class="fas fa-tasks"></i> Assignments
+                </button>
+                <button class="mobile-nav-tab hidden" data-tab="devadmin">
+                    <i class="fas fa-cog"></i> Admin Panel
+                </button>
+            </div>
+        </div>
+    </div>
 
    <script src="working-script.js"></script>
+   <script>
+        // Mobile Navigation Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileNav = document.getElementById('mobile-nav');
+            const mobileCloseBtn = document.getElementById('mobile-close-btn');
+            const mobileNavTabs = document.querySelectorAll('.mobile-nav-tab');
+            
+            // Toggle mobile menu
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileNav.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Close mobile menu
+            mobileCloseBtn.addEventListener('click', function() {
+                mobileNav.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Handle mobile tab clicks
+            mobileNavTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Close mobile menu
+                    mobileNav.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Switch to the selected tab using existing function
+                    if (typeof switchToTab === 'function') {
+                        switchToTab(tabName);
+                    } else {
+                        // Fallback: trigger click on desktop tab
+                        const desktopTab = document.querySelector(`[data-tab="${tabName}"]`);
+                        if (desktopTab) {
+                            desktopTab.click();
+                        }
+                    }
+                });
+            });
+            
+            // Close mobile menu when clicking outside
+            mobileNav.addEventListener('click', function(e) {
+                if (e.target === mobileNav) {
+                    mobileNav.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Handle escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.style.display === 'block') {
+                    mobileNav.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Update mobile nav tabs when user logs in/out
+            updateMobileNavTabs();
+        });
+        
+        // Update mobile navigation tabs based on login status
+        function updateMobileNavTabs() {
+            const isLoggedIn = document.getElementById('user-profile-header').classList.contains('hidden') === false;
+            const mobileNavTabs = document.querySelectorAll('.mobile-nav-tab');
+            
+            mobileNavTabs.forEach(tab => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                if (isLoggedIn) {
+                    // Show logged-in tabs
+                    if (['dashboard', 'discussion-forum', 'assignments', 'devadmin'].includes(tabName)) {
+                        tab.classList.remove('hidden');
+                    }
+                    if (['login', 'register'].includes(tabName)) {
+                        tab.classList.add('hidden');
+                    }
+                } else {
+                    // Show logged-out tabs
+                    if (['login', 'register'].includes(tabName)) {
+                        tab.classList.remove('hidden');
+                    }
+                    if (['dashboard', 'discussion-forum', 'assignments', 'devadmin'].includes(tabName)) {
+                        tab.classList.add('hidden');
+                    }
+                }
+            });
+        }
+        
+        // Add touch gestures for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - could trigger next tab
+                    console.log('Swipe left detected');
+                } else {
+                    // Swipe right - could open mobile menu
+                    const mobileNav = document.getElementById('mobile-nav');
+                    if (mobileNav.style.display === 'none' || mobileNav.style.display === '') {
+                        mobileNav.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+            }
+        }
+        
+        // Optimize for mobile performance
+        if ('serviceWorker' in navigator) {
+            // Register service worker for PWA capabilities
+            navigator.serviceWorker.register('/sw.js').catch(function() {
+                console.log('Service Worker registration failed');
+            });
+        }
+        
+        // Add mobile-specific optimizations
+        function optimizeForMobile() {
+            // Prevent double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            });
+            
+            // Add smooth scrolling
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // Optimize images for mobile
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.loading = 'lazy';
+            });
+        }
+        
+        // Initialize mobile optimizations
+        optimizeForMobile();
+        
+        // Listen for login/logout events to update mobile nav
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    updateMobileNavTabs();
+                }
+            });
+        });
+        
+        const userProfileHeader = document.getElementById('user-profile-header');
+        if (userProfileHeader) {
+            observer.observe(userProfileHeader, { attributes: true });
+        }
+   </script>
 </body>
 </html>
-```
