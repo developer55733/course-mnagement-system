@@ -222,6 +222,31 @@
     });
   }
 
+  // Load modules for dropdowns
+  const loadModules = async () => {
+    try {
+      const response = await axios.get('/api/modules');
+      if (response.data.success && response.data.data) {
+        const timetableModuleSelect = document.getElementById('timetableModule');
+        if (timetableModuleSelect) {
+          timetableModuleSelect.innerHTML = '<option value="">Select Module</option>';
+          response.data.data.forEach(module => {
+            const option = document.createElement('option');
+            option.value = module.code;
+            option.textContent = `${module.code} - ${module.name}`;
+            timetableModuleSelect.appendChild(option);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading modules:', error);
+      const timetableModuleSelect = document.getElementById('timetableModule');
+      if (timetableModuleSelect) {
+        timetableModuleSelect.innerHTML = '<option value="">Error loading modules</option>';
+      }
+    }
+  };
+
   // Add Test Timetable handler
   const btnAddTimetable = document.getElementById('btnAddTimetable');
   if (btnAddTimetable) {
@@ -1545,6 +1570,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (panel.style.display === 'block') {
             initAssignmentManagement();
             initClassTimetableManagement();
+            loadModules();
           }
         }
       });
