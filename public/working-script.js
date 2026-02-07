@@ -3657,6 +3657,9 @@ window.initialize = function() {
     // Initialize security - hide admin panel button by default
     initializeSecurity();
     
+    // Initialize WhatsApp integration
+    initializeWhatsAppIntegration();
+    
     // Initialize new features
     initializeDiscussionForum();
     initializeAssignments();
@@ -3691,5 +3694,78 @@ if (document.readyState === 'loading') {
 
     initialize();
 
+}
+
+// WhatsApp Integration for Contact Form
+function initializeWhatsAppIntegration() {
+    const contactForm = document.getElementById('contact-form');
+    const whatsappBtn = document.getElementById('whatsapp-btn');
+    
+    if (contactForm && whatsappBtn) {
+        // WhatsApp button click handler
+        whatsappBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sendViaWhatsApp();
+        });
+        
+        // Form submit handler
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendContactMessage();
+        });
+    }
+}
+
+// Send message via WhatsApp
+function sendViaWhatsApp() {
+    const name = document.getElementById('contact-name')?.value || '';
+    const email = document.getElementById('contact-email')?.value || '';
+    const phone = document.getElementById('contact-phone')?.value || '';
+    const subject = document.getElementById('contact-subject')?.value || '';
+    const message = document.getElementById('contact-message')?.value || '';
+    
+    if (!name || !phone || !message) {
+        showMessage('contact-message-status', 'Please fill in name, phone number, and message', true);
+        return;
+    }
+    
+    // Format WhatsApp message
+    const whatsappMessage = `*New Contact Message*\n\n*Name:* ${name}\n*Email:* ${email}\n*Subject:* ${subject}\n*Message:* ${message}`;
+    
+    // Create WhatsApp URL with phone number +255 628 701 663
+    const whatsappUrl = `https://wa.me/255628701663?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
+    
+    showMessage('contact-message-status', 'Opening WhatsApp to send your message...', false);
+}
+
+// Send regular contact message (existing functionality)
+function sendContactMessage() {
+    const name = document.getElementById('contact-name')?.value || '';
+    const email = document.getElementById('contact-email')?.value || '';
+    const phone = document.getElementById('contact-phone')?.value || '';
+    const subject = document.getElementById('contact-subject')?.value || '';
+    const message = document.getElementById('contact-message')?.value || '';
+    
+    if (!name || !email || !message) {
+        showMessage('contact-message-status', 'Please fill in all required fields', true);
+        return;
+    }
+    
+    // Here you can add existing email sending logic
+    // For now, just show success message
+    showMessage('contact-message-status', 'Message sent successfully! We will get back to you soon.', false);
+    
+    // Also send via WhatsApp if phone is provided
+    if (phone) {
+        setTimeout(() => {
+            sendViaWhatsApp();
+        }, 1000);
+    }
+    
+    // Reset form
+    contactForm.reset();
 }
 

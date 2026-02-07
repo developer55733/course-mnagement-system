@@ -2724,3 +2724,59 @@
         padding: 20px;
     }
 }
+
+/* WhatsApp Button Styles */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.btn-whatsapp:hover {
+    background: linear-gradient(135deg, #128c7e, #25d366);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-hint {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #25d366;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.whatsapp-hint i {
+    color: #25d366;
+    width: 14px;
+}
+
+/* Responsive Design for Contact Form */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-whatsapp {
+        width: 100%;
+    }
+}
