@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const { pool } = require('../config/database');
 
 // Get all class timetable entries
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await db.execute(`
+        const [rows] = await pool.execute(`
             SELECT * FROM class_timetable 
             ORDER BY day_of_week, start_time
         `);
@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
         }
 
         // Insert into database
-        const [result] = await db.execute(`
+        const [result] = await pool.execute(`
             INSERT INTO class_timetable 
             (module_code, module_name, lecturer_name, venue, day_of_week, start_time, end_time)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -79,7 +79,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        const [result] = await db.execute(`
+        const [result] = await pool.execute(`
             DELETE FROM class_timetable WHERE id = ?
         `, [id]);
 
@@ -125,7 +125,7 @@ router.put('/:id', async (req, res) => {
             });
         }
 
-        const [result] = await db.execute(`
+        const [result] = await pool.execute(`
             UPDATE class_timetable 
             SET module_code = ?, module_name = ?, lecturer_name = ?, venue = ?, 
                 day_of_week = ?, start_time = ?, end_time = ?, updated_at = CURRENT_TIMESTAMP

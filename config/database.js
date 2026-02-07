@@ -325,6 +325,22 @@ async function initializeDatabase() {
       INDEX idx_visibility (visibility),
       INDEX idx_created_by (created_by),
       FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    
+    `CREATE TABLE class_timetable (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      module_code VARCHAR(50) NOT NULL,
+      module_name VARCHAR(100) NOT NULL,
+      lecturer_name VARCHAR(100) NOT NULL,
+      venue VARCHAR(100) NOT NULL,
+      day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
+      start_time TIME NOT NULL,
+      end_time TIME NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_module_code (module_code),
+      INDEX idx_day (day_of_week),
+      INDEX idx_lecturer (lecturer_name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -366,7 +382,7 @@ async function initializeDatabase() {
 
 // Recreate tables to fix AUTO_INCREMENT issues
 async function recreateTablesWithAutoIncrement() {
-  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes'];
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable'];
   
   for (const tableName of tables) {
     try {
