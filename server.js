@@ -41,9 +41,6 @@ const settingsRoutes = require('./routes/settings');
 const timetableRoutes = require('./routes/timetable');
 const lecturerRoutes = require('./routes/lecturers');
 const notesRoutes = require('./routes/notes');
-const forumRoutes = require('./routes/forum');
-const assignmentRoutes = require('./routes/assignments');
-const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -126,9 +123,6 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/integrations', integrationRoutes);
-app.use('/api/forum', forumRoutes);
-app.use('/api/assignments', assignmentRoutes);
-app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use((req, res) => {
