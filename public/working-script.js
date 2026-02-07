@@ -683,6 +683,12 @@ function updateDashboard() {
 
     if (dashboardTab) dashboardTab.classList.remove('hidden');
 
+    // Show new tabs for all logged-in users
+    const discussionTab = document.getElementById('discussion-tab');
+    const assignmentsTab = document.getElementById('assignments-tab');
+    if (discussionTab) discussionTab.classList.remove('hidden');
+    if (assignmentsTab) assignmentsTab.classList.remove('hidden');
+
 
 
     // Show/hide admin controls based on user role
@@ -2640,6 +2646,12 @@ function logout() {
 
         const devadminTab = document.getElementById('devadmin-tab');
 
+        // Show new tabs for all logged-in users
+        const discussionTab = document.getElementById('discussion-tab');
+        const assignmentsTab = document.getElementById('assignments-tab');
+        if (discussionTab) discussionTab.classList.remove('hidden');
+        if (assignmentsTab) assignmentsTab.classList.remove('hidden');
+
         
 
         if (userProfileHeader) userProfileHeader.classList.add('hidden');
@@ -2647,6 +2659,10 @@ function logout() {
         if (dashboardTab) dashboardTab.classList.add('hidden');
 
         if (devadminTab) devadminTab.classList.add('hidden');
+
+        // Hide new tabs when logging out
+        if (discussionTab) discussionTab.classList.add('hidden');
+        if (assignmentsTab) assignmentsTab.classList.add('hidden');
 
         
 
@@ -3242,6 +3258,298 @@ function constructZoomUrl(baseUrl, name, password) {
 if (meetingNameInput && currentUser && currentUser.name) {
     meetingNameInput.value = currentUser.name;
 }
+
+// Discussion Forum Functions
+async function loadDiscussions() {
+    try {
+        const result = await apiCall('/discussions');
+        if (result.success) {
+            displayDiscussions(result.data);
+        }
+    } catch (error) {
+        console.error('Error loading discussions:', error);
+    }
+}
+
+function displayDiscussions(discussions) {
+    const container = document.getElementById('discussions-container');
+    if (!container) return;
+
+    if (discussions.length === 0) {
+        container.innerHTML = `
+            <div class="no-discussions">
+                <i class="fas fa-comments"></i>
+                <p>No discussions yet. Be the first to start one!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = discussions.map(discussion => `
+        <div class="discussion-item" data-id="${discussion.id}">
+            <div class="discussion-header">
+                <h4><i class="fas fa-comment"></i> ${discussion.title}</h4>
+                <div class="discussion-meta">
+                    <span class="discussion-author">by ${discussion.author_name}</span>
+                    <span class="discussion-date">${formatDate(discussion.created_at)}</span>
+                    ${discussion.module_code ? `<span class="discussion-module">${discussion.module_code}</span>` : ''}
+                </div>
+            </div>
+            <div class="discussion-content">
+                <p>${discussion.content.substring(0, 200)}${discussion.content.length > 200 ? '...' : ''}</p>
+            </div>
+            <div class="discussion-footer">
+                <span class="reply-count"><i class="fas fa-reply"></i> ${discussion.reply_count} replies</span>
+                <button class="btn btn-sm btn-primary" onclick="viewDiscussion(${discussion.id})">View Discussion</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function createDiscussion(e) {
+    e.preventDefault();
+    if (!currentUser) {
+        showMessage('forum-message', 'Please login to create a discussion', true);
+        return;
+    }
+
+    const title = document.getElementById('discussion-title').value;
+    const content = document.getElementById('discussion-content').value;
+    const moduleCode = document.getElementById('discussion-module').value;
+
+    try {
+        const result = await apiCall('/discussions', 'POST', {
+            title,
+            content,
+            module_code: moduleCode,
+            created_by: currentUser.id
+        });
+
+        if (result.success) {
+            showMessage('forum-message', 'Discussion posted successfully!', false);
+            document.getElementById('create-discussion-form').reset();
+            loadDiscussions();
+        }
+    } catch (error) {
+        showMessage('forum-message', 'Failed to post discussion', true);
+    }
+}
+
+async function viewDiscussion(discussionId) {
+    try {
+        const result = await apiCall(`/discussions/${discussionId}`);
+        if (result.success) {
+            // For now, just show an alert. In a full implementation, this would open a modal
+            alert(`Discussion: ${result.data.discussion.title}\n\n${result.data.discussion.content}\n\nReplies: ${result.data.replies.length}`);
+        }
+    } catch (error) {
+        console.error('Error viewing discussion:', error);
+    }
+}
+
+// Assignment Functions
+async function loadAssignments() {
+    try {
+        const result = await apiCall('/assignments');
+        if (result.success) {
+            displayAssignments(result.data);
+        }
+    } catch (error) {
+        console.error('Error loading assignments:', error);
+    }
+}
+
+function displayAssignments(assignments) {
+    const container = document.getElementById('assignments-container');
+    if (!container) return;
+
+    if (assignments.length === 0) {
+        container.innerHTML = `
+            <div class="no-assignments">
+                <i class="fas fa-tasks"></i>
+                <p>No assignments posted yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = assignments.map(assignment => {
+        const urgencyClass = assignment.urgency_status === 'overdue' ? 'overdue' : 
+                           assignment.urgency_status === 'due_soon' ? 'due-soon' : 'active';
+        const urgencyIcon = assignment.urgency_status === 'overdue' ? 'fa-exclamation-triangle' : 
+                            assignment.urgency_status === 'due_soon' ? 'fa-clock' : 'fa-calendar';
+        
+        return `
+            <div class="assignment-item ${urgencyClass}">
+                <div class="assignment-header">
+                    <h4><i class="fas fa-tasks"></i> ${assignment.title}</h4>
+                    <div class="assignment-meta">
+                        <span class="assignment-module">${assignment.module_code}</span>
+                        <span class="assignment-urgency ${urgencyClass}">
+                            <i class="fas ${urgencyIcon}"></i> ${assignment.urgency_status.replace('_', ' ')}
+                        </span>
+                    </div>
+                </div>
+                <div class="assignment-content">
+                    <p>${assignment.description.substring(0, 200)}${assignment.description.length > 200 ? '...' : ''}</p>
+                </div>
+                <div class="assignment-footer">
+                    <span class="due-date">
+                        <i class="fas fa-calendar-alt"></i> Due: ${formatDateTime(assignment.due_date)}
+                    </span>
+                    <span class="posted-by">Posted by ${assignment.posted_by_name}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function createAssignment(e) {
+    e.preventDefault();
+    if (!currentUser || currentUser.role !== 'admin') {
+        showMessage('assignments-message', 'Only admins can post assignments', true);
+        return;
+    }
+
+    const title = document.getElementById('assignment-title').value;
+    const description = document.getElementById('assignment-description').value;
+    const moduleCode = document.getElementById('assignment-module').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+
+    try {
+        const result = await apiCall('/assignments', 'POST', {
+            title,
+            description,
+            module_code: moduleCode,
+            module_name: document.getElementById('assignment-module').options[document.getElementById('assignment-module').selectedIndex].text.replace(/^[^-]+ - /, ''),
+            due_date: dueDate,
+            posted_by: currentUser.id
+        });
+
+        if (result.success) {
+            showMessage('assignments-message', 'Assignment posted successfully!', false);
+            document.getElementById('create-assignment-form').reset();
+            loadAssignments();
+            loadAssignmentNotifications(); // Refresh notifications
+        }
+    } catch (error) {
+        showMessage('assignments-message', 'Failed to post assignment', true);
+    }
+}
+
+async function loadAssignmentNotifications() {
+    if (!currentUser) return;
+
+    try {
+        const result = await apiCall(`/assignments/notifications/${currentUser.id}`);
+        if (result.success) {
+            displayNotifications(result.data.notifications);
+            updateNotificationBadge(result.data.unread_count);
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+function displayNotifications(notifications) {
+    const container = document.getElementById('notifications-container');
+    if (!container) return;
+
+    if (notifications.length === 0) {
+        container.innerHTML = `
+            <div class="no-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p>No new assignment notifications</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = notifications.map(notification => `
+        <div class="notification-item ${notification.is_read ? 'read' : 'unread'}" data-id="${notification.id}">
+            <div class="notification-header">
+                <h4><i class="fas fa-tasks"></i> ${notification.title}</h4>
+                <span class="notification-date">${formatDate(notification.created_at)}</span>
+            </div>
+            <div class="notification-content">
+                <p><strong>Module:</strong> ${notification.module_name}</p>
+                <p><strong>Due:</strong> ${formatDateTime(notification.due_date)}</p>
+                <p class="urgency-status ${notification.urgency_status}">
+                    <i class="fas fa-${notification.urgency_status === 'overdue' ? 'exclamation-triangle' : 
+                                     notification.urgency_status === 'due_soon' ? 'clock' : 'calendar'}"></i>
+                    Status: ${notification.urgency_status.replace('_', ' ')}
+                </p>
+            </div>
+            ${!notification.is_read ? `<button class="btn btn-sm" onclick="markAsRead(${notification.id})">Mark as Read</button>` : ''}
+        </div>
+    `).join('');
+}
+
+async function markAsRead(notificationId) {
+    try {
+        await apiCall(`/assignments/notifications/${notificationId}/read`, 'PUT');
+        loadAssignmentNotifications(); // Refresh notifications
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+function updateNotificationBadge(unreadCount) {
+    // Update notification badge in the UI if it exists
+    const badge = document.getElementById('notification-badge');
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+}
+
+// Helper function to format dates
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+
+// Initialize Discussion Forum and Assignment functionality
+function initializeDiscussionForum() {
+    const createDiscussionForm = document.getElementById('create-discussion-form');
+    if (createDiscussionForm) {
+        createDiscussionForm.addEventListener('submit', createDiscussion);
+    }
+    loadDiscussions();
+}
+
+function initializeAssignments() {
+    const createAssignmentForm = document.getElementById('create-assignment-form');
+    if (createAssignmentForm) {
+        createAssignmentForm.addEventListener('submit', createAssignment);
+    }
+    
+    // Show/hide admin assignment section based on user role
+    const adminSection = document.getElementById('admin-assignments-section');
+    if (adminSection && currentUser) {
+        adminSection.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+    }
+    
+    loadAssignments();
+    loadAssignmentNotifications();
+}
+
+// Update the main initialize function to include new functionality
+const originalInitialize = window.initialize;
+window.initialize = function() {
+    if (originalInitialize) {
+        originalInitialize();
+    }
+    
+    // Initialize new features
+    initializeDiscussionForum();
+    initializeAssignments();
+};
 
 // Start when DOM is ready
 

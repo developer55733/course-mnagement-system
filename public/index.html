@@ -77,6 +77,8 @@
             <button class="tab-btn" data-tab="contact">Contact</button>
             <button class="tab-btn" data-tab="zoom-meeting" id="zoom-tab">Zoom Meeting</button>
             <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
+            <button class="tab-btn hidden" data-tab="discussion-forum" id="discussion-tab">Discussion Forum</button>
+            <button class="tab-btn hidden" data-tab="assignments" id="assignments-tab">Assignments</button>
             <button class="tab-btn hidden" data-tab="devadmin" id="devadmin-tab">Dev & Admin</button>
         </div>
         
@@ -521,6 +523,117 @@
                                 <p>No study notes available yet.</p>
                                 <p>Admin will add study materials for your courses.</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Discussion Forum Tab -->
+        <div class="tab-content" id="discussion-forum">
+            <div class="forum-container">
+                <h2 class="page-title"><i class="fas fa-comments"></i> Discussion Forum</h2>
+                <div class="message" id="forum-message"></div>
+                
+                <!-- Create New Discussion -->
+                <div class="create-discussion-section">
+                    <h3><i class="fas fa-plus-circle"></i> Start New Discussion</h3>
+                    <form id="create-discussion-form">
+                        <div class="form-group">
+                            <label for="discussion-title">Discussion Title</label>
+                            <input type="text" id="discussion-title" required placeholder="Enter discussion title">
+                        </div>
+                        <div class="form-group">
+                            <label for="discussion-module">Module (Optional)</label>
+                            <select id="discussion-module">
+                                <option value="">General Discussion</option>
+                                <option value="IT101">IT101 - Introduction to Programming</option>
+                                <option value="IT102">IT102 - Web Development Fundamentals</option>
+                                <option value="IT103">IT103 - Database Management Systems</option>
+                                <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                                <option value="IT105">IT105 - Computer Networks</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="discussion-content">Message</label>
+                            <textarea id="discussion-content" required placeholder="Write your discussion message..." rows="6"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Post Discussion
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Discussions List -->
+                <div class="discussions-list">
+                    <h3><i class="fas fa-list"></i> Recent Discussions</h3>
+                    <div id="discussions-container">
+                        <div class="no-discussions">
+                            <i class="fas fa-comments"></i>
+                            <p>No discussions yet. Be the first to start one!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Assignments Tab -->
+        <div class="tab-content" id="assignments">
+            <div class="assignments-container">
+                <h2 class="page-title"><i class="fas fa-tasks"></i> Assignments</h2>
+                <div class="message" id="assignments-message"></div>
+                
+                <!-- Assignment Notifications -->
+                <div class="notifications-section" id="assignment-notifications">
+                    <h3><i class="fas fa-bell"></i> Assignment Notifications</h3>
+                    <div id="notifications-container">
+                        <div class="no-notifications">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No new assignment notifications</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Admin Assignment Management -->
+                <div class="admin-assignments-section" id="admin-assignments-section" style="display: none;">
+                    <h3><i class="fas fa-user-shield"></i> Post New Assignment</h3>
+                    <form id="create-assignment-form">
+                        <div class="form-group">
+                            <label for="assignment-title">Assignment Title</label>
+                            <input type="text" id="assignment-title" required placeholder="Enter assignment title">
+                        </div>
+                        <div class="form-group">
+                            <label for="assignment-module">Module</label>
+                            <select id="assignment-module" required>
+                                <option value="">Select Module</option>
+                                <option value="IT101">IT101 - Introduction to Programming</option>
+                                <option value="IT102">IT102 - Web Development Fundamentals</option>
+                                <option value="IT103">IT103 - Database Management Systems</option>
+                                <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                                <option value="IT105">IT105 - Computer Networks</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignment-description">Assignment Description</label>
+                            <textarea id="assignment-description" required placeholder="Enter assignment details and requirements..." rows="6"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignment-due-date">Due Date & Time</label>
+                            <input type="datetime-local" id="assignment-due-date" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Post Assignment
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Assignments List -->
+                <div class="assignments-list">
+                    <h3><i class="fas fa-list"></i> All Assignments</h3>
+                    <div id="assignments-container">
+                        <div class="no-assignments">
+                            <i class="fas fa-tasks"></i>
+                            <p>No assignments posted yet.</p>
                         </div>
                     </div>
                 </div>

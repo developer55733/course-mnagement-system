@@ -85,6 +85,67 @@ CREATE TABLE IF NOT EXISTS `notes` (
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Create discussion forum table
+CREATE TABLE IF NOT EXISTS `discussion_forum` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `module_code` VARCHAR(50),
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module (module_code),
+  INDEX idx_created_by (created_by),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create discussion replies table
+CREATE TABLE IF NOT EXISTS `discussion_replies` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `discussion_id` INT NOT NULL,
+  `content` TEXT NOT NULL,
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_discussion (discussion_id),
+  INDEX idx_created_by (created_by),
+  FOREIGN KEY (discussion_id) REFERENCES discussion_forum(id) ON DELETE CASCADE,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create assignments table
+CREATE TABLE IF NOT EXISTS `assignments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `description` TEXT NOT NULL,
+  `module_code` VARCHAR(50) NOT NULL,
+  `module_name` VARCHAR(100) NOT NULL,
+  `due_date` DATETIME NOT NULL,
+  `posted_by` INT NOT NULL,
+  `status` ENUM('active', 'closed') DEFAULT 'active',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module (module_code),
+  INDEX idx_due_date (due_date),
+  INDEX idx_status (status),
+  INDEX idx_posted_by (posted_by),
+  FOREIGN KEY (posted_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create assignment notifications table
+CREATE TABLE IF NOT EXISTS `assignment_notifications` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `assignment_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `is_read` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_assignment (assignment_id),
+  INDEX idx_user (user_id),
+  INDEX idx_is_read (is_read),
+  FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Insert default test users
 INSERT INTO `users` (`name`, `email`, `student_id`, `password`, `role`) VALUES
 ('John Smith', 'john@student.edu', 'IT2023001', '$2b$10$c6mYZv1Xleen2fqxaPyGAODQvGl.7BiCQcamQlsLBEJrkhU9wEBcW', 'user'),
@@ -117,6 +178,67 @@ INSERT INTO `timetable` (`test`, `module`, `date`, `time`, `venue`) VALUES
 -- Insert default settings
 INSERT INTO `settings` (`academic_year`, `semester`, `institution_name`) VALUES
 ('2023-2024', 1, 'IT University');
+
+-- Create discussion forum table
+CREATE TABLE IF NOT EXISTS `discussion_forum` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `module_code` VARCHAR(50),
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module (module_code),
+  INDEX idx_created_by (created_by),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create discussion replies table
+CREATE TABLE IF NOT EXISTS `discussion_replies` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `discussion_id` INT NOT NULL,
+  `content` TEXT NOT NULL,
+  `created_by` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_discussion (discussion_id),
+  INDEX idx_created_by (created_by),
+  FOREIGN KEY (discussion_id) REFERENCES discussion_forum(id) ON DELETE CASCADE,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create assignments table
+CREATE TABLE IF NOT EXISTS `assignments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `description` TEXT NOT NULL,
+  `module_code` VARCHAR(50) NOT NULL,
+  `module_name` VARCHAR(100) NOT NULL,
+  `due_date` DATETIME NOT NULL,
+  `posted_by` INT NOT NULL,
+  `status` ENUM('active', 'closed') DEFAULT 'active',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module (module_code),
+  INDEX idx_due_date (due_date),
+  INDEX idx_status (status),
+  INDEX idx_posted_by (posted_by),
+  FOREIGN KEY (posted_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create assignment notifications table
+CREATE TABLE IF NOT EXISTS `assignment_notifications` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `assignment_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `is_read` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_assignment (assignment_id),
+  INDEX idx_user (user_id),
+  INDEX idx_is_read (is_read),
+  FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- Note: Default passwords for test accounts:
 -- Student (john@student.edu): password123
