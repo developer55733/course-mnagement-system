@@ -289,6 +289,75 @@
           </div>
         </div>
 
+        <!-- Assignment Management Section -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-orange text-white">
+                <h5 class="mb-0">Post Assignment</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Assignment Title</label>
+                  <input id="assignmentTitle" class="form-control" placeholder="Enter assignment title">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Module</label>
+                  <select id="assignmentModule" class="form-control">
+                    <option value="">Select Module</option>
+                    <option value="IT101">IT101 - Introduction to Programming</option>
+                    <option value="IT102">IT102 - Web Development Fundamentals</option>
+                    <option value="IT103">IT103 - Database Management Systems</option>
+                    <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                    <option value="IT105">IT105 - Computer Networks</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Assignment Description</label>
+                  <textarea id="assignmentDescription" class="form-control" placeholder="Enter assignment details and requirements..." rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Due Date & Time</label>
+                  <input id="assignmentDueDate" type="datetime-local" class="form-control">
+                </div>
+                <button id="btnPostAssignment" class="btn btn-orange w-100">
+                  <i class="fas fa-plus"></i> Post Assignment
+                </button>
+                <div id="assignmentMsg" class="alert alert-info mt-3" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4">
+              <div class="card-header bg-orange text-white">
+                <h5 class="mb-0">Manage Assignments</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <div class="input-group">
+                    <input type="text" id="searchAssignments" class="form-control" placeholder="Search assignments by title or module...">
+                    <button class="btn btn-outline-secondary" type="button" id="btnSearchAssignments">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <select id="filterAssignments" class="form-control">
+                    <option value="">All Assignments</option>
+                    <option value="active">Active</option>
+                    <option value="closed">Closed</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
+                </div>
+                <div id="assignmentsList" style="max-height: 400px; overflow-y: auto;">
+                  <p class="text-muted">No assignments posted yet. Add one using the form on the left.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Database Management Section -->
         <div class="row">
           <div class="col-md-6">

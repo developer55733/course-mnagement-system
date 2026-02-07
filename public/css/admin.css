@@ -481,6 +481,23 @@ h1 {
   background-color: #6f42c1 !important;
 }
 
+/* Assignment Management Styles */
+.bg-orange {
+  background-color: #fd7e14 !important;
+}
+
+.btn-orange {
+  background-color: #fd7e14;
+  border-color: #fd7e14;
+  color: white;
+}
+
+.btn-orange:hover {
+  background-color: #e8590c;
+  border-color: #e8590c;
+  color: white;
+}
+
 /* Rich Text Editor Styles */
 .editor-toolbar {
   display: flex;

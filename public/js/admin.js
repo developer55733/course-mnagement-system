@@ -1224,4 +1224,198 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   };
+
+  // Assignment Management Functions
+  const initAssignmentManagement = () => {
+    const btnPostAssignment = document.getElementById('btnPostAssignment');
+    const assignmentTitle = document.getElementById('assignmentTitle');
+    const assignmentModule = document.getElementById('assignmentModule');
+    const assignmentDescription = document.getElementById('assignmentDescription');
+    const assignmentDueDate = document.getElementById('assignmentDueDate');
+    const assignmentsList = document.getElementById('assignmentsList');
+
+    if (btnPostAssignment) {
+      btnPostAssignment.addEventListener('click', async () => {
+        const title = assignmentTitle.value.trim();
+        const module = assignmentModule.value;
+        const description = assignmentDescription.value.trim();
+        const dueDate = assignmentDueDate.value;
+
+        if (!title || !module || !description || !dueDate) {
+          showMessage('assignmentMsg', 'Please fill all fields', true);
+          return;
+        }
+
+        try {
+          btnPostAssignment.disabled = true;
+          btnPostAssignment.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+
+          const response = await axios.post('/api/assignments', {
+            title,
+            description,
+            module_code: module,
+            module_name: assignmentModule.options[assignmentModule.selectedIndex].text,
+            due_date: dueDate,
+            posted_by: 1 // Admin user ID
+          });
+
+          if (response.data.success) {
+            showMessage('assignmentMsg', 'Assignment posted successfully!', false);
+            // Clear form
+            assignmentTitle.value = '';
+            assignmentModule.value = '';
+            assignmentDescription.value = '';
+            assignmentDueDate.value = '';
+            
+            // Refresh assignments list
+            loadAssignments();
+          } else {
+            showMessage('assignmentMsg', 'Failed to post assignment', true);
+          }
+        } catch (error) {
+          console.error('Error posting assignment:', error);
+          showMessage('assignmentMsg', 'Error posting assignment', true);
+        } finally {
+          btnPostAssignment.disabled = false;
+          btnPostAssignment.innerHTML = '<i class="fas fa-plus"></i> Post Assignment';
+        }
+      });
+    }
+
+    // Load assignments
+    const loadAssignments = async () => {
+      try {
+        const response = await axios.get('/api/assignments/admin');
+        if (response.data.success) {
+          displayAssignments(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error loading assignments:', error);
+        if (assignmentsList) {
+          assignmentsList.innerHTML = '<p class="text-muted">Error loading assignments.</p>';
+        }
+      }
+    };
+
+    const displayAssignments = (assignments) => {
+      if (!assignmentsList) return;
+
+      if (assignments.length === 0) {
+        assignmentsList.innerHTML = '<p class="text-muted">No assignments posted yet.</p>';
+        return;
+      }
+
+      assignmentsList.innerHTML = assignments.map(assignment => {
+        const dueDate = new Date(assignment.due_date);
+        const now = new Date();
+        const isOverdue = dueDate < now;
+        const statusClass = isOverdue ? 'text-danger' : assignment.status === 'active' ? 'text-success' : 'text-secondary';
+        
+        return `
+          <div class="card mb-2">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h6 class="mb-1">${assignment.title}</h6>
+                  <p class="mb-1 text-muted small">${assignment.module_code} - ${assignment.module_name}</p>
+                  <p class="mb-1 small">${assignment.description.substring(0, 100)}${assignment.description.length > 100 ? '...' : ''}</p>
+                  <small class="${statusClass}">
+                    Due: ${dueDate.toLocaleDateString()} ${dueDate.toLocaleTimeString()}
+                    ${isOverdue ? ' (OVERDUE)' : ` (${assignment.status})`}
+                  </small>
+                </div>
+                <div class="btn-group btn-group-sm">
+                  ${assignment.status === 'active' ? 
+                    `<button class="btn btn-outline-warning btn-sm" onclick="closeAssignment(${assignment.id})">
+                      <i class="fas fa-times"></i> Close
+                    </button>` : 
+                    `<button class="btn btn-outline-success btn-sm" onclick="reopenAssignment(${assignment.id})">
+                      <i class="fas fa-check"></i> Reopen
+                    </button>`
+                  }
+                  <button class="btn btn-outline-danger btn-sm" onclick="deleteAssignment(${assignment.id})">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    // Make functions globally accessible
+    window.closeAssignment = async (id) => {
+      try {
+        const response = await axios.put(`/api/assignments/${id}`, {
+          status: 'closed'
+        });
+        if (response.data.success) {
+          loadAssignments();
+        }
+      } catch (error) {
+        console.error('Error closing assignment:', error);
+      }
+    };
+
+    window.reopenAssignment = async (id) => {
+      try {
+        const response = await axios.put(`/api/assignments/${id}`, {
+          status: 'active'
+        });
+        if (response.data.success) {
+          loadAssignments();
+        }
+      } catch (error) {
+        console.error('Error reopening assignment:', error);
+      }
+    };
+
+    window.deleteAssignment = async (id) => {
+      if (!confirm('Are you sure you want to delete this assignment?')) return;
+      
+      try {
+        const response = await axios.delete(`/api/assignments/${id}`);
+        if (response.data.success) {
+          loadAssignments();
+        }
+      } catch (error) {
+        console.error('Error deleting assignment:', error);
+      }
+    };
+
+    // Search and filter functionality
+    const searchAssignments = document.getElementById('searchAssignments');
+    const filterAssignments = document.getElementById('filterAssignments');
+    const btnSearchAssignments = document.getElementById('btnSearchAssignments');
+
+    const performSearch = () => {
+      // This would require a search endpoint or client-side filtering
+      loadAssignments();
+    };
+
+    if (btnSearchAssignments) btnSearchAssignments.addEventListener('click', performSearch);
+    if (searchAssignments) searchAssignments.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') performSearch();
+    });
+    if (filterAssignments) filterAssignments.addEventListener('change', performSearch);
+
+    // Initial load
+    loadAssignments();
+  };
+
+  // Initialize assignment management when panel is shown
+  if (panel) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          if (panel.style.display === 'block') {
+            initAssignmentManagement();
+          }
+        }
+      });
+    });
+    observer.observe(panel, { attributes: true });
+  }
+
 })();
