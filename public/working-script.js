@@ -3647,6 +3647,55 @@ function initializeAssignments() {
     loadAssignmentNotifications();
 }
 
+// Mobile Menu Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const tabsContainer = document.querySelector('.tabs');
+    
+    if (mobileMenuToggle && tabsContainer) {
+        mobileMenuToggle.addEventListener('click', function() {
+            tabsContainer.classList.toggle('active');
+            
+            // Toggle icon
+            const icon = mobileMenuToggle.querySelector('i');
+            if (icon) {
+                if (tabsContainer.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!tabsContainer.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                tabsContainer.classList.remove('active');
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+        });
+        
+        // Close menu when tab is clicked
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                tabsContainer.classList.remove('active');
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
+    }
+});
+
 // Update the main initialize function to include new functionality
 const originalInitialize = window.initialize;
 window.initialize = function() {
