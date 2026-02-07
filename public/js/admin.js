@@ -227,6 +227,7 @@
     try {
       const response = await axios.get('/api/modules');
       if (response.data.success && response.data.data) {
+        // Populate timetable dropdown
         const timetableModuleSelect = document.getElementById('timetableModule');
         if (timetableModuleSelect) {
           timetableModuleSelect.innerHTML = '<option value="">Select Module</option>';
@@ -237,12 +238,29 @@
             timetableModuleSelect.appendChild(option);
           });
         }
+        
+        // Populate notes dropdown
+        const noteModuleSelect = document.getElementById('noteModule');
+        if (noteModuleSelect) {
+          noteModuleSelect.innerHTML = '<option value="">Select Module</option>';
+          response.data.data.forEach(module => {
+            const option = document.createElement('option');
+            option.value = module.code;
+            option.textContent = `${module.code} - ${module.name}`;
+            noteModuleSelect.appendChild(option);
+          });
+        }
       }
     } catch (error) {
       console.error('Error loading modules:', error);
       const timetableModuleSelect = document.getElementById('timetableModule');
+      const noteModuleSelect = document.getElementById('noteModule');
+      
       if (timetableModuleSelect) {
         timetableModuleSelect.innerHTML = '<option value="">Error loading modules</option>';
+      }
+      if (noteModuleSelect) {
+        noteModuleSelect.innerHTML = '<option value="">Error loading modules</option>';
       }
     }
   };
