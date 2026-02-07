@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const { query } = require('../config/database');
 
 // Get all assignments (for users)
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    const sql = `
       SELECT a.*, u.name as posted_by_name,
              CASE WHEN a.due_date < NOW() THEN 'overdue'
                   WHEN a.due_date < DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 'due_soon'
@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
       ORDER BY a.due_date ASC
     `;
     
-    const [results] = await database.execute(query);
+    const [results] = await query(sql);
     res.json({ success: true, data: results });
   } catch (error) {
     console.error('Error fetching assignments:', error);
@@ -28,14 +28,14 @@ router.get('/', async (req, res) => {
 // Get all assignments (for admin management)
 router.get('/admin', async (req, res) => {
   try {
-    const query = `
+    const sql = `
       SELECT a.*, u.name as posted_by_name
       FROM assignments a
       LEFT JOIN users u ON a.posted_by = u.id
       ORDER BY a.created_at DESC
     `;
     
-    const [results] = await database.execute(query);
+    const [results] = await query(sql);
     res.json({ success: true, data: results });
   } catch (error) {
     console.error('Error fetching assignments:', error);
@@ -48,14 +48,14 @@ router.get('/:id', async (req, res) => {
   try {
     const assignmentId = req.params.id;
     
-    const query = `
+    const sql = `
       SELECT a.*, u.name as posted_by_name, u.email as posted_by_email
       FROM assignments a
       LEFT JOIN users u ON a.posted_by = u.id
       WHERE a.id = ?
     `;
     
-    const [results] = await database.execute(query, [assignmentId]);
+    const [results] = await query(sql, [assignmentId]);
     
     if (results.length === 0) {
       return res.status(404).json({ success: false, error: 'Assignment not found' });
@@ -81,7 +81,7 @@ router.post('/', async (req, res) => {
     }
     
     // Start transaction
-    await database.execute('START TRANSACTION');
+    await query('START TRANSACTION');
     
     // Insert assignment
     const assignmentQuery = `
@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     
-    const [assignmentResult] = await database.execute(assignmentQuery, [
+    const [assignmentResult] = await query(assignmentQuery, [
       title, description, module_code, module_name, due_date, posted_by
     ]);
     
@@ -97,7 +97,7 @@ router.post('/', async (req, res) => {
     
     // Create notifications for all users
     const usersQuery = 'SELECT id FROM users WHERE role = "user"';
-    const [users] = await database.execute(usersQuery);
+    const [users] = await query(usersQuery);
     
     if (users.length > 0) {
       const notificationValues = users.map(user => [assignmentId, user.id]);
@@ -106,10 +106,10 @@ router.post('/', async (req, res) => {
         VALUES ?
       `;
       
-      await database.execute(notificationsQuery, [notificationValues]);
+      await query(notificationsQuery, [notificationValues]);
     }
     
-    await database.execute('COMMIT');
+    await query('COMMIT');
     
     res.json({ 
       success: true, 
@@ -124,7 +124,7 @@ router.post('/', async (req, res) => {
       }
     });
   } catch (error) {
-    await database.execute('ROLLBACK');
+    await query('ROLLBACK');
     console.error('Error creating assignment:', error);
     res.status(500).json({ success: false, error: 'Failed to create assignment' });
   }
@@ -136,13 +136,13 @@ router.put('/:id', async (req, res) => {
     const assignmentId = req.params.id;
     const { title, description, module_code, module_name, due_date, status } = req.body;
     
-    const query = `
+    const sql = `
       UPDATE assignments 
       SET title = ?, description = ?, module_code = ?, module_name = ?, due_date = ?, status = ?
       WHERE id = ?
     `;
     
-    const [result] = await database.execute(query, [
+    const [result] = await query(sql, [
       title, description, module_code, module_name, due_date, status, assignmentId
     ]);
     
@@ -162,7 +162,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const assignmentId = req.params.id;
     
-    await database.execute('DELETE FROM assignments WHERE id = ?', [assignmentId]);
+    await query('DELETE FROM assignments WHERE id = ?', [assignmentId]);
     
     res.json({ success: true, message: 'Assignment deleted successfully' });
   } catch (error) {
@@ -188,7 +188,7 @@ router.get('/notifications/:user_id', async (req, res) => {
       ORDER BY an.created_at DESC
     `;
     
-    const [results] = await database.execute(query, [userId]);
+    const [results] = await query(sql, [userId]);
     
     // Get unread count
     const unreadQuery = `
@@ -198,7 +198,7 @@ router.get('/notifications/:user_id', async (req, res) => {
       WHERE an.user_id = ? AND an.is_read = FALSE AND a.status = 'active'
     `;
     
-    const [unreadResult] = await database.execute(unreadQuery, [userId]);
+    const [unreadResult] = await query(unreadQuery, [userId]);
     
     res.json({ 
       success: true, 
@@ -218,7 +218,7 @@ router.put('/notifications/:notification_id/read', async (req, res) => {
   try {
     const notificationId = req.params.notification_id;
     
-    await database.execute(
+    await query(
       'UPDATE assignment_notifications SET is_read = TRUE WHERE id = ?',
       [notificationId]
     );
@@ -235,7 +235,7 @@ router.put('/notifications/user/:user_id/read-all', async (req, res) => {
   try {
     const userId = req.params.user_id;
     
-    await database.execute(
+    await query(
       'UPDATE assignment_notifications SET is_read = TRUE WHERE user_id = ?',
       [userId]
     );

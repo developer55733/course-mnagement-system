@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const { query } = require('../config/database');
 
 // Get all discussion posts
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    const sql = `
       SELECT df.*, u.name as author_name, u.email as author_email,
              COUNT(dr.id) as reply_count
       FROM discussion_forum df
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
       ORDER BY df.created_at DESC
     `;
     
-    const [results] = await database.execute(query);
+    const [results] = await query(sql);
     res.json({ success: true, data: results });
   } catch (error) {
     console.error('Error fetching discussions:', error);
@@ -45,8 +45,8 @@ router.get('/:id', async (req, res) => {
       ORDER BY dr.created_at ASC
     `;
     
-    const [discussion] = await database.execute(discussionQuery, [discussionId]);
-    const [replies] = await database.execute(repliesQuery, [discussionId]);
+    const [discussion] = await query(discussionQuery, [discussionId]);
+    const [replies] = await query(repliesQuery, [discussionId]);
     
     if (discussion.length === 0) {
       return res.status(404).json({ success: false, error: 'Discussion not found' });
@@ -77,12 +77,12 @@ router.post('/', async (req, res) => {
       });
     }
     
-    const query = `
+    const sql = `
       INSERT INTO discussion_forum (title, content, module_code, created_by)
       VALUES (?, ?, ?, ?)
     `;
     
-    const [result] = await database.execute(query, [title, content, module_code, created_by]);
+    const [result] = await query(sql, [title, content, module_code || null, created_by]);
     
     res.json({ 
       success: true, 
@@ -114,21 +114,18 @@ router.post('/:id/replies', async (req, res) => {
     }
     
     // Check if discussion exists
-    const [discussion] = await database.execute(
-      'SELECT id FROM discussion_forum WHERE id = ?',
-      [discussionId]
-    );
+    const [discussion] = await query('SELECT id FROM discussion_forum WHERE id = ?', [discussionId]);
     
     if (discussion.length === 0) {
       return res.status(404).json({ success: false, error: 'Discussion not found' });
     }
     
-    const query = `
+    const sql = `
       INSERT INTO discussion_replies (discussion_id, content, created_by)
       VALUES (?, ?, ?)
     `;
     
-    const [result] = await database.execute(query, [discussionId, content, created_by]);
+    const [result] = await query(sql, [discussionId, content, created_by]);
     
     res.json({ 
       success: true, 
