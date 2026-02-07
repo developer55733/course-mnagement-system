@@ -6,6 +6,7 @@ const config = require('./config/config');
 const database = require('./config/database'); // Use MySQL only
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/users');
+const initializeDatabase = require('./config/init-database');
 
 // Enhanced CORS middleware for Railway
 const cors = (req, res, next) => {
@@ -143,7 +144,16 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-app.listen(PORT, () => {
+// Initialize database tables before starting the server
+initializeDatabase().then(success => {
+  if (success) {
+    console.log('🎉 Database initialization completed successfully');
+  } else {
+    console.log('⚠️ Database initialization failed, but server will continue');
+  }
+  
+  // Start the server after database initialization
+  app.listen(PORT, () => {
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction 
     ? `https://course-management-system.up.railway.app`
@@ -170,4 +180,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server ready for Railway deployment`);
   console.log(`📊 Health check available at: ${apiUrl}/health`);
   console.log(`🔗 API documentation at: ${apiUrl}/api`);
+  });
 });
