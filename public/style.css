@@ -2600,3 +2600,119 @@
         gap: 15px;
     }
 }
+
+/* Login Form Styles */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-title {
+    color: #1a237e;
+    margin-bottom: 8px;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.login-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.login-form {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.login-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1a237e;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.login-label i {
+    color: #2196f3;
+    width: 16px;
+    text-align: center;
+}
+
+.login-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #1976d2, #2196f3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.login-footer p {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Responsive Design for Login */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 15px;
+    }
+    
+    .login-title {
+        font-size: 1.4rem;
+    }
+    
+    .login-form {
+        padding: 20px;
+    }
+}
