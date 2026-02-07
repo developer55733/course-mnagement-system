@@ -185,6 +185,8 @@
             <button class="tab-btn" data-tab="about">About</button>
             <button class="tab-btn" data-tab="contact">Contact</button>
             <button class="tab-btn" data-tab="zoom-meeting" id="zoom-tab">Zoom Meeting</button>
+            <button class="tab-btn" data-tab="news" id="news-tab">News & Info</button>
+            <button class="tab-btn" data-tab="ads" id="ads-tab">Ads</button>
             <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
             <button class="tab-btn hidden" data-tab="discussion-forum" id="discussion-tab">Discussion Forum</button>
             <button class="tab-btn hidden" data-tab="assignments" id="assignments-tab">
@@ -529,6 +531,76 @@
                     <div class="footer-item">
                         <i class="fas fa-desktop"></i>
                         <span>Screen sharing available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- News & Information Tab -->
+        <div class="tab-content" id="news">
+            <div class="news-container">
+                <div class="news-header">
+                    <h2 class="page-title"><i class="fas fa-newspaper"></i> News & Information</h2>
+                    <p class="news-subtitle">Stay updated with the latest announcements and events</p>
+                </div>
+                
+                <div class="news-filters">
+                    <div class="filter-group">
+                        <select id="news-category-filter" class="filter-select">
+                            <option value="">All Categories</option>
+                            <option value="general">General</option>
+                            <option value="academic">Academic</option>
+                            <option value="events">Events</option>
+                            <option value="announcements">Announcements</option>
+                        </select>
+                        <select id="news-priority-filter" class="filter-select">
+                            <option value="">All Priorities</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="news-list" id="news-list">
+                    <div class="no-news-message">
+                        <i class="fas fa-newspaper"></i>
+                        <p>No news articles available yet.</p>
+                        <p>Admin will post news and updates here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ads Tab -->
+        <div class="tab-content" id="ads">
+            <div class="ads-container">
+                <div class="ads-header">
+                    <h2 class="page-title"><i class="fas fa-ad"></i> Advertisements</h2>
+                    <p class="ads-subtitle">Discover relevant products and services</p>
+                </div>
+                
+                <div class="ads-grid" id="ads-grid">
+                    <!-- Video Ads Section -->
+                    <div class="ads-section">
+                        <h3><i class="fas fa-video"></i> Video Ads</h3>
+                        <div class="video-ads-container" id="video-ads">
+                            <div class="no-ads-message">
+                                <i class="fas fa-video"></i>
+                                <p>No video ads available at the moment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Banner Ads Section -->
+                    <div class="ads-section">
+                        <h3><i class="fas fa-image"></i> Banner Ads</h3>
+                        <div class="banner-ads-container" id="banner-ads">
+                            <div class="no-ads-message">
+                                <i class="fas fa-image"></i>
+                                <p>No banner ads available at the moment.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1181,6 +1253,92 @@
                     </div>
                     <button class="btn" id="reload-config-btn">Reload Configuration</button>
                 </div>
+                
+                <!-- News Management Card -->
+                <div class="card">
+                    <h3><i class="fas fa-newspaper"></i> News Management</h3>
+                    <form id="add-news-form">
+                        <div class="form-group">
+                            <label for="news-title">News Title</label>
+                            <input type="text" id="news-title" required placeholder="Enter news title">
+                        </div>
+                        <div class="form-group">
+                            <label for="news-content">News Content</label>
+                            <textarea id="news-content" required placeholder="Enter news content..." rows="6"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-category">Category</label>
+                            <select id="news-category" required>
+                                <option value="">Select Category</option>
+                                <option value="general">General</option>
+                                <option value="academic">Academic</option>
+                                <option value="events">Events</option>
+                                <option value="announcements">Announcements</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-priority">Priority</label>
+                            <select id="news-priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-image">Image URL (Optional)</label>
+                            <input type="url" id="news-image" placeholder="Enter image URL">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Post News
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Ads Management Card -->
+                <div class="card">
+                    <h3><i class="fas fa-ad"></i> Ads Management</h3>
+                    <form id="add-ad-form">
+                        <div class="form-group">
+                            <label for="ad-title">Ad Title</label>
+                            <input type="text" id="ad-title" required placeholder="Enter ad title">
+                        </div>
+                        <div class="form-group">
+                            <label for="ad-description">Ad Description</label>
+                            <textarea id="ad-description" placeholder="Enter ad description..." rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="ad-video-url">Video URL</label>
+                            <input type="url" id="ad-video-url" required placeholder="Enter video URL (YouTube, Vimeo, etc.)">
+                        </div>
+                        <div class="form-group">
+                            <label for="ad-redirect-url">Redirect URL</label>
+                            <input type="url" id="ad-redirect-url" required placeholder="Enter URL to redirect when clicked">
+                        </div>
+                        <div class="form-group">
+                            <label for="ad-type">Ad Type</label>
+                            <select id="ad-type" required>
+                                <option value="">Select Type</option>
+                                <option value="video">Video Ad</option>
+                                <option value="banner">Banner Ad</option>
+                                <option value="popup">Popup Ad</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ad-position">Position</label>
+                            <select id="ad-position" required>
+                                <option value="">Select Position</option>
+                                <option value="top">Top</option>
+                                <option value="sidebar">Sidebar</option>
+                                <option value="bottom">Bottom</option>
+                                <option value="popup">Popup</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Ad
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         
@@ -1210,6 +1368,12 @@
                 </button>
                 <button class="mobile-nav-tab" data-tab="zoom-meeting">
                     <i class="fas fa-video"></i> Zoom Meeting
+                </button>
+                <button class="mobile-nav-tab" data-tab="news">
+                    <i class="fas fa-newspaper"></i> News & Info
+                </button>
+                <button class="mobile-nav-tab" data-tab="ads">
+                    <i class="fas fa-ad"></i> Ads
                 </button>
                 <button class="mobile-nav-tab hidden" data-tab="dashboard">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -1308,7 +1472,7 @@
                     }
                 } else {
                     // Show logged-out tabs
-                    if (['login', 'register'].includes(tabName)) {
+                    if (['login', 'register', 'news', 'ads'].includes(tabName)) {
                         tab.classList.remove('hidden');
                     }
                     if (['dashboard', 'discussion-forum', 'assignments', 'devadmin'].includes(tabName)) {
