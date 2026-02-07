@@ -727,6 +727,10 @@ function updateDashboard() {
 
     const timetableActionHeader = document.getElementById('timetable-action-header');
     
+    // Class timetable admin controls
+    const classTimetableAdminControls = document.getElementById('class-timetable-admin-controls');
+    const adminClassActionHeader = document.getElementById('admin-class-action-header');
+    
     if (isAdmin()) {
 
         if (lecturerAdminControls) lecturerAdminControls.classList.remove('hidden');
@@ -740,6 +744,10 @@ function updateDashboard() {
         if (adminActionHeader) adminActionHeader.style.display = 'table-cell';
 
         if (timetableActionHeader) timetableActionHeader.style.display = 'table-cell';
+        
+        // Show class timetable admin controls
+        if (classTimetableAdminControls) classTimetableAdminControls.classList.remove('hidden');
+        if (adminClassActionHeader) adminClassActionHeader.style.display = 'table-cell';
         
         // Show all admin action columns with delay to ensure DOM is ready
 
@@ -766,6 +774,10 @@ function updateDashboard() {
         if (adminActionHeader) adminActionHeader.style.display = 'none';
 
         if (timetableActionHeader) timetableActionHeader.style.display = 'none';
+        
+        // Hide class timetable admin controls
+        if (classTimetableAdminControls) classTimetableAdminControls.classList.add('hidden');
+        if (adminClassActionHeader) adminClassActionHeader.style.display = 'none';
         
         // Hide all admin action columns
 
@@ -3660,6 +3672,9 @@ window.initialize = function() {
     // Initialize WhatsApp integration
     initializeWhatsAppIntegration();
     
+    // Initialize class timetable
+    initializeClassTimetable();
+    
     // Initialize new features
     initializeDiscussionForum();
     initializeAssignments();
@@ -3767,5 +3782,196 @@ function sendContactMessage() {
     
     // Reset form
     contactForm.reset();
+}
+
+// Class Timetable Management
+function initializeClassTimetable() {
+    const classTimetableForm = document.getElementById('add-class-timetable-form');
+    const classTimetableBody = document.getElementById('class-timetable-body');
+    
+    if (classTimetableForm) {
+        classTimetableForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            addClassSession();
+        });
+    }
+    
+    // Load class timetable on page load
+    loadClassTimetable();
+}
+
+// Add class session
+function addClassSession() {
+    const moduleCode = document.getElementById('class-module-code')?.value || '';
+    const moduleName = document.getElementById('class-module-name')?.value || '';
+    const lecturerName = document.getElementById('class-lecturer-name')?.value || '';
+    const venue = document.getElementById('class-venue')?.value || '';
+    const day = document.getElementById('class-day')?.value || '';
+    const startTime = document.getElementById('class-start-time')?.value || '';
+    const endTime = document.getElementById('class-end-time')?.value || '';
+    
+    if (!moduleCode || !moduleName || !lecturerName || !venue || !day || !startTime || !endTime) {
+        showMessage('class-timetable-message', 'Please fill in all required fields', true);
+        return;
+    }
+    
+    // Create class session object
+    const classSession = {
+        module_code: moduleCode,
+        module_name: moduleName,
+        lecturer_name: lecturerName,
+        venue: venue,
+        day_of_week: day,
+        start_time: startTime,
+        end_time: endTime
+    };
+    
+    // Add to database (API call)
+    apiCall('/class-timetable', 'POST', classSession)
+        .then(response => {
+            if (response.success) {
+                showMessage('class-timetable-message', 'Class session added successfully!', false);
+                document.getElementById('add-class-timetable-form').reset();
+                loadClassTimetable(); // Reload timetable
+            } else {
+                showMessage('class-timetable-message', response.message || 'Failed to add class session', true);
+            }
+        })
+        .catch(error => {
+            console.error('Error adding class session:', error);
+            // Fallback: Add to local display
+            addClassSessionToTable(classSession);
+            showMessage('class-timetable-message', 'Class session added locally!', false);
+            document.getElementById('add-class-timetable-form').reset();
+        });
+}
+
+// Load class timetable
+function loadClassTimetable() {
+    const classTimetableBody = document.getElementById('class-timetable-body');
+    
+    if (!classTimetableBody) return;
+    
+    // Clear existing content
+    classTimetableBody.innerHTML = '';
+    
+    // Fetch from API
+    apiCall('/class-timetable', 'GET')
+        .then(response => {
+            if (response.success && response.data && response.data.length > 0) {
+                response.data.forEach(session => {
+                    addClassSessionToTable(session);
+                });
+            } else {
+                // Add sample data for demonstration
+                const sampleSessions = [
+                    {
+                        id: 1,
+                        module_code: 'IT101',
+                        module_name: 'Introduction to Programming',
+                        lecturer_name: 'Dr. John Smith',
+                        venue: 'Room 101',
+                        day_of_week: 'Monday',
+                        start_time: '09:00',
+                        end_time: '11:00'
+                    },
+                    {
+                        id: 2,
+                        module_code: 'IT102',
+                        module_name: 'Web Development Fundamentals',
+                        lecturer_name: 'Prof. Mary Johnson',
+                        venue: 'Lab 3',
+                        day_of_week: 'Tuesday',
+                        start_time: '14:00',
+                        end_time: '16:00'
+                    }
+                ];
+                
+                sampleSessions.forEach(session => {
+                    addClassSessionToTable(session);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading class timetable:', error);
+            // Add sample data as fallback
+            const sampleSessions = [
+                {
+                    id: 1,
+                    module_code: 'IT101',
+                    module_name: 'Introduction to Programming',
+                    lecturer_name: 'Dr. John Smith',
+                    venue: 'Room 101',
+                    day_of_week: 'Monday',
+                    start_time: '09:00',
+                    end_time: '11:00'
+                }
+            ];
+            
+            sampleSessions.forEach(session => {
+                addClassSessionToTable(session);
+            });
+        });
+}
+
+// Add class session to table
+function addClassSessionToTable(session) {
+    const classTimetableBody = document.getElementById('class-timetable-body');
+    if (!classTimetableBody) return;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${session.module_code}</td>
+        <td>${session.module_name}</td>
+        <td>${session.lecturer_name}</td>
+        <td>${session.day_of_week}</td>
+        <td>${session.start_time} - ${session.end_time}</td>
+        <td>${session.venue}</td>
+        <td class="admin-only" id="class-action-${session.id}" style="display: none;">
+            <button class="btn btn-small btn-danger" onclick="deleteClassSession(${session.id})">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </td>
+    `;
+    
+    classTimetableBody.appendChild(row);
+    
+    // Show/hide admin action column based on user role
+    if (isAdmin()) {
+        const actionCell = document.getElementById(`class-action-${session.id}`);
+        if (actionCell) {
+            actionCell.style.display = 'table-cell';
+        }
+        const actionHeader = document.getElementById('admin-class-action-header');
+        if (actionHeader) {
+            actionHeader.classList.remove('hidden');
+        }
+    }
+}
+
+// Delete class session
+function deleteClassSession(sessionId) {
+    if (!confirm('Are you sure you want to delete this class session?')) {
+        return;
+    }
+    
+    apiCall(`/class-timetable/${sessionId}`, 'DELETE')
+        .then(response => {
+            if (response.success) {
+                showMessage('class-timetable-message', 'Class session deleted successfully!', false);
+                loadClassTimetable(); // Reload timetable
+            } else {
+                showMessage('class-timetable-message', response.message || 'Failed to delete class session', true);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting class session:', error);
+            // Fallback: Remove from table
+            const row = document.querySelector(`#class-action-${sessionId}`).parentElement;
+            if (row) {
+                row.remove();
+                showMessage('class-timetable-message', 'Class session deleted locally!', false);
+            }
+        });
 }
 

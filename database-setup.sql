@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `lecturers` (
   INDEX idx_module (module)
 );
 
--- Create timetable table
+-- Create timetable table (for tests)
 CREATE TABLE IF NOT EXISTS `timetable` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `test` VARCHAR(100) NOT NULL,
@@ -42,6 +42,23 @@ CREATE TABLE IF NOT EXISTS `timetable` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_module (module),
   INDEX idx_date (date)
+);
+
+-- Create class_timetable table (for regular classes)
+CREATE TABLE IF NOT EXISTS `class_timetable` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `module_code` VARCHAR(50) NOT NULL,
+  `module_name` VARCHAR(100) NOT NULL,
+  `lecturer_name` VARCHAR(100) NOT NULL,
+  `venue` VARCHAR(100) NOT NULL,
+  `day_of_week` ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
+  `start_time` TIME NOT NULL,
+  `end_time` TIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_module_code (module_code),
+  INDEX idx_day_of_week (day_of_week),
+  INDEX idx_lecturer (lecturer_name)
 );
 
 -- Create modules table
