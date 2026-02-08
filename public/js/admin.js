@@ -14,6 +14,8 @@
     outPre: !!outPre
   });
 
+  let ADMIN_SECRET = '';
+
   const showOutput = (obj) => {
     outPre.textContent = JSON.stringify(obj, null, 2);
   };
@@ -30,15 +32,44 @@
     msgEl.style.display = 'none';
   };
 
-  // Wait for DOM to be fully loaded
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing admin panel...');
+  // Add safety check for login button
+  if (btnLogin) {
+    btnLogin.addEventListener('click', () => {
+      console.log('Login button clicked'); // Debug log
+      const s = secretInput.value.trim();
+      console.log('Secret entered:', s); // Debug log
+      if (!s) {
+        loginMsg.textContent = 'Please enter the admin secret.';
+        return;
+      }
+      ADMIN_SECRET = s;
+      loginMsg.textContent = '';
+      panel.style.display = 'block';
+      document.getElementById('loginCard').style.display = 'none';
+      
+      // Show logout button after successful login
+      const logoutBtn = document.getElementById('btnLogout');
+      if (logoutBtn) {
+        logoutBtn.style.display = 'block';
+      }
+      
+      // Show edit profile button after successful login
+      const editProfileBtn = document.getElementById('btnEditProfile');
+      if (editProfileBtn) {
+        editProfileBtn.style.display = 'block';
+        console.log('Edit profile button shown after login'); // Debug log
+      } else {
+        console.error('Edit profile button not found!'); // Debug log
+      }
+    });
+  } else {
+    console.error('Login button not found!');
+  }
 
-    const secretInput = document.getElementById('adminSecret');
-    const btnLogin = document.getElementById('btnLogin');
-    const loginMsg = document.getElementById('loginMsg');
-    const panel = document.getElementById('panel');
-    const outPre = document.getElementById('outPre');
+  const request = async (method, url, data) => {
+    try {
+      const res = await axios({ method, url, data, headers: { 'x-admin-secret': ADMIN_SECRET } });
+      return res.data;
     } catch (err) {
       const payload = err?.response?.data || { message: err.message };
       return { success: false, error: payload };
@@ -1311,6 +1342,44 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Show loading state immediately
       btnLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+      btnLogout.disabled = true;
+      console.log('Loading state activated'); // Debug log
+      
+      // Perform logout synchronously
+      try {
+        // Clear admin secret
+        ADMIN_SECRET = '';
+        console.log('Admin secret cleared'); // Debug log
+        
+        // Hide panel and show login card
+        if (panel) panel.style.display = 'none';
+        const loginCard = document.getElementById('loginCard');
+        if (loginCard) loginCard.style.display = 'block';
+        console.log('Panel hidden, login card shown'); // Debug log
+        
+        // Hide logout button
+        btnLogout.style.display = 'none';
+        console.log('Logout button hidden'); // Debug log
+        
+        // Hide edit profile button
+        const editProfileBtn = document.getElementById('btnEditProfile');
+        if (editProfileBtn) {
+          editProfileBtn.style.display = 'none';
+          console.log('Edit profile button hidden'); // Debug log
+        }
+        
+        // Clear login form
+        if (secretInput) secretInput.value = '';
+        if (loginMsg) {
+          loginMsg.textContent = 'Logged out successfully!';
+          loginMsg.style.color = '#28a745';
+        }
+        console.log('Login form updated'); // Debug log
+        
+        // Clear output
+        if (outPre) outPre.textContent = 'Use buttons above to perform admin actions.';
+        console.log('Output cleared'); // Debug log
+        
         // Show success message briefly, then clear it
         setTimeout(() => {
           if (loginMsg) {

@@ -1,8 +1,5 @@
 body {
-  background: linear-gradient(135deg, rgba(246, 246, 246, 0.9), rgba(246, 246, 246, 0.8)), url('/images/flavio-zWERT5ADMsk-unsplash.jpg') center/cover no-repeat fixed;
-  background-attachment: fixed;
-  background-size: cover;
-  min-height: 100vh;
+  background: #f6f8fa;
 }
 
 .card {
@@ -52,25 +49,11 @@ h1 {
   font-size: 14px !important;
   font-weight: 500 !important;
   transition: all 0.3s ease !important;
-  position: relative;
-  z-index: 10;
 }
 
-#btnLogout:hover:not(:disabled) {
+#btnLogout:hover {
   background-color: #c82333 !important;
   transform: translateY(-1px);
-}
-
-#btnLogout:active:not(:disabled) {
-  transform: translateY(0) !important;
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
-}
-
-#btnLogout:disabled {
-  background-color: #6c757d !important;
-  cursor: not-allowed !important;
-  opacity: 0.7 !important;
-  transform: none !important;
 }
 
 /* Admin Edit Profile Button Styles */
