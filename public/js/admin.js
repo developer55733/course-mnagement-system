@@ -2108,65 +2108,29 @@ document.addEventListener('DOMContentLoaded', function() {
   const handleCreateDiscussion = async (e) => {
     e.preventDefault();
     
-    const form = e.target;
-    const editingId = form.getAttribute('data-editing-id');
-    
     const title = document.getElementById('discussionTitle').value;
     const module = document.getElementById('discussionModule').value;
     const content = document.getElementById('discussionContent').value;
     
     try {
-      let response;
-      
-      if (editingId) {
-        // Update existing discussion
-        response = await axios.put(`/api/discussions/${editingId}`, {
-          title,
-          module,
-          content
-        }, {
-          headers: {
-            'x-admin-secret': ADMIN_SECRET
-          }
-        });
-      } else {
-        // Create new discussion
-        response = await axios.post('/api/discussions', {
-          title,
-          module,
-          content
-        }, {
-          headers: {
-            'x-admin-secret': ADMIN_SECRET
-          }
-        });
-      }
+      const response = await axios.post('/api/discussions', {
+        title,
+        module,
+        content
+      }, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
       
       if (response.data.success) {
-        const message = editingId ? 'Discussion updated successfully!' : 'Discussion posted successfully!';
-        showMessage('discussionMsg', message, false);
-        
-        // Reset form
-        form.reset();
-        form.removeAttribute('data-editing-id');
-        
-        // Reset button
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Discussion';
-          submitBtn.className = 'btn btn-success';
-        }
-        
-        // Refresh discussions list
+        showMessage('discussionMsg', 'Discussion posted successfully!', false);
+        document.getElementById('createDiscussionForm').reset();
         triggerAutoRefresh('discussions');
-        
-        // Update total count if creating new
-        if (!editingId) {
-          document.getElementById('totalDiscussions').textContent = 
-            (parseInt(document.getElementById('totalDiscussions').textContent) + 1);
-        }
+        document.getElementById('totalDiscussions').textContent = 
+          (parseInt(document.getElementById('totalDiscussions').textContent) + 1);
       } else {
-        showMessage('discussionMsg', response.data.message || 'Failed to save discussion', true);
+        showMessage('discussionMsg', response.data.message || 'Failed to post discussion', true);
       }
     } catch (error) {
       console.error('Error creating discussion:', error);
@@ -2198,18 +2162,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="card-text text-muted small">
                       ${discussion.module ? `<span class="badge badge-info mr-2">${discussion.module}</span>` : ''}
                       <small>Posted: ${new Date(discussion.created_at).toLocaleDateString()}</small>
-                      <small>By: ${discussion.author_name || 'Admin'}</small>
                     </p>
-                    <p class="card-text">${discussion.content.substring(0, 150)}${discussion.content.length > 150 ? '...' : ''}</p>
+                    <p class="card-text">${discussion.content.substring(0, 100)}${discussion.content.length > 100 ? '...' : ''}</p>
                   </div>
-                  <div class="ml-3 d-flex flex-column gap-2">
-                    <button class="btn btn-sm btn-info" onclick="viewDiscussionReplies(${discussion.id})" title="View Replies">
-                      <i class="fas fa-comments"></i> View Replies
-                    </button>
-                    <button class="btn btn-sm btn-warning" onclick="editDiscussion(${discussion.id})" title="Edit Discussion">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteDiscussion(${discussion.id})" title="Delete Discussion">
+                  <div class="ml-3">
+                    <button class="btn btn-sm btn-danger" onclick="deleteDiscussion(${discussion.id})">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -2251,171 +2208,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
       console.error('Error deleting discussion:', error);
       showMessage('discussionMsg', `Failed to delete discussion: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  const viewDiscussionReplies = async (id) => {
-    try {
-      // Fetch discussion with replies
-      const response = await axios.get(`/api/discussions/${id}`, {
-        headers: {
-          'x-admin-secret': ADMIN_SECRET
-        }
-      });
-      
-      if (response.data.success) {
-        const { discussion, replies } = response.data.data;
-        
-        // Create modal to show discussion details and replies
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.5);
-          z-index: 10000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        `;
-        
-        modal.innerHTML = `
-          <div style="background: white; border-radius: 8px; padding: 20px; max-width: 800px; max-height: 80vh; overflow-y: auto; width: 90%;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4><i class="fas fa-comments"></i> ${discussion.title}</h4>
-              <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <div class="mb-3">
-              <p><strong>Module:</strong> ${discussion.module_code || 'General Discussion'}</p>
-              <p><strong>Posted by:</strong> ${discussion.author_name || 'Admin'}</p>
-              <p><strong>Posted on:</strong> ${new Date(discussion.created_at).toLocaleDateString()}</p>
-              <p><strong>Content:</strong></p>
-              <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0;">
-                ${discussion.content}
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <h5><i class="fas fa-reply"></i> Replies (${replies.length})</h5>
-              <div style="max-height: 300px; overflow-y: auto;">
-                ${replies.length === 0 ? 
-                  '<p class="text-muted">No replies yet.</p>' :
-                  replies.map(reply => `
-                    <div style="border-left: 3px solid #007bff; padding-left: 15px; margin-bottom: 15px;">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <strong>${reply.author_name || 'Anonymous'}</strong>
-                          <small class="text-muted">${new Date(reply.created_at).toLocaleDateString()}</small>
-                        </div>
-                        <div>
-                          <button class="btn btn-sm btn-danger" onclick="deleteReply(${reply.id})" title="Delete Reply">
-                            <i class="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <div style="margin-top: 8px; padding: 10px; background: #f1f3f4; border-radius: 6px;">
-                        ${reply.content}
-                      </div>
-                    </div>
-                  `).join('')
-                }
-              </div>
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(e) {
-          if (e.target === modal) {
-            modal.remove();
-          }
-        });
-        
-      } else {
-        showMessage('discussionMsg', 'Failed to load discussion replies', true);
-      }
-    } catch (error) {
-      console.error('Error viewing discussion replies:', error);
-      showMessage('discussionMsg', `Error loading discussion: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  const deleteReply = async (id) => {
-    if (!confirm('Are you sure you want to delete this reply?')) {
-      return;
-    }
-    
-    try {
-      const response = await axios.delete(`/api/discussions/replies/${id}`, {
-        headers: {
-          'x-admin-secret': ADMIN_SECRET
-        }
-      });
-      
-      if (response.data.success) {
-        showMessage('discussionMsg', 'Reply deleted successfully!', false);
-        // Refresh the discussion replies view
-        const modal = document.querySelector('.modal');
-        if (modal) {
-          const discussionId = modal.querySelector('h4').textContent.replace(/.*Discussion\s+(.*)\s*.*/, '$1').trim();
-          viewDiscussionReplies(discussionId);
-        }
-      } else {
-        triggerAutoRefresh('discussions');
-      }
-    } else {
-      showMessage('discussionMsg', response.data.message || 'Failed to delete reply', true);
-    }
-  } catch (error) {
-    console.error('Error deleting reply:', error);
-    showMessage('discussionMsg', `Failed to delete reply: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  const editDiscussion = async (id) => {
-    try {
-      // Fetch discussion data
-      const response = await axios.get(`/api/discussions/${id}`, {
-        headers: {
-          'x-admin-secret': ADMIN_SECRET
-        }
-      });
-      
-      if (response.data.success) {
-        const discussion = response.data.data.discussion;
-        
-        // Populate form with discussion data
-        document.getElementById('discussionTitle').value = discussion.title;
-        document.getElementById('discussionModule').value = discussion.module_code || '';
-        document.getElementById('discussionContent').value = discussion.content;
-        
-        // Change button to update mode
-        const form = document.getElementById('createDiscussionForm');
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Discussion';
-          submitBtn.className = 'btn btn-warning';
-        }
-        
-        // Store editing ID
-        form.setAttribute('data-editing-id', id);
-        
-        // Scroll to form
-        form.scrollIntoView({ behavior: 'smooth' });
-        
-        showMessage('discussionMsg', 'Editing discussion. Make changes and click Update Discussion.', false);
-      } else {
-        showMessage('discussionMsg', response.data.message || 'Failed to load discussion', true);
-      }
-    } catch (error) {
-      console.error('Error loading discussion for editing:', error);
-      showMessage('discussionMsg', `Failed to load discussion: ${error.response?.data?.message || error.message}`, true);
     }
   };
 
