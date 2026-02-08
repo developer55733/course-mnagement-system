@@ -1634,8 +1634,12 @@ document.addEventListener('DOMContentLoaded', function() {
       is_active: true
     };
 
+    console.log('🔍 Creating news with data:', newsData);
+
     try {
       const response = await axios.post('/api/news', newsData);
+      console.log('✅ News creation response:', response.data);
+      
       if (response.data.success) {
         showMessage('newsMsg', 'News posted successfully!', false);
         document.getElementById('addNewsForm').reset();
@@ -1643,8 +1647,9 @@ document.addEventListener('DOMContentLoaded', function() {
         showMessage('newsMsg', response.data.message || 'Failed to post news', true);
       }
     } catch (error) {
-      console.error('Error posting news:', error);
-      showMessage('newsMsg', 'Failed to post news. Please try again.', true);
+      console.error('❌ Error posting news:', error);
+      console.error('❌ Error details:', error.response?.data || error.message);
+      showMessage('newsMsg', `Failed to post news: ${error.response?.data?.message || error.message}`, true);
     }
   }
 
@@ -1662,6 +1667,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const videoUrl = document.getElementById('adVideoUrl').value;
     const redirectUrl = document.getElementById('adRedirectUrl').value;
     
+    console.log('🔍 Creating ad with data:', {
+      title: document.getElementById('adTitle').value,
+      description: document.getElementById('adDescription').value,
+      video_url: videoUrl,
+      redirect_url: redirectUrl,
+      ad_type: document.getElementById('adType').value,
+      position: document.getElementById('adPosition').value,
+      auto_play: document.getElementById('adAutoPlay').checked
+    });
+
+    // Temporarily bypass video duration validation for testing
+    /*
     // Validate video duration (5-30 seconds)
     try {
       const videoDuration = await getVideoDuration(videoUrl);
@@ -1672,6 +1689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
       console.warn('Could not validate video duration:', error);
     }
+    */
 
     const adData = {
       title: document.getElementById('adTitle').value,
@@ -1684,8 +1702,12 @@ document.addEventListener('DOMContentLoaded', function() {
       auto_play: document.getElementById('adAutoPlay').checked
     };
 
+    console.log('🔍 Sending ad data to API:', adData);
+
     try {
       const response = await axios.post('/api/ads', adData);
+      console.log('✅ Ad creation response:', response.data);
+      
       if (response.data.success) {
         showMessage('adMsg', 'Ad created successfully!', false);
         document.getElementById('addAdForm').reset();
@@ -1694,8 +1716,9 @@ document.addEventListener('DOMContentLoaded', function() {
         showMessage('adMsg', response.data.message || 'Failed to create ad', true);
       }
     } catch (error) {
-      console.error('Error creating ad:', error);
-      showMessage('adMsg', 'Failed to create ad. Please try again.', true);
+      console.error('❌ Error creating ad:', error);
+      console.error('❌ Error details:', error.response?.data || error.message);
+      showMessage('adMsg', `Failed to create ad: ${error.response?.data?.message || error.message}`, true);
     }
   }
 

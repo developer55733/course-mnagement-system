@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel API Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Admin Panel API Test</h1>
+    
+    <div>
+        <h2>Test News API</h2>
+        <button onclick="testNewsAPI()">Test Create News</button>
+        <div id="news-result"></div>
+    </div>
+    
+    <div>
+        <h2>Test Ads API</h2>
+        <button onclick="testAdsAPI()">Test Create Ad</button>
+        <div id="ads-result"></div>
+    </div>
+    
+    <div>
+        <h2>Test Connection</h2>
+        <button onclick="testConnection()">Test API Connection</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('connection-result');
+            try {
+                const response = await axios.get('/api/health');
+                resultDiv.innerHTML = `<p style="color: green;">✅ Connection successful: ${JSON.stringify(response.data)}</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">❌ Connection failed: ${error.message}</p>`;
+                console.error('Connection error:', error);
+            }
+        }
+
+        async function testNewsAPI() {
+            const resultDiv = document.getElementById('news-result');
+            try {
+                const newsData = {
+                    title: 'Test News from Admin Panel',
+                    content: 'This is a test news article from the admin panel.',
+                    category: 'general',
+                    priority: 'medium',
+                    image_url: null
+                };
+                
+                const response = await axios.post('/api/news', newsData);
+                resultDiv.innerHTML = `<p style="color: green;">✅ News created: ${JSON.stringify(response.data)}</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">❌ News creation failed: ${error.message}</p>`;
+                console.error('News API error:', error);
+            }
+        }
+
+        async function testAdsAPI() {
+            const resultDiv = document.getElementById('ads-result');
+            try {
+                const adsData = {
+                    title: 'Test Ad from Admin Panel',
+                    description: 'This is a test advertisement from the admin panel.',
+                    video_url: 'https://example.com/test-video.mp4',
+                    redirect_url: 'https://example.com',
+                    ad_type: 'video',
+                    position: 'sidebar',
+                    auto_play: true
+                };
+                
+                const response = await axios.post('/api/ads', adsData);
+                resultDiv.innerHTML = `<p style="color: green;">✅ Ad created: ${JSON.stringify(response.data)}</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">❌ Ad creation failed: ${error.message}</p>`;
+                console.error('Ads API error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
