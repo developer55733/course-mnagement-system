@@ -142,4 +142,62 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
+// DELETE news
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await query('DELETE FROM news WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'News article not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'News article deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting news:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete news article'
+    });
+  }
+});
+
+// PUT toggle news status
+router.put('/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await query(`
+      UPDATE news 
+      SET is_active = NOT is_active, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `, [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'News article not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'News status updated successfully'
+    });
+  } catch (error) {
+    console.error('Error toggling news status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update news status'
+    });
+  }
+});
+
 module.exports = router;

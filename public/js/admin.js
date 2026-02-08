@@ -1687,6 +1687,125 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // News Management Dashboard Functions
+  async function loadNews() {
+    try {
+      const response = await axios.get('/api/news', {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        displayNews(response.data.data);
+        document.getElementById('totalNews').textContent = response.data.data.length;
+      } else {
+        console.log('Failed to load news from API');
+        document.getElementById('newsList').innerHTML = '<p class="text-muted">Failed to load news.</p>';
+      }
+    } catch (error) {
+      console.error('Error loading news:', error);
+      document.getElementById('newsList').innerHTML = '<p class="text-muted">Error loading news.</p>';
+    }
+  }
+
+  function displayNews(news) {
+    const newsList = document.getElementById('newsList');
+    if (!newsList) return;
+
+    if (news.length === 0) {
+      newsList.innerHTML = '<p class="text-muted">No news articles created yet. Add one using the form above.</p>';
+      return;
+    }
+
+    const html = news.map(article => `
+      <div class="card mb-3" data-id="${article.id}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">${article.title}</h6>
+          <div>
+            <span class="badge badge-${article.is_active ? 'success' : 'secondary'}">${article.is_active ? 'Active' : 'Inactive'}</span>
+            <span class="badge badge-info">${article.category}</span>
+            <span class="badge badge-warning">${article.priority}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <p><strong>Content:</strong> ${article.content.substring(0, 150)}${article.content.length > 150 ? '...' : ''}</p>
+              ${article.image_url ? `<p><strong>Image:</strong> <img src="${article.image_url}" alt="${article.title}" style="max-width: 100px; height: auto;"></p>` : ''}
+            </div>
+            <div class="col-md-4">
+              <p><strong>Created:</strong> ${new Date(article.created_at).toLocaleDateString()}</p>
+              <p><strong>Author:</strong> ${article.created_by_name || 'Unknown'}</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-sm btn-primary" onclick="editNews(${article.id})">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-warning" onclick="toggleNewsStatus(${article.id})">
+            <i class="fas fa-power-off"></i> ${article.is_active ? 'Deactivate' : 'Activate'}
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteNews(${article.id})">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+    
+    newsList.innerHTML = html;
+  }
+
+  // Delete News function
+  window.deleteNews = async (id) => {
+    if (!confirm('Are you sure you want to delete this news article? This action cannot be undone.')) return;
+    
+    try {
+      const response = await axios.delete(`/api/news/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        loadNews(); // Refresh news list
+        showMessage('newsMsg', 'News article deleted successfully!', false);
+      } else {
+        showMessage('newsMsg', response.data.message || 'Failed to delete news article', true);
+      }
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      showMessage('newsMsg', `Failed to delete news article: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  // Toggle News Status function
+  window.toggleNewsStatus = async (id) => {
+    try {
+      const response = await axios.put(`/api/news/${id}/toggle`, {}, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        loadNews(); // Refresh news list
+        showMessage('newsMsg', 'News status updated successfully!', false);
+      } else {
+        showMessage('newsMsg', response.data.message || 'Failed to update news status', true);
+      }
+    } catch (error) {
+      console.error('Error updating news status:', error);
+      showMessage('newsMsg', `Failed to update news status: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  // Edit News function (placeholder for future implementation)
+  window.editNews = (id) => {
+    showMessage('newsMsg', 'Edit functionality coming soon!', false);
+  };
+
   // Helper function to get video duration
   async function getVideoDuration(videoUrl) {
     return new Promise((resolve, reject) => {

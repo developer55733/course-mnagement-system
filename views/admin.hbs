@@ -591,7 +591,30 @@
             </form>
           </div>
         </div>
-
+        
+        <!-- News Dashboard Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-newspaper"></i> News Dashboard</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <button class="btn btn-success btn-sm" onclick="loadNews()">
+                  <i class="fas fa-sync"></i> Refresh News
+                </button>
+              </div>
+              <div class="col-md-6 text-right">
+                <span class="badge badge-primary" id="totalNews">0</span> Total News
+              </div>
+            </div>
+            
+            <div id="newsList" style="max-height: 500px; overflow-y: auto;">
+              <p class="text-muted">Loading news...</p>
+            </div>
+          </div>
+        </div>
+        
         <!-- Ads Management Section -->
         <div class="card mb-4">
           <div class="card-header bg-warning text-dark">
