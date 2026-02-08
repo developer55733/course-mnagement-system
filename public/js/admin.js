@@ -1644,9 +1644,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch (error) {
       console.error('Error posting news:', error);
-      // Simulate success for demo
-      showMessage('newsMsg', 'News posted successfully! (Demo mode)', false);
-      document.getElementById('addNewsForm').reset();
+      showMessage('newsMsg', 'Failed to post news. Please try again.', true);
     }
   }
 
@@ -1697,10 +1695,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch (error) {
       console.error('Error creating ad:', error);
-      // Simulate success for demo
-      showMessage('adMsg', 'Ad created successfully! (Demo mode)', false);
-      document.getElementById('addAdForm').reset();
-      document.getElementById('adAutoPlay').checked = true;
+      showMessage('adMsg', 'Failed to create ad. Please try again.', true);
     }
   }
 
