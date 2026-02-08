@@ -16,7 +16,13 @@
 
     "build": "echo 'Build completed'",
 
-    "heroku-postbuild": "npm install"
+    "heroku-postbuild": "npm install",
+
+    "railway-setup": "chmod +x railway-deploy.sh && ./railway-deploy.sh",
+
+    "railway-migrate": "mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USERNAME -p$MYSQL_PASSWORD $MYSQL_DATABASE < railway-database-setup.sql",
+
+    "deploy:railway": "railway up"
 
   },
 
