@@ -2104,4 +2104,122 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
+  // Discussion Management Functions
+  const handleCreateDiscussion = async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('discussionTitle').value;
+    const module = document.getElementById('discussionModule').value;
+    const content = document.getElementById('discussionContent').value;
+    
+    try {
+      const response = await axios.post('/api/discussions', {
+        title,
+        module,
+        content
+      }, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        showMessage('discussionMsg', 'Discussion posted successfully!', false);
+        document.getElementById('createDiscussionForm').reset();
+        loadDiscussions();
+        document.getElementById('totalDiscussions').textContent = 
+          (parseInt(document.getElementById('totalDiscussions').textContent) + 1);
+      } else {
+        showMessage('discussionMsg', response.data.message || 'Failed to post discussion', true);
+      }
+    } catch (error) {
+      console.error('Error creating discussion:', error);
+      showMessage('discussionMsg', `Failed to post discussion: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  const loadDiscussions = async () => {
+    try {
+      const response = await axios.get('/api/discussions', {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        const discussions = response.data.data;
+        const discussionsList = document.getElementById('discussionsList');
+        
+        if (discussions.length === 0) {
+          discussionsList.innerHTML = '<p class="text-muted">No discussions posted yet.</p>';
+        } else {
+          discussionsList.innerHTML = discussions.map(discussion => `
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <h6 class="card-title">${discussion.title}</h6>
+                    <p class="card-text text-muted small">
+                      ${discussion.module ? `<span class="badge badge-info mr-2">${discussion.module}</span>` : ''}
+                      <small>Posted: ${new Date(discussion.created_at).toLocaleDateString()}</small>
+                    </p>
+                    <p class="card-text">${discussion.content.substring(0, 100)}${discussion.content.length > 100 ? '...' : ''}</p>
+                  </div>
+                  <div class="ml-3">
+                    <button class="btn btn-sm btn-danger" onclick="deleteDiscussion(${discussion.id})">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        document.getElementById('totalDiscussions').textContent = discussions.length;
+      }
+    } catch (error) {
+      console.error('Error loading discussions:', error);
+      document.getElementById('discussionsList').innerHTML = 
+        '<p class="text-danger">Error loading discussions</p>';
+    }
+  };
+
+  const deleteDiscussion = async (id) => {
+    if (!confirm('Are you sure you want to delete this discussion?')) {
+      return;
+    }
+    
+    try {
+      const response = await axios.delete(`/api/discussions/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        showMessage('discussionMsg', 'Discussion deleted successfully!', false);
+        loadDiscussions();
+        document.getElementById('totalDiscussions').textContent = 
+          (parseInt(document.getElementById('totalDiscussions').textContent) - 1);
+      } else {
+        showMessage('discussionMsg', response.data.message || 'Failed to delete discussion', true);
+      }
+    } catch (error) {
+      console.error('Error deleting discussion:', error);
+      showMessage('discussionMsg', `Failed to delete discussion: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  // Initialize discussion management
+  document.addEventListener('DOMContentLoaded', function() {
+    const createDiscussionForm = document.getElementById('createDiscussionForm');
+    if (createDiscussionForm) {
+      createDiscussionForm.addEventListener('submit', handleCreateDiscussion);
+    }
+    
+    // Load discussions when page loads
+    loadDiscussions();
+  });
+
 })();
