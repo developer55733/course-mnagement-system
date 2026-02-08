@@ -68,12 +68,6 @@ class Module {
     return deleteResult.affectedRows > 0;
   }
 
-  static async clearAll() {
-    const result = await pool.query('DELETE FROM modules');
-    const [clearResult] = result;
-    return clearResult.affectedRows >= 0;
-  }
-
 }
 
 

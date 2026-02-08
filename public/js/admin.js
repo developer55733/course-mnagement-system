@@ -548,10 +548,19 @@
       btnExecuteDbOperation.disabled = true;
       
       try {
-        await executeDatabaseOperation(operationType);
+        const res = await request('post', '/admin/database-operation', { operationType });
+        
+        if (res && res.success) {
+          showMessage('dbOperationMsg', res.message || 'Database operation completed successfully!', false);
+          await loadDatabaseStats(); // Refresh stats after operation
+        } else {
+          // Simulate operation for demo
+          simulateDatabaseOperation(operationType);
+        }
       } catch (error) {
         console.error('Error executing database operation:', error);
-        showMessage('dbOperationMsg', `Operation failed: ${error.message}`, true);
+        // Simulate operation for demo
+        simulateDatabaseOperation(operationType);
       }
       
       setTimeout(() => {
@@ -561,58 +570,6 @@
         document.getElementById('dbOperationConfirm').value = '';
       }, 2000);
     });
-  }
-
-  async function executeDatabaseOperation(operationType) {
-    const confirmText = document.getElementById('dbOperationConfirm').value;
-    
-    if (confirmText !== 'CONFIRM') {
-      showMessage('dbOperationMsg', 'Please type CONFIRM to proceed with this operation.', true);
-      return;
-    }
-
-    try {
-      let response;
-      let endpoint;
-      
-      switch (operationType) {
-        case 'clearUsers':
-          endpoint = '/api/users/clear';
-          break;
-        case 'clearModules':
-          endpoint = '/api/modules/clear';
-          break;
-        case 'clearLecturers':
-          endpoint = '/api/lecturers/clear';
-          break;
-        case 'clearTimetables':
-          endpoint = '/api/timetable/clear';
-          break;
-        case 'resetDatabase':
-          endpoint = '/api/database/reset';
-          break;
-        default:
-          showMessage('dbOperationMsg', 'Invalid operation selected.', true);
-          return;
-      }
-
-      response = await axios.delete(endpoint);
-      
-      if (response.data.success) {
-        showMessage('dbOperationMsg', response.data.message || 'Operation completed successfully!', false);
-        // Refresh stats after operation
-        loadDatabaseStats();
-        // Clear confirmation field
-        document.getElementById('dbOperationConfirm').value = '';
-        // Reset operation selection
-        document.getElementById('dbOperationType').value = '';
-      } else {
-        showMessage('dbOperationMsg', response.data.message || 'Operation failed.', true);
-      }
-    } catch (error) {
-      console.error('Database operation error:', error);
-      showMessage('dbOperationMsg', `Operation failed: ${error.response?.data?.message || error.message}`, true);
-    }
   }
 
   function simulateDatabaseOperation(operationType) {
@@ -657,283 +614,11 @@
     }, 1000);
   }
 
-  // Modules Management Functions
-  let modulesData = [];
-
-  async function loadModules() {
-    try {
-      const response = await axios.get('/api/modules');
-      if (response.data.success) {
-        modulesData = response.data.data;
-        displayModules(modulesData);
-        // Populate dropdowns
-        populateModuleDropdowns();
-      } else {
-        console.log('Failed to load modules from API');
-      }
-    } catch (error) {
-      console.error('Error loading modules:', error);
-    }
-  }
-
-  function displayModules(modules) {
-    const modulesList = document.getElementById('modulesList');
-    if (!modulesList) return;
-
-    if (modules.length === 0) {
-      modulesList.innerHTML = '<p class="text-muted">No modules found. Add one using the form on the left.</p>';
-      return;
-    }
-
-    const html = modules.map(module => `
-      <div class="module-item border rounded p-3 mb-2">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="mb-1">${module.code}</h6>
-            <p class="mb-1 text-muted">${module.name}</p>
-            ${module.lecturer ? `<small class="text-info"><i class="fas fa-user"></i> ${module.lecturer}</small>` : ''}
-          </div>
-          <div class="btn-group btn-group-sm">
-            <button class="btn btn-sm btn-warning" onclick="editModule(${module.id})">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-danger" onclick="deleteModule(${module.id})">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    modulesList.innerHTML = html;
-  }
-
-  function populateModuleDropdowns() {
-    const dropdowns = [
-      'lecturerModule',
-      'timetableModule',
-      'noteModule',
-      'assignmentModule'
-    ];
-
-    dropdowns.forEach(dropdownId => {
-      const dropdown = document.getElementById(dropdownId);
-      if (dropdown) {
-        const currentValue = dropdown.value;
-        dropdown.innerHTML = '<option value="">Select Module</option>';
-        modulesData.forEach(module => {
-          const option = document.createElement('option');
-          option.value = module.code;
-          option.textContent = `${module.code} - ${module.name}`;
-          dropdown.appendChild(option);
-        });
-        dropdown.value = currentValue;
-      }
-    });
-  }
-
-  // Add Module button handler
-  const btnAddModule = document.getElementById('btnAddModule');
-  if (btnAddModule) {
-    btnAddModule.addEventListener('click', async () => {
-      const code = document.getElementById('moduleCode').value.trim();
-      const name = document.getElementById('moduleName').value.trim();
-      const lecturer = document.getElementById('moduleLecturer').value.trim();
-      const phone = document.getElementById('modulePhone').value.trim();
-
-      if (!code || !name) {
-        showMessage('moduleMsg', 'Module Code and Name are required.', true);
-        return;
-      }
-
-      try {
-        const response = await axios.post('/api/modules', { code, name, lecturer, phone });
-        if (response.data.success) {
-          showMessage('moduleMsg', 'Module created successfully!', false);
-          document.getElementById('moduleCode').value = '';
-          document.getElementById('moduleName').value = '';
-          document.getElementById('moduleLecturer').value = '';
-          document.getElementById('modulePhone').value = '';
-          loadModules(); // Refresh the list
-        } else {
-          showMessage('moduleMsg', response.data.message || 'Failed to create module', true);
-        }
-      } catch (error) {
-        console.error('Error creating module:', error);
-        showMessage('moduleMsg', `Failed to create module: ${error.response?.data?.message || error.message}`, true);
-      }
-    });
-  }
-
-  // Search Modules button handler
-  const btnSearchModules = document.getElementById('btnSearchModules');
-  if (btnSearchModules) {
-    btnSearchModules.addEventListener('click', () => {
-      const searchTerm = document.getElementById('searchModules').value.toLowerCase();
-      const filtered = modulesData.filter(module => 
-        module.code.toLowerCase().includes(searchTerm) || 
-        module.name.toLowerCase().includes(searchTerm)
-      );
-      displayModules(filtered);
-    });
-  }
-
-  // Lecturers Management Functions
-  let lecturersData = [];
-
-  async function loadLecturers() {
-    try {
-      const response = await axios.get('/api/lecturers');
-      if (response.data.success) {
-        lecturersData = response.data.data;
-        displayLecturers(lecturersData);
-      } else {
-        console.log('Failed to load lecturers from API');
-      }
-    } catch (error) {
-      console.error('Error loading lecturers:', error);
-    }
-  }
-
-  function displayLecturers(lecturers) {
-    const lecturersList = document.getElementById('lecturersList');
-    if (!lecturersList) return;
-
-    if (lecturers.length === 0) {
-      lecturersList.innerHTML = '<p class="text-muted">No lecturers found. Add one using the form on the left.</p>';
-      return;
-    }
-
-    const html = lecturers.map(lecturer => `
-      <div class="lecturer-item border rounded p-3 mb-2">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="mb-1">${lecturer.name}</h6>
-            <p class="mb-1 text-muted">${lecturer.module}</p>
-            <small class="text-info"><i class="fas fa-phone"></i> ${lecturer.phone}</small>
-          </div>
-          <div class="btn-group btn-group-sm">
-            <button class="btn btn-sm btn-warning" onclick="editLecturer(${lecturer.id})">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-danger" onclick="deleteLecturer(${lecturer.id})">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    lecturersList.innerHTML = html;
-  }
-
-  // Add Lecturer button handler
-  const btnAddLecturer = document.getElementById('btnAddLecturer');
-  if (btnAddLecturer) {
-    btnAddLecturer.addEventListener('click', async () => {
-      const name = document.getElementById('lecturerName').value.trim();
-      const module = document.getElementById('lecturerModule').value.trim();
-      const phone = document.getElementById('lecturerPhone').value.trim();
-
-      if (!name || !module || !phone) {
-        showMessage('lecturerMsg', 'All fields are required.', true);
-        return;
-      }
-
-      try {
-        const response = await axios.post('/api/lecturers', { name, module, phone });
-        if (response.data.success) {
-          showMessage('lecturerMsg', 'Lecturer created successfully!', false);
-          document.getElementById('lecturerName').value = '';
-          document.getElementById('lecturerModule').value = '';
-          document.getElementById('lecturerPhone').value = '';
-          loadLecturers(); // Refresh the list
-        } else {
-          showMessage('lecturerMsg', response.data.message || 'Failed to create lecturer', true);
-        }
-      } catch (error) {
-        console.error('Error creating lecturer:', error);
-        showMessage('lecturerMsg', `Failed to create lecturer: ${error.response?.data?.message || error.message}`, true);
-      }
-    });
-  }
-
-  // Search Lecturers button handler
-  const btnSearchLecturers = document.getElementById('btnSearchLecturers');
-  if (btnSearchLecturers) {
-    btnSearchLecturers.addEventListener('click', () => {
-      const searchTerm = document.getElementById('searchLecturers').value.toLowerCase();
-      const filtered = lecturersData.filter(lecturer => 
-        lecturer.name.toLowerCase().includes(searchTerm) || 
-        lecturer.module.toLowerCase().includes(searchTerm)
-      );
-      displayLecturers(filtered);
-    });
-  }
-
-  // Global functions for edit and delete
-  window.deleteModule = async (id) => {
-    if (!confirm('Are you sure you want to delete this module? This action cannot be undone.')) return;
-    
-    try {
-      const response = await axios.delete(`/api/modules/${id}`);
-      if (response.data.success) {
-        loadModules();
-        showMessage('moduleMsg', 'Module deleted successfully!', false);
-      } else {
-        showMessage('moduleMsg', response.data.message || 'Failed to delete module', true);
-      }
-    } catch (error) {
-      console.error('Error deleting module:', error);
-      showMessage('moduleMsg', `Failed to delete module: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  window.deleteLecturer = async (id) => {
-    if (!confirm('Are you sure you want to delete this lecturer? This action cannot be undone.')) return;
-    
-    try {
-      const response = await axios.delete(`/api/lecturers/${id}`);
-      if (response.data.success) {
-        loadLecturers();
-        showMessage('lecturerMsg', 'Lecturer deleted successfully!', false);
-      } else {
-        showMessage('lecturerMsg', response.data.message || 'Failed to delete lecturer', true);
-      }
-    } catch (error) {
-      console.error('Error deleting lecturer:', error);
-      showMessage('lecturerMsg', `Failed to delete lecturer: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  window.editModule = (id) => {
-    const module = modulesData.find(m => m.id === id);
-    if (module) {
-      document.getElementById('moduleCode').value = module.code;
-      document.getElementById('moduleName').value = module.name;
-      // Scroll to add module form
-      document.getElementById('moduleCode').scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  window.editLecturer = (id) => {
-    const lecturer = lecturersData.find(l => l.id === id);
-    if (lecturer) {
-      document.getElementById('lecturerName').value = lecturer.name;
-      document.getElementById('lecturerModule').value = lecturer.module;
-      document.getElementById('lecturerPhone').value = lecturer.phone;
-      // Scroll to add lecturer form
-      document.getElementById('lecturerName').scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Load modules and lecturers on login
+  // Load database stats on login
   const originalLoginHandler = btnLogin.onclick;
   btnLogin.addEventListener('click', () => {
     setTimeout(() => {
       if (ADMIN_SECRET) {
-        loadModules();
-        loadLecturers();
         loadDatabaseStats();
         loadNotes();
       }

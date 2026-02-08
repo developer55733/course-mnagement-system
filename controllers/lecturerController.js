@@ -81,16 +81,3 @@ exports.getLecturersByModule = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
-exports.clearAllLecturers = async (req, res) => {
-  try {
-    const success = await Lecturer.clearAll();
-    if (!success) {
-      return res.status(500).json({ success: false, error: 'Failed to clear lecturers' });
-    }
-
-    res.json({ success: true, message: 'All lecturers have been deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};

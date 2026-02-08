@@ -21,7 +21,4 @@ router.put('/:id', adminAuth, lecturerController.updateLecturer);
 // Delete lecturer
 router.delete('/:id', adminAuth, lecturerController.deleteLecturer);
 
-// Clear all lecturers
-router.delete('/clear', adminAuth, lecturerController.clearAllLecturers);
-
 module.exports = router;

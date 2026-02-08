@@ -21,7 +21,4 @@ router.put('/:id', adminAuth, moduleController.updateModule);
 // Delete module
 router.delete('/:id', adminAuth, moduleController.deleteModule);
 
-// Clear all modules
-router.delete('/clear', adminAuth, moduleController.clearAllModules);
-
 module.exports = router;

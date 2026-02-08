@@ -74,12 +74,6 @@ class Lecturer {
 
   }
 
-  static async clearAll() {
-    const result = await pool.query('DELETE FROM lecturers');
-    const [clearResult] = result;
-    return clearResult.affectedRows >= 0;
-  }
-
 }
 
 
