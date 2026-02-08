@@ -2162,14 +2162,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="card-text text-muted small">
                       ${discussion.module ? `<span class="badge badge-info mr-2">${discussion.module}</span>` : ''}
                       <small>Posted: ${new Date(discussion.created_at).toLocaleDateString()}</small>
-                      <span class="badge badge-primary ml-2">${discussion.reply_count || 0} replies</span>
                     </p>
                     <p class="card-text">${discussion.content.substring(0, 100)}${discussion.content.length > 100 ? '...' : ''}</p>
                   </div>
                   <div class="ml-3">
-                    <button class="btn btn-sm btn-info mr-2" onclick="viewDiscussionReplies(${discussion.id})">
-                      <i class="fas fa-comments"></i> View Replies
-                    </button>
                     <button class="btn btn-sm btn-danger" onclick="deleteDiscussion(${discussion.id})">
                       <i class="fas fa-trash"></i>
                     </button>
@@ -2189,8 +2185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Make deleteDiscussion globally accessible
-  window.deleteDiscussion = async (id) => {
+  const deleteDiscussion = async (id) => {
     if (!confirm('Are you sure you want to delete this discussion?')) {
       return;
     }
@@ -2213,180 +2208,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
       console.error('Error deleting discussion:', error);
       showMessage('discussionMsg', `Failed to delete discussion: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  // Make viewDiscussionReplies globally accessible
-  window.viewDiscussionReplies = async (discussionId) => {
-    try {
-      const response = await axios.get(`/api/discussions/${discussionId}`, {
-        headers: {
-          'x-admin-secret': ADMIN_SECRET
-        }
-      });
-      
-      if (response.data.success) {
-        const { discussion, replies } = response.data.data;
-        showRepliesModal(discussion, replies);
-      } else {
-        showMessage('discussionMsg', response.data.message || 'Failed to load discussion replies', true);
-      }
-    } catch (error) {
-      console.error('Error loading discussion replies:', error);
-      showMessage('discussionMsg', `Failed to load replies: ${error.response?.data?.message || error.message}`, true);
-    }
-  };
-
-  const showRepliesModal = (discussion, replies) => {
-    // Create modal if it doesn't exist
-    let modal = document.getElementById('repliesModal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'repliesModal';
-      modal.className = 'modal';
-      modal.style.cssText = `
-        display: block;
-        position: fixed;
-        z-index: 10000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-      `;
-      document.body.appendChild(modal);
-    }
-
-    modal.innerHTML = `
-      <div class="modal-content" style="
-        background-color: #fefefe;
-        margin: 5% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 800px;
-        border-radius: 8px;
-        max-height: 80vh;
-        overflow-y: auto;
-      ">
-        <div class="modal-header" style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
-        ">
-          <h3><i class="fas fa-comments"></i> Discussion Replies</h3>
-          <button class="close-btn" onclick="closeRepliesModal()" style="
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #aaa;
-          ">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="discussion-detail" style="
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-          ">
-            <h4>${discussion.title}</h4>
-            <p class="text-muted small">
-              ${discussion.module_code ? `<span class="badge badge-info mr-2">${discussion.module_code}</span>` : ''}
-              <small>Posted by ${discussion.author_name || 'Admin'} on ${new Date(discussion.created_at).toLocaleDateString()}</small>
-            </p>
-            <p>${discussion.content}</p>
-          </div>
-          
-          <div class="replies-section">
-            <h5><i class="fas fa-reply"></i> Replies (${replies.length})</h5>
-            <div id="repliesList">
-              ${replies.length === 0 ? 
-                '<p class="text-muted">No replies yet.</p>' :
-                replies.map(reply => `
-                  <div class="reply-item" style="
-                    border: 1px solid #ddd;
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: white;
-                  ">
-                    <div class="reply-header" style="
-                      display: flex;
-                      justify-content: space-between;
-                      align-items: center;
-                      margin-bottom: 10px;
-                    ">
-                      <div>
-                        <strong>${reply.author_name || 'Unknown User'}</strong>
-                        <small class="text-muted ml-2">${new Date(reply.created_at).toLocaleDateString()}</small>
-                      </div>
-                      <button class="btn btn-sm btn-danger" onclick="deleteReply(${reply.id})">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                    <div class="reply-content">
-                      <p>${reply.content}</p>
-                    </div>
-                  </div>
-                `).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  };
-
-  window.closeRepliesModal = () => {
-    const modal = document.getElementById('repliesModal');
-    if (modal) {
-      modal.style.display = 'none';
-    }
-  };
-
-  window.deleteReply = async (replyId) => {
-    if (!confirm('Are you sure you want to delete this reply?')) {
-      return;
-    }
-    
-    try {
-      const response = await axios.delete(`/api/discussions/replies/${replyId}`, {
-        headers: {
-          'x-admin-secret': ADMIN_SECRET
-        }
-      });
-      
-      if (response.data.success) {
-        showMessage('discussionMsg', 'Reply deleted successfully!', false);
-        // Get the discussion ID from the modal title or store it
-        const discussionTitle = document.querySelector('#repliesModal .discussion-detail h4')?.textContent;
-        if (discussionTitle) {
-          // Find the discussion ID from the current discussions list
-          const discussions = Array.from(document.querySelectorAll('#discussionsList .card-title'));
-          const discussionCard = discussions.find(el => el.textContent === discussionTitle);
-          if (discussionCard) {
-            const discussionCardElement = discussionCard.closest('.card');
-            const viewButton = discussionCardElement.querySelector('button[onclick*="viewDiscussionReplies"]');
-            if (viewButton) {
-              const onclickAttr = viewButton.getAttribute('onclick');
-              const discussionId = onclickAttr.match(/viewDiscussionReplies\((\d+)\)/);
-              if (discussionId) {
-                viewDiscussionReplies(parseInt(discussionId[1]));
-              }
-            }
-          }
-        }
-      } else {
-        showMessage('discussionMsg', response.data.message || 'Failed to delete reply', true);
-      }
-    } catch (error) {
-      console.error('Error deleting reply:', error);
-      showMessage('discussionMsg', `Failed to delete reply: ${error.response?.data?.message || error.message}`, true);
     }
   };
 

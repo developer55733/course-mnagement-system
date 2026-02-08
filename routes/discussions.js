@@ -193,40 +193,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Delete reply (admin only)
-router.delete('/replies/:id', async (req, res) => {
-  try {
-    const replyId = req.params.id;
-    
-    // Check if admin is deleting the reply
-    const adminSecret = req.headers['x-admin-secret'];
-    const isAdmin = adminSecret === process.env.ADMIN_SECRET;
-    
-    if (!isAdmin) {
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Admin access required to delete replies' 
-      });
-    }
-    
-    // Get reply to verify it exists
-    const [reply] = await query('SELECT * FROM discussion_replies WHERE id = ?', [replyId]);
-    
-    if (reply.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Reply not found' 
-      });
-    }
-    
-    // Delete the reply
-    await query('DELETE FROM discussion_replies WHERE id = ?', [replyId]);
-    
-    res.json({ success: true, message: 'Reply deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting reply:', error);
-    res.status(500).json({ success: false, error: 'Failed to delete reply' });
-  }
-});
-
 module.exports = router;
