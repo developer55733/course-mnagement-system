@@ -733,9 +733,9 @@
   }
 
   // Add Module button handler
-  const btnAddModule = document.getElementById('btnAddModule');
-  if (btnAddModule) {
-    btnAddModule.addEventListener('click', async () => {
+  const btnAddModuleHandler = document.getElementById('btnAddModule');
+  if (btnAddModuleHandler) {
+    btnAddModuleHandler.addEventListener('click', async () => {
       const code = document.getElementById('moduleCode').value.trim();
       const name = document.getElementById('moduleName').value.trim();
       const lecturer = document.getElementById('moduleLecturer').value.trim();
@@ -766,9 +766,9 @@
   }
 
   // Search Modules button handler
-  const btnSearchModules = document.getElementById('btnSearchModules');
-  if (btnSearchModules) {
-    btnSearchModules.addEventListener('click', () => {
+  const btnSearchModulesHandler = document.getElementById('btnSearchModules');
+  if (btnSearchModulesHandler) {
+    btnSearchModulesHandler.addEventListener('click', () => {
       const searchTerm = document.getElementById('searchModules').value.toLowerCase();
       const filtered = modulesData.filter(module => 
         module.code.toLowerCase().includes(searchTerm) || 
@@ -828,9 +828,9 @@
   }
 
   // Add Lecturer button handler
-  const btnAddLecturer = document.getElementById('btnAddLecturer');
-  if (btnAddLecturer) {
-    btnAddLecturer.addEventListener('click', async () => {
+  const btnAddLecturerHandler = document.getElementById('btnAddLecturer');
+  if (btnAddLecturerHandler) {
+    btnAddLecturerHandler.addEventListener('click', async () => {
       const name = document.getElementById('lecturerName').value.trim();
       const module = document.getElementById('lecturerModule').value.trim();
       const phone = document.getElementById('lecturerPhone').value.trim();
@@ -859,9 +859,9 @@
   }
 
   // Search Lecturers button handler
-  const btnSearchLecturers = document.getElementById('btnSearchLecturers');
-  if (btnSearchLecturers) {
-    btnSearchLecturers.addEventListener('click', () => {
+  const btnSearchLecturersHandler = document.getElementById('btnSearchLecturers');
+  if (btnSearchLecturersHandler) {
+    btnSearchLecturersHandler.addEventListener('click', () => {
       const searchTerm = document.getElementById('searchLecturers').value.toLowerCase();
       const filtered = lecturersData.filter(lecturer => 
         lecturer.name.toLowerCase().includes(searchTerm) || 
@@ -936,6 +936,9 @@
         loadLecturers();
         loadDatabaseStats();
         loadNotes();
+        // Also load assignments and class timetables
+        loadAssignments();
+        loadClassTimetables();
       }
     }, 500);
   });
