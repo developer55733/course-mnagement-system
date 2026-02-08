@@ -5,6 +5,15 @@
   const panel = document.getElementById('panel');
   const outPre = document.getElementById('outPre');
 
+  // Debug: Check if elements are found
+  console.log('Elements found:', {
+    secretInput: !!secretInput,
+    btnLogin: !!btnLogin,
+    loginMsg: !!loginMsg,
+    panel: !!panel,
+    outPre: !!outPre
+  });
+
   let ADMIN_SECRET = '';
 
   const showOutput = (obj) => {
@@ -23,32 +32,39 @@
     msgEl.style.display = 'none';
   };
 
-  btnLogin.addEventListener('click', () => {
-    const s = secretInput.value.trim();
-    if (!s) {
-      loginMsg.textContent = 'Please enter the admin secret.';
-      return;
-    }
-    ADMIN_SECRET = s;
-    loginMsg.textContent = '';
-    panel.style.display = 'block';
-    document.getElementById('loginCard').style.display = 'none';
-    
-    // Show logout button after successful login
-    const logoutBtn = document.getElementById('btnLogout');
-    if (logoutBtn) {
-      logoutBtn.style.display = 'block';
-    }
-    
-    // Show edit profile button after successful login
-    const editProfileBtn = document.getElementById('btnEditProfile');
-    if (editProfileBtn) {
-      editProfileBtn.style.display = 'block';
-      console.log('Edit profile button shown after login'); // Debug log
-    } else {
-      console.error('Edit profile button not found!'); // Debug log
-    }
-  });
+  // Add safety check for login button
+  if (btnLogin) {
+    btnLogin.addEventListener('click', () => {
+      console.log('Login button clicked'); // Debug log
+      const s = secretInput.value.trim();
+      console.log('Secret entered:', s); // Debug log
+      if (!s) {
+        loginMsg.textContent = 'Please enter the admin secret.';
+        return;
+      }
+      ADMIN_SECRET = s;
+      loginMsg.textContent = '';
+      panel.style.display = 'block';
+      document.getElementById('loginCard').style.display = 'none';
+      
+      // Show logout button after successful login
+      const logoutBtn = document.getElementById('btnLogout');
+      if (logoutBtn) {
+        logoutBtn.style.display = 'block';
+      }
+      
+      // Show edit profile button after successful login
+      const editProfileBtn = document.getElementById('btnEditProfile');
+      if (editProfileBtn) {
+        editProfileBtn.style.display = 'block';
+        console.log('Edit profile button shown after login'); // Debug log
+      } else {
+        console.error('Edit profile button not found!'); // Debug log
+      }
+    });
+  } else {
+    console.error('Login button not found!');
+  }
 
   const request = async (method, url, data) => {
     try {
@@ -1704,20 +1720,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       video.src = videoUrl;
     });
-  }
-
-  // Helper function to show messages
-  function showMessage(elementId, message, isError = false) {
-    const messageEl = document.getElementById(elementId);
-    if (messageEl) {
-      messageEl.textContent = message;
-      messageEl.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
-      messageEl.style.display = 'block';
-      
-      setTimeout(() => {
-        messageEl.style.display = 'none';
-      }, 5000);
-    }
   }
 
 })();
