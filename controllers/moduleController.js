@@ -107,3 +107,16 @@ exports.deleteModule = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.clearAllModules = async (req, res) => {
+  try {
+    const success = await Module.clearAll();
+    if (!success) {
+      return res.status(500).json({ success: false, error: 'Failed to clear modules' });
+    }
+
+    res.json({ success: true, message: 'All modules have been deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

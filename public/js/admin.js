@@ -548,19 +548,10 @@
       btnExecuteDbOperation.disabled = true;
       
       try {
-        const res = await request('post', '/admin/database-operation', { operationType });
-        
-        if (res && res.success) {
-          showMessage('dbOperationMsg', res.message || 'Database operation completed successfully!', false);
-          await loadDatabaseStats(); // Refresh stats after operation
-        } else {
-          // Simulate operation for demo
-          simulateDatabaseOperation(operationType);
-        }
+        await executeDatabaseOperation(operationType);
       } catch (error) {
         console.error('Error executing database operation:', error);
-        // Simulate operation for demo
-        simulateDatabaseOperation(operationType);
+        showMessage('dbOperationMsg', `Operation failed: ${error.message}`, true);
       }
       
       setTimeout(() => {
@@ -570,6 +561,58 @@
         document.getElementById('dbOperationConfirm').value = '';
       }, 2000);
     });
+  }
+
+  async function executeDatabaseOperation(operationType) {
+    const confirmText = document.getElementById('dbOperationConfirm').value;
+    
+    if (confirmText !== 'CONFIRM') {
+      showMessage('dbOperationMsg', 'Please type CONFIRM to proceed with this operation.', true);
+      return;
+    }
+
+    try {
+      let response;
+      let endpoint;
+      
+      switch (operationType) {
+        case 'clearUsers':
+          endpoint = '/api/users/clear';
+          break;
+        case 'clearModules':
+          endpoint = '/api/modules/clear';
+          break;
+        case 'clearLecturers':
+          endpoint = '/api/lecturers/clear';
+          break;
+        case 'clearTimetables':
+          endpoint = '/api/timetable/clear';
+          break;
+        case 'resetDatabase':
+          endpoint = '/api/database/reset';
+          break;
+        default:
+          showMessage('dbOperationMsg', 'Invalid operation selected.', true);
+          return;
+      }
+
+      response = await axios.delete(endpoint);
+      
+      if (response.data.success) {
+        showMessage('dbOperationMsg', response.data.message || 'Operation completed successfully!', false);
+        // Refresh stats after operation
+        loadDatabaseStats();
+        // Clear confirmation field
+        document.getElementById('dbOperationConfirm').value = '';
+        // Reset operation selection
+        document.getElementById('dbOperationType').value = '';
+      } else {
+        showMessage('dbOperationMsg', response.data.message || 'Operation failed.', true);
+      }
+    } catch (error) {
+      console.error('Database operation error:', error);
+      showMessage('dbOperationMsg', `Operation failed: ${error.response?.data?.message || error.message}`, true);
+    }
   }
 
   function simulateDatabaseOperation(operationType) {
