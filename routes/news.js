@@ -200,4 +200,87 @@ router.put('/:id/toggle', async (req, res) => {
   }
 });
 
+// POST track news view
+router.post('/track-view', async (req, res) => {
+  try {
+    const { news_id, user_id } = req.body;
+    const ip_address = req.ip || req.connection.remoteAddress;
+    const user_agent = req.get('User-Agent');
+    
+    // Insert news view
+    await query(`
+      INSERT INTO news_views (news_id, user_id, ip_address, user_agent, viewed_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `, [news_id, user_id || null, ip_address, user_agent]);
+    
+    // Update view count
+    await query(`
+      UPDATE news SET view_count = view_count + 1 WHERE id = ?
+    `, [news_id]);
+    
+    res.json({
+      success: true,
+      message: 'News view tracked successfully'
+    });
+  } catch (error) {
+    console.error('Error tracking news view:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to track news view'
+    });
+  }
+});
+
+// GET news analytics
+router.get('/analytics/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get news details
+    const [newsRows] = await query(`
+      SELECT * FROM news WHERE id = ?
+    `, [id]);
+    
+    if (newsRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'News article not found'
+      });
+    }
+    
+    const news = newsRows[0];
+    
+    // Get view count
+    const [viewRows] = await query(`
+      SELECT COUNT(*) as total_views FROM news_views WHERE news_id = ?
+    `, [id]);
+    
+    // Get daily views (last 7 days)
+    const [dailyViewsRows] = await query(`
+      SELECT DATE(viewed_at) as date, COUNT(*) as views
+      FROM news_views 
+      WHERE news_id = ? AND viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY DATE(viewed_at)
+      ORDER BY date DESC
+    `, [id]);
+    
+    res.json({
+      success: true,
+      data: {
+        news,
+        analytics: {
+          total_views: viewRows[0].total_views,
+          daily_views: dailyViewsRows
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching news analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch news analytics'
+    });
+  }
+});
+
 module.exports = router;

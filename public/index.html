@@ -1575,9 +1575,9 @@
                                 <div>
                                     <h3 class="news-item-title">${news.title}</h3>
                                     <div class="news-item-meta">
-                                        <span class="news-category">${news.category}</span>
-                                        <span class="news-priority ${news.priority}">${news.priority}</span>
                                         <span class="news-date">${new Date(news.created_at).toLocaleDateString()}</span>
+                                        <span class="news-views">${news.view_count || 0} views</span>
+                                        <span class="news-author">By ${news.created_by_name || 'Unknown'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1725,6 +1725,38 @@
         document.getElementById('news-category-filter')?.addEventListener('change', loadNews);
         document.getElementById('news-priority-filter')?.addEventListener('change', loadNews);
 
+        // Track news views when displayed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Track views for news articles when they are displayed
+            const trackNewsView = async (newsId) => {
+                try {
+                    await fetch('/api/news/track-view', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ news_id: newsId })
+                    });
+                } catch (error) {
+                    console.error('Error tracking news view:', error);
+                }
+            };
+            
+            // Track views for all visible news articles
+            const trackAllNewsViews = async () => {
+                const newsItems = document.querySelectorAll('.news-item');
+                newsItems.forEach(item => {
+                    const newsId = item.getAttribute('data-news-id');
+                    if (newsId) {
+                        trackNewsView(newsId);
+                    }
+                });
+            };
+            
+            // Track views periodically
+            setInterval(trackAllNewsViews, 30000); // Track every 30 seconds
+        });
+        
         // Load news and ads when tabs are opened
         document.addEventListener('DOMContentLoaded', function() {
             // Load news and ads when their tabs are clicked

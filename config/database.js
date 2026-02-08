@@ -498,6 +498,7 @@ async function initializeDatabase() {
       priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
       image_url VARCHAR(500),
       is_active BOOLEAN DEFAULT TRUE,
+      view_count INT DEFAULT 0,
       created_by INT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -555,6 +556,20 @@ async function initializeDatabase() {
       INDEX idx_viewed_at (viewed_at),
       FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    
+    `CREATE TABLE IF NOT EXISTS news_views (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      news_id INT NOT NULL,
+      user_id INT,
+      ip_address VARCHAR(45),
+      user_agent TEXT,
+      viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_news (news_id),
+      INDEX idx_user (user_id),
+      INDEX idx_viewed_at (viewed_at),
+      FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -576,7 +591,7 @@ async function initializeDatabase() {
 
 async function recreateTablesWithAutoIncrement() {
 
-  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable', 'news', 'ads', 'ad_clicks', 'ad_views'];
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable', 'news', 'ads', 'ad_clicks', 'ad_views', 'news_views'];
 
   
 
