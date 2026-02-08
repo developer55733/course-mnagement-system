@@ -334,9 +334,13 @@
       const timetableList = document.getElementById('timetableList');
       
       if (res && res.success && res.data && res.data.length > 0) {
-        let html = '<table class="table table-sm"><thead><tr><th>Test</th><th>Module</th><th>Date</th><th>Time</th><th>Venue</th></tr></thead><tbody>';
+        let html = '<table class="table table-sm"><thead><tr><th>Test</th><th>Module</th><th>Date</th><th>Time</th><th>Venue</th><th>Actions</th></tr></thead><tbody>';
         res.data.forEach(t => {
-          html += `<tr><td>${t.test}</td><td>${t.module}</td><td>${t.date}</td><td>${t.time}</td><td>${t.venue}</td></tr>`;
+          html += `<tr><td>${t.test}</td><td>${t.module}</td><td>${t.date}</td><td>${t.time}</td><td>${t.venue}</td><td>
+            <button class="btn btn-sm btn-danger" onclick="deleteTestTimetable(${t.id})">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </td></tr>`;
         });
         html += '</tbody></table>';
         timetableList.innerHTML = html;
@@ -345,6 +349,26 @@
       console.error('Error loading timetables:', error);
     }
   }
+
+  // Delete Test Timetable function
+  window.deleteTestTimetable = async (id) => {
+    if (!confirm('Are you sure you want to delete this test timetable?')) return;
+    
+    try {
+      const response = await axios.delete(`/api/timetable/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      if (response.data.success) {
+        loadTimetables();
+        showMessage('timetableMsg', 'Test timetable deleted successfully!', false);
+      }
+    } catch (error) {
+      console.error('Error deleting test timetable:', error);
+      showMessage('timetableMsg', 'Failed to delete test timetable. Please try again.', true);
+    }
+  };
 
   // Load timetables on page load
   window.addEventListener('load', loadTimetables);
