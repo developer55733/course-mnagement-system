@@ -116,28 +116,26 @@ router.post('/', async (req, res) => {
 router.post('/:id/replies', async (req, res) => {
   try {
     const discussionId = req.params.id;
-    const { content, created_by } = req.body;
+    const { content, user_id, user_name } = req.body;
     
-    if (!content || !created_by) {
+    if (!content) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Content and created_by are required' 
+        error: 'Reply content is required' 
       });
     }
     
-    // Check if discussion exists
-    const [discussion] = await query('SELECT id FROM discussion_forum WHERE id = ?', [discussionId]);
-    
-    if (discussion.length === 0) {
-      return res.status(404).json({ success: false, error: 'Discussion not found' });
-    }
-    
     const sql = `
-      INSERT INTO discussion_replies (discussion_id, content, created_by)
-      VALUES (?, ?, ?)
+      INSERT INTO discussion_replies (discussion_id, content, user_id, user_name, created_by)
+      VALUES (?, ?, ?, ?, ?)
     `;
     
-    const [result] = await query(sql, [discussionId, content, created_by]);
+    const [result] = await query(sql, [
+      discussionId, 
+      content, 
+      user_id || null, 
+      user_name || 'Anonymous'
+    ]);
     
     res.json({ 
       success: true, 
@@ -145,7 +143,8 @@ router.post('/:id/replies', async (req, res) => {
         id: result.insertId,
         discussion_id: discussionId,
         content,
-        created_by
+        user_id,
+        user_name: user_name || 'Anonymous'
       }
     });
   } catch (error) {
@@ -190,6 +189,53 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting discussion:', error);
     res.status(500).json({ success: false, error: 'Failed to delete discussion' });
+  }
+});
+
+// Get current user from session
+router.get('/current-user', async (req, res) => {
+  try {
+    // Check if user is logged in via session
+    if (req.session && req.session.userId) {
+      const sql = 'SELECT id, name, email FROM users WHERE id = ?';
+      const [users] = await query(sql, [req.session.userId]);
+      
+      if (users.length > 0) {
+        res.json({ 
+          success: true, 
+          data: {
+            id: users[0].id,
+            name: users[0].name,
+            email: users[0].email
+          }
+        });
+      } else {
+        res.json({ success: false, error: 'User not found' });
+      }
+    } else {
+      res.json({ success: false, error: 'Not logged in' });
+    }
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    res.status(500).json({ success: false, error: 'Failed to get current user' });
+  }
+});
+
+// Get available modules
+router.get('/modules', async (req, res) => {
+  try {
+    const sql = `
+      SELECT DISTINCT module_code, module_name 
+      FROM modules 
+      WHERE is_active = TRUE 
+      ORDER BY module_code
+    `;
+    
+    const [modules] = await query(sql);
+    res.json({ success: true, data: modules });
+  } catch (error) {
+    console.error('Error fetching modules:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch modules' });
   }
 });
 

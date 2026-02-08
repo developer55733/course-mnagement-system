@@ -1791,7 +1791,6 @@
                 e.preventDefault();
                 
                 const replyContent = document.getElementById('reply-content').value;
-                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
                 
                 if (!replyContent.trim()) {
                     alert('Please write a reply before submitting.');
@@ -1799,6 +1798,18 @@
                 }
                 
                 try {
+                    // Get current user from secure session
+                    const userResponse = await fetch('/api/discussions/current-user');
+                    const userData = await userResponse.json();
+                    
+                    let userId = null;
+                    let userName = 'Anonymous';
+                    
+                    if (userData.success && userData.data) {
+                        userId = userData.data.id;
+                        userName = userData.data.name;
+                    }
+                    
                     const response = await fetch(`/api/discussions/${discussionId}/replies`, {
                         method: 'POST',
                         headers: {
@@ -1806,7 +1817,8 @@
                         },
                         body: JSON.stringify({
                             content: replyContent,
-                            user_id: currentUser.id || null
+                            user_id: userId,
+                            user_name: userName
                         })
                     });
                     

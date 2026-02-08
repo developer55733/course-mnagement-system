@@ -2392,11 +2392,55 @@ document.addEventListener('DOMContentLoaded', function() {
       createDiscussionForm.addEventListener('submit', handleCreateDiscussion);
     }
     
+    // Load modules dynamically
+    loadDiscussionModules();
+    
     // Load discussions when page loads
     loadDiscussions();
     
     // Start auto-refresh for discussions
     startAutoRefresh('discussions', 30000); // Refresh every 30 seconds
   });
+  
+  // Load modules from database
+  const loadDiscussionModules = async () => {
+    try {
+      const response = await axios.get('/api/discussions/modules', {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        const moduleSelect = document.getElementById('discussionModule');
+        if (moduleSelect) {
+          // Clear existing options except "General Discussion"
+          moduleSelect.innerHTML = '<option value="">General Discussion</option>';
+          
+          // Add modules from database
+          response.data.data.forEach(module => {
+            const option = document.createElement('option');
+            option.value = module.module_code;
+            option.textContent = `${module.module_code} - ${module.module_name}`;
+            moduleSelect.appendChild(option);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading modules:', error);
+      // Fallback to basic options if database fails
+      const moduleSelect = document.getElementById('discussionModule');
+      if (moduleSelect) {
+        moduleSelect.innerHTML = `
+          <option value="">General Discussion</option>
+          <option value="IT101">IT101 - Introduction to Programming</option>
+          <option value="IT102">IT102 - Web Development Fundamentals</option>
+          <option value="IT103">IT103 - Database Management Systems</option>
+          <option value="IT104">IT104 - Data Structures & Algorithms</option>
+          <option value="IT105">IT105 - Computer Networks</option>
+        `;
+      }
+    }
+  };
 
 })();
