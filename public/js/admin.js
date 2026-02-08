@@ -1697,4 +1697,126 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Ads Management Dashboard Functions
+  async function loadAds() {
+    try {
+      const response = await axios.get('/api/ads', {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        displayAds(response.data.data);
+        document.getElementById('totalAds').textContent = response.data.data.length;
+      } else {
+        console.log('Failed to load ads from API');
+        document.getElementById('adsList').innerHTML = '<p class="text-muted">Failed to load ads.</p>';
+      }
+    } catch (error) {
+      console.error('Error loading ads:', error);
+      document.getElementById('adsList').innerHTML = '<p class="text-muted">Error loading ads.</p>';
+    }
+  }
+
+  function displayAds(ads) {
+    const adsList = document.getElementById('adsList');
+    if (!adsList) return;
+
+    if (ads.length === 0) {
+      adsList.innerHTML = '<p class="text-muted">No ads created yet. Add one using the form above.</p>';
+      return;
+    }
+
+    const html = ads.map(ad => `
+      <div class="card mb-3" data-id="${ad.id}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">${ad.title}</h6>
+          <div>
+            <span class="badge badge-${ad.is_active ? 'success' : 'secondary'}">${ad.is_active ? 'Active' : 'Inactive'}</span>
+            <span class="badge badge-info">${ad.ad_type}</span>
+            <span class="badge badge-warning">${ad.position}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Description:</strong> ${ad.description || 'No description'}</p>
+              <p><strong>Video URL:</strong> <a href="${ad.video_url}" target="_blank">${ad.video_url}</a></p>
+              <p><strong>Redirect URL:</strong> <a href="${ad.redirect_url}" target="_blank">${ad.redirect_url}</a></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Auto Play:</strong> ${ad.auto_play ? 'Yes' : 'No'}</p>
+              <p><strong>Clicks:</strong> ${ad.click_count || 0}</p>
+              <p><strong>Views:</strong> ${ad.view_count || 0}</p>
+              <p><strong>Created:</strong> ${new Date(ad.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-sm btn-primary" onclick="editAd(${ad.id})">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-warning" onclick="toggleAdStatus(${ad.id})">
+              <i class="fas fa-power-off"></i> ${ad.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteAd(${ad.id})">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    adsList.innerHTML = html;
+  }
+
+  // Delete Ad function
+  window.deleteAd = async (id) => {
+    if (!confirm('Are you sure you want to delete this ad? This action cannot be undone.')) return;
+    
+    try {
+      const response = await axios.delete(`/api/ads/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        loadAds(); // Refresh the ads list
+        showMessage('adMsg', 'Ad deleted successfully!', false);
+      } else {
+        showMessage('adMsg', response.data.message || 'Failed to delete ad', true);
+      }
+    } catch (error) {
+      console.error('Error deleting ad:', error);
+      showMessage('adMsg', `Failed to delete ad: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  // Toggle Ad Status function
+  window.toggleAdStatus = async (id) => {
+    try {
+      const response = await axios.put(`/api/ads/${id}/toggle`, {}, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        loadAds(); // Refresh the ads list
+        showMessage('adMsg', 'Ad status updated successfully!', false);
+      } else {
+        showMessage('adMsg', response.data.message || 'Failed to update ad status', true);
+      }
+    } catch (error) {
+      console.error('Error updating ad status:', error);
+      showMessage('adMsg', `Failed to update ad status: ${error.response?.data?.message || error.message}`, true);
+    }
+  };
+
+  // Edit Ad function (placeholder for future implementation)
+  window.editAd = (id) => {
+    showMessage('adMsg', 'Edit functionality coming soon!', false);
+  };
+
 })();

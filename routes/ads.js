@@ -302,4 +302,62 @@ router.get('/analytics/:id', async (req, res) => {
   }
 });
 
+// DELETE ad
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await query('DELETE FROM ads WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Ad not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Ad deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting ad:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete ad'
+    });
+  }
+});
+
+// PUT toggle ad status
+router.put('/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await query(`
+      UPDATE ads 
+      SET is_active = NOT is_active, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `, [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Ad not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Ad status updated successfully'
+    });
+  } catch (error) {
+    console.error('Error toggling ad status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update ad status'
+    });
+  }
+});
+
 module.exports = router;

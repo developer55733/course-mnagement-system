@@ -654,6 +654,29 @@
             </form>
           </div>
         </div>
+        
+        <!-- Ads Dashboard Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Ads Dashboard</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <button class="btn btn-info btn-sm" onclick="loadAds()">
+                  <i class="fas fa-sync"></i> Refresh Ads
+                </button>
+              </div>
+              <div class="col-md-6 text-right">
+                <span class="badge badge-primary" id="totalAds">0</span> Total Ads
+              </div>
+            </div>
+            
+            <div id="adsList" style="max-height: 500px; overflow-y: auto;">
+              <p class="text-muted">Loading ads...</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
