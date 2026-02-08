@@ -14,8 +14,6 @@
     outPre: !!outPre
   });
 
-  let ADMIN_SECRET = '';
-
   const showOutput = (obj) => {
     outPre.textContent = JSON.stringify(obj, null, 2);
   };
@@ -32,44 +30,15 @@
     msgEl.style.display = 'none';
   };
 
-  // Add safety check for login button
-  if (btnLogin) {
-    btnLogin.addEventListener('click', () => {
-      console.log('Login button clicked'); // Debug log
-      const s = secretInput.value.trim();
-      console.log('Secret entered:', s); // Debug log
-      if (!s) {
-        loginMsg.textContent = 'Please enter the admin secret.';
-        return;
-      }
-      ADMIN_SECRET = s;
-      loginMsg.textContent = '';
-      panel.style.display = 'block';
-      document.getElementById('loginCard').style.display = 'none';
-      
-      // Show logout button after successful login
-      const logoutBtn = document.getElementById('btnLogout');
-      if (logoutBtn) {
-        logoutBtn.style.display = 'block';
-      }
-      
-      // Show edit profile button after successful login
-      const editProfileBtn = document.getElementById('btnEditProfile');
-      if (editProfileBtn) {
-        editProfileBtn.style.display = 'block';
-        console.log('Edit profile button shown after login'); // Debug log
-      } else {
-        console.error('Edit profile button not found!'); // Debug log
-      }
-    });
-  } else {
-    console.error('Login button not found!');
-  }
+  // Wait for DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing admin panel...');
 
-  const request = async (method, url, data) => {
-    try {
-      const res = await axios({ method, url, data, headers: { 'x-admin-secret': ADMIN_SECRET } });
-      return res.data;
+    const secretInput = document.getElementById('adminSecret');
+    const btnLogin = document.getElementById('btnLogin');
+    const loginMsg = document.getElementById('loginMsg');
+    const panel = document.getElementById('panel');
+    const outPre = document.getElementById('outPre');
     } catch (err) {
       const payload = err?.response?.data || { message: err.message };
       return { success: false, error: payload };
