@@ -52,11 +52,25 @@ h1 {
   font-size: 14px !important;
   font-weight: 500 !important;
   transition: all 0.3s ease !important;
+  position: relative;
+  z-index: 10;
 }
 
-#btnLogout:hover {
+#btnLogout:hover:not(:disabled) {
   background-color: #c82333 !important;
   transform: translateY(-1px);
+}
+
+#btnLogout:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
+}
+
+#btnLogout:disabled {
+  background-color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+  transform: none !important;
 }
 
 /* Admin Edit Profile Button Styles */
