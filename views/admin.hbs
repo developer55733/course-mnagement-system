@@ -707,6 +707,63 @@
             </div>
           </div>
         </div>
+        
+        <!-- Discussion Management Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-comments"></i> Discussion Management</h5>
+          </div>
+          <div class="card-body">
+            <form id="addDiscussionForm">
+              <div class="mb-3">
+                <label class="form-label">Discussion Title</label>
+                <input type="text" id="discussionTitle" class="form-control" required placeholder="Enter discussion title">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Module</label>
+                <select id="discussionModule" class="form-control">
+                  <option value="">General Discussion</option>
+                  <option value="IT101">IT101 - Introduction to Programming</option>
+                  <option value="IT102">IT102 - Web Development Fundamentals</option>
+                  <option value="IT103">IT103 - Database Management Systems</option>
+                  <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                  <option value="IT105">IT105 - Computer Networks</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Discussion Content</label>
+                <textarea id="discussionContent" class="form-control" rows="6" required placeholder="Write the discussion content..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Discussion
+              </button>
+              <div id="discussionMsg" class="alert alert-info mt-3" style="display:none;"></div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Discussions Dashboard Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Discussions Dashboard</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <button class="btn btn-secondary btn-sm" onclick="loadDiscussions()">
+                  <i class="fas fa-sync"></i> Refresh Discussions
+                </button>
+              </div>
+              <div class="col-md-6 text-right">
+                <span class="badge badge-secondary" id="totalDiscussions">0</span> Total Discussions
+              </div>
+            </div>
+            
+            <div id="discussionsList" style="max-height: 500px; overflow-y: auto;">
+              <p class="text-muted">Loading discussions...</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

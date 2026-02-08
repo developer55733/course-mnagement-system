@@ -16,7 +16,15 @@ router.get('/', async (req, res) => {
     `;
     
     const [results] = await query(sql);
-    res.json({ success: true, data: results });
+    
+    // Transform results to handle admin posts
+    const transformedResults = results.map(discussion => ({
+      ...discussion,
+      author: discussion.author || discussion.author_name || 'Admin',
+      module: discussion.module_code
+    }));
+    
+    res.json({ success: true, data: transformedResults });
   } catch (error) {
     console.error('Error fetching discussions:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch discussions' });
@@ -52,10 +60,17 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Discussion not found' });
     }
     
+    // Transform discussion data
+    const transformedDiscussion = {
+      ...discussion[0],
+      author: discussion[0].author || discussion[0].author_name || 'Admin',
+      module: discussion[0].module_code
+    };
+    
     res.json({ 
       success: true, 
       data: {
-        discussion: discussion[0],
+        discussion: transformedDiscussion,
         replies: replies
       }
     });
@@ -65,24 +80,36 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create new discussion post
+// Create new discussion post (admin only)
 router.post('/', async (req, res) => {
   try {
-    const { title, content, module_code, created_by } = req.body;
+    const { title, content, module, author, author_role } = req.body;
     
-    if (!title || !content || !created_by) {
+    // Check if user is admin
+    const adminSecret = req.headers['x-admin-secret'];
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Admin access required to create discussions' 
+      });
+    }
+    
+    if (!title || !content) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Title, content, and created_by are required' 
+        error: 'Title and content are required' 
       });
     }
     
     const sql = `
-      INSERT INTO discussion_forum (title, content, module_code, created_by)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO discussion_forum (title, content, module_code, created_by, author, author_role)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
     
-    const [result] = await query(sql, [title, content, module_code || null, created_by]);
+    // For admin posts, we'll use a special admin user ID or NULL
+    const adminUserId = null; // You can set this to a specific admin user ID if needed
+    
+    const [result] = await query(sql, [title, content, module || null, adminUserId, author || 'Admin', author_role || 'admin']);
     
     res.json({ 
       success: true, 
@@ -90,8 +117,10 @@ router.post('/', async (req, res) => {
         id: result.insertId,
         title,
         content,
-        module_code,
-        created_by
+        module,
+        author: author || 'Admin',
+        author_role: author_role || 'admin',
+        created_at: new Date()
       }
     });
   } catch (error) {
@@ -142,33 +171,28 @@ router.post('/:id/replies', async (req, res) => {
   }
 });
 
-// Delete discussion (admin only or author)
+// Delete discussion (admin only)
 router.delete('/:id', async (req, res) => {
   try {
     const discussionId = req.params.id;
-    const { user_id, user_role } = req.body;
     
-    // Check if user is admin or author
-    const [discussion] = await database.execute(
-      'SELECT created_by FROM discussion_forum WHERE id = ?',
-      [discussionId]
-    );
+    // Check if user is admin
+    const adminSecret = req.headers['x-admin-secret'];
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Admin access required to delete discussions' 
+      });
+    }
+    
+    // Check if discussion exists
+    const [discussion] = await query('SELECT id FROM discussion_forum WHERE id = ?', [discussionId]);
     
     if (discussion.length === 0) {
       return res.status(404).json({ success: false, error: 'Discussion not found' });
     }
     
-    const isAuthor = discussion[0].created_by === user_id;
-    const isAdmin = user_role === 'admin';
-    
-    if (!isAuthor && !isAdmin) {
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Not authorized to delete this discussion' 
-      });
-    }
-    
-    await database.execute('DELETE FROM discussion_forum WHERE id = ?', [discussionId]);
+    await query('DELETE FROM discussion_forum WHERE id = ?', [discussionId]);
     
     res.json({ success: true, message: 'Discussion deleted successfully' });
   } catch (error) {

@@ -571,6 +571,35 @@ async function initializeDatabase() {
       INDEX idx_viewed_at (viewed_at),
       FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    
+    `CREATE TABLE IF NOT EXISTS discussion_forum (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(200) NOT NULL,
+      content TEXT NOT NULL,
+      module_code VARCHAR(20),
+      created_by INT,
+      author VARCHAR(100),
+      author_role VARCHAR(20) DEFAULT 'user',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_module_code (module_code),
+      INDEX idx_created_at (created_at),
+      INDEX idx_author_role (author_role),
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    
+    `CREATE TABLE IF NOT EXISTS discussion_replies (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      discussion_id INT NOT NULL,
+      content TEXT NOT NULL,
+      created_by INT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_discussion_id (discussion_id),
+      INDEX idx_created_at (created_at),
+      FOREIGN KEY (discussion_id) REFERENCES discussion_forum(id) ON DELETE CASCADE,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -592,7 +621,7 @@ async function initializeDatabase() {
 
 async function recreateTablesWithAutoIncrement() {
 
-  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable', 'news', 'ads', 'ad_clicks', 'ad_views', 'news_views'];
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable', 'news', 'ads', 'ad_clicks', 'ad_views', 'news_views', 'discussion_forum', 'discussion_replies'];
 
   
 
