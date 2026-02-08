@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const { query } = require('../config/database');
 
 // GET all news
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await database.execute(`
+    const [rows] = await query(`
       SELECT n.*, u.name as created_by_name 
       FROM news n 
       LEFT JOIN users u ON n.created_by = u.id 
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
     }
     
     // Insert news
-    const [result] = await database.execute(`
+    const [result] = await query(`
       INSERT INTO news (title, content, category, priority, image_url, created_by)
       VALUES (?, ?, ?, ?, ?, ?)
     `, [title, content, category, priority, image_url || null, created_by || null]);
@@ -74,7 +74,7 @@ router.put('/:id', async (req, res) => {
     const { title, content, category, priority, image_url, is_active } = req.body;
     
     // Update news
-    await database.execute(`
+    await query(`
       UPDATE news 
       SET title = ?, content = ?, category = ?, priority = ?, image_url = ?, is_active = ?
       WHERE id = ?
@@ -99,7 +99,7 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     
     // Soft delete by setting is_active to false
-    await database.execute(`
+    await query(`
       UPDATE news SET is_active = FALSE WHERE id = ?
     `, [id]);
     
@@ -121,7 +121,7 @@ router.get('/category/:category', async (req, res) => {
   try {
     const { category } = req.params;
     
-    const [rows] = await database.execute(`
+    const [rows] = await query(`
       SELECT n.*, u.name as created_by_name 
       FROM news n 
       LEFT JOIN users u ON n.created_by = u.id 

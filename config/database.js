@@ -684,6 +684,140 @@ async function initializeDatabase() {
 
       INDEX idx_lecturer (lecturer_name)
 
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    
+
+    `CREATE TABLE news (
+
+      id INT AUTO_INCREMENT PRIMARY KEY,
+
+      title VARCHAR(200) NOT NULL,
+
+      content TEXT NOT NULL,
+
+      category ENUM('general', 'academic', 'events', 'announcements') DEFAULT 'general',
+
+      priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
+
+      image_url VARCHAR(500),
+
+      is_active BOOLEAN DEFAULT TRUE,
+
+      created_by INT,
+
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+      INDEX idx_category (category),
+
+      INDEX idx_priority (priority),
+
+      INDEX idx_is_active (is_active),
+
+      INDEX idx_created_at (created_at),
+
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    
+
+    `CREATE TABLE ads (
+
+      id INT AUTO_INCREMENT PRIMARY KEY,
+
+      title VARCHAR(200) NOT NULL,
+
+      description TEXT,
+
+      video_url VARCHAR(500) NOT NULL,
+
+      redirect_url VARCHAR(500) NOT NULL,
+
+      ad_type ENUM('video', 'banner', 'popup') DEFAULT 'video',
+
+      position ENUM('top', 'sidebar', 'bottom', 'popup') DEFAULT 'sidebar',
+
+      is_active BOOLEAN DEFAULT TRUE,
+
+      auto_play BOOLEAN DEFAULT TRUE,
+
+      click_count INT DEFAULT 0,
+
+      view_count INT DEFAULT 0,
+
+      created_by INT,
+
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+      INDEX idx_ad_type (ad_type),
+
+      INDEX idx_position (position),
+
+      INDEX idx_is_active (is_active),
+
+      INDEX idx_created_at (created_at),
+
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    
+
+    `CREATE TABLE ad_clicks (
+
+      id INT AUTO_INCREMENT PRIMARY KEY,
+
+      ad_id INT NOT NULL,
+
+      user_id INT,
+
+      ip_address VARCHAR(45),
+
+      user_agent TEXT,
+
+      clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+      INDEX idx_ad (ad_id),
+
+      INDEX idx_user (user_id),
+
+      INDEX idx_clicked_at (clicked_at),
+
+      FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    
+
+    `CREATE TABLE ad_views (
+
+      id INT AUTO_INCREMENT PRIMARY KEY,
+
+      ad_id INT NOT NULL,
+
+      user_id INT,
+
+      ip_address VARCHAR(45),
+
+      viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+      INDEX idx_ad (ad_id),
+
+      INDEX idx_user (user_id),
+
+      INDEX idx_viewed_at (viewed_at),
+
+      FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 
   ];
@@ -766,7 +900,7 @@ async function initializeDatabase() {
 
 async function recreateTablesWithAutoIncrement() {
 
-  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable'];
+  const tables = ['users', 'modules', 'lecturers', 'timetable', 'settings', 'notes', 'class_timetable', 'news', 'ads', 'ad_clicks', 'ad_views'];
 
   
 

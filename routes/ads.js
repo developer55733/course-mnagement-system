@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const { query } = require('../config/database');
 
 // GET all ads
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await database.execute(`
+    const [rows] = await query(`
       SELECT a.*, u.name as created_by_name 
       FROM ads a 
       LEFT JOIN users u ON a.created_by = u.id 
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
     }
     
     // Insert ad
-    const [result] = await database.execute(`
+    const [result] = await query(`
       INSERT INTO ads (title, description, video_url, redirect_url, ad_type, position, auto_play, created_by)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [title, description || null, video_url, redirect_url, ad_type, position, auto_play || true, created_by || null]);
@@ -76,7 +76,7 @@ router.put('/:id', async (req, res) => {
     const { title, description, video_url, redirect_url, ad_type, position, auto_play, is_active } = req.body;
     
     // Update ad
-    await database.execute(`
+    await query(`
       UPDATE ads 
       SET title = ?, description = ?, video_url = ?, redirect_url = ?, ad_type = ?, position = ?, auto_play = ?, is_active = ?
       WHERE id = ?
@@ -101,7 +101,7 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     
     // Soft delete by setting is_active to false
-    await database.execute(`
+    await query(`
       UPDATE ads SET is_active = FALSE WHERE id = ?
     `, [id]);
     
@@ -123,7 +123,7 @@ router.get('/type/:type', async (req, res) => {
   try {
     const { type } = req.params;
     
-    const [rows] = await database.execute(`
+    const [rows] = await query(`
       SELECT a.*, u.name as created_by_name 
       FROM ads a 
       LEFT JOIN users u ON a.created_by = u.id 
@@ -149,7 +149,7 @@ router.get('/position/:position', async (req, res) => {
   try {
     const { position } = req.params;
     
-    const [rows] = await database.execute(`
+    const [rows] = await query(`
       SELECT a.*, u.name as created_by_name 
       FROM ads a 
       LEFT JOIN users u ON a.created_by = u.id 
@@ -178,13 +178,13 @@ router.post('/track-view', async (req, res) => {
     const user_agent = req.get('User-Agent');
     
     // Insert ad view
-    await database.execute(`
+    await query(`
       INSERT INTO ad_views (ad_id, user_id, ip_address, user_agent)
       VALUES (?, ?, ?, ?)
     `, [ad_id, user_id || null, ip_address, user_agent]);
     
     // Update view count
-    await database.execute(`
+    await query(`
       UPDATE ads SET view_count = view_count + 1 WHERE id = ?
     `, [ad_id]);
     
@@ -209,13 +209,13 @@ router.post('/track-click', async (req, res) => {
     const user_agent = req.get('User-Agent');
     
     // Insert ad click
-    await database.execute(`
+    await query(`
       INSERT INTO ad_clicks (ad_id, user_id, ip_address, user_agent)
       VALUES (?, ?, ?, ?)
     `, [ad_id, user_id || null, ip_address, user_agent]);
     
     // Update click count
-    await database.execute(`
+    await query(`
       UPDATE ads SET click_count = click_count + 1 WHERE id = ?
     `, [ad_id]);
     
@@ -238,7 +238,7 @@ router.get('/analytics/:id', async (req, res) => {
     const { id } = req.params;
     
     // Get ad details
-    const [adRows] = await database.execute(`
+    const [adRows] = await query(`
       SELECT * FROM ads WHERE id = ?
     `, [id]);
     
@@ -252,17 +252,17 @@ router.get('/analytics/:id', async (req, res) => {
     const ad = adRows[0];
     
     // Get view count
-    const [viewRows] = await database.execute(`
+    const [viewRows] = await query(`
       SELECT COUNT(*) as total_views FROM ad_views WHERE ad_id = ?
     `, [id]);
     
     // Get click count
-    const [clickRows] = await database.execute(`
+    const [clickRows] = await query(`
       SELECT COUNT(*) as total_clicks FROM ad_clicks WHERE ad_id = ?
     `, [id]);
     
     // Get daily views (last 7 days)
-    const [dailyViewsRows] = await database.execute(`
+    const [dailyViewsRows] = await query(`
       SELECT DATE(viewed_at) as date, COUNT(*) as views
       FROM ad_views 
       WHERE ad_id = ? AND viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -271,7 +271,7 @@ router.get('/analytics/:id', async (req, res) => {
     `, [id]);
     
     // Get daily clicks (last 7 days)
-    const [dailyClicksRows] = await database.execute(`
+    const [dailyClicksRows] = await query(`
       SELECT DATE(clicked_at) as date, COUNT(*) as clicks
       FROM ad_clicks 
       WHERE ad_id = ? AND clicked_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
