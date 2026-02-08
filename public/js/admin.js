@@ -1629,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Refresh news dashboard to show the updated/newly created news
-        loadNews();
+        triggerAutoRefresh('news');
         if (!editingId) {
           document.getElementById('totalNews').textContent = 
             (parseInt(document.getElementById('totalNews').textContent) + 1);
@@ -1749,7 +1749,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Refresh ads dashboard to show the updated/newly created ad
-        loadAds();
+        triggerAutoRefresh('ads');
         if (!editingId) {
           document.getElementById('totalAds').textContent = 
             (parseInt(document.getElementById('totalAds').textContent) + 1);
@@ -1848,7 +1848,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       if (response.data.success) {
-        loadNews(); // Refresh news list
+        triggerAutoRefresh('news');
         showMessage('newsMsg', 'News article deleted successfully!', false);
       } else {
         showMessage('newsMsg', response.data.message || 'Failed to delete news article', true);
@@ -1869,7 +1869,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       if (response.data.success) {
-        loadNews(); // Refresh news list
+        triggerAutoRefresh('news');
         showMessage('newsMsg', 'News status updated successfully!', false);
       } else {
         showMessage('newsMsg', response.data.message || 'Failed to update news status', true);
@@ -2026,7 +2026,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       if (response.data.success) {
-        loadAds(); // Refresh the ads list
+        triggerAutoRefresh('ads');
         showMessage('adMsg', 'Ad deleted successfully!', false);
       } else {
         showMessage('adMsg', response.data.message || 'Failed to delete ad', true);
@@ -2047,7 +2047,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       if (response.data.success) {
-        loadAds(); // Refresh the ads list
+        triggerAutoRefresh('ads');
         showMessage('adMsg', 'Ad status updated successfully!', false);
       } else {
         showMessage('adMsg', response.data.message || 'Failed to update ad status', true);
@@ -2126,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (response.data.success) {
         showMessage('discussionMsg', 'Discussion posted successfully!', false);
         document.getElementById('createDiscussionForm').reset();
-        loadDiscussions();
+        triggerAutoRefresh('discussions');
         document.getElementById('totalDiscussions').textContent = 
           (parseInt(document.getElementById('totalDiscussions').textContent) + 1);
       } else {
@@ -2199,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (response.data.success) {
         showMessage('discussionMsg', 'Discussion deleted successfully!', false);
-        loadDiscussions();
+        triggerAutoRefresh('discussions');
         document.getElementById('totalDiscussions').textContent = 
           (parseInt(document.getElementById('totalDiscussions').textContent) - 1);
       } else {
@@ -2211,6 +2211,179 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
+  // Auto-refresh functionality
+  let refreshIntervals = {};
+  
+  const startAutoRefresh = (dataType, interval = 30000) => {
+    // Clear existing interval if any
+    if (refreshIntervals[dataType]) {
+      clearInterval(refreshIntervals[dataType]);
+    }
+    
+    // Set new interval
+    refreshIntervals[dataType] = setInterval(() => {
+      switch(dataType) {
+        case 'news':
+          loadNews();
+          break;
+        case 'ads':
+          loadAds();
+          break;
+        case 'discussions':
+          loadDiscussions();
+          break;
+        case 'users':
+          loadUsers();
+          break;
+        case 'modules':
+          loadModules();
+          break;
+        case 'lecturers':
+          loadLecturers();
+          break;
+        case 'timetable':
+          loadTimetable();
+          break;
+        case 'classTimetable':
+          loadClassTimetable();
+          break;
+        case 'notes':
+          loadNotes();
+          break;
+        case 'assignments':
+          loadAssignments();
+          break;
+      }
+    }, interval);
+  };
+  
+  const stopAutoRefresh = (dataType) => {
+    if (refreshIntervals[dataType]) {
+      clearInterval(refreshIntervals[dataType]);
+      delete refreshIntervals[dataType];
+    }
+  };
+  
+  const refreshAllData = () => {
+    loadNews();
+    loadAds();
+    loadDiscussions();
+    loadUsers();
+    loadModules();
+    loadLecturers();
+    loadTimetable();
+    loadClassTimetable();
+    loadNotes();
+    loadAssignments();
+  };
+  
+  // Enhanced success handlers with auto-refresh trigger
+  const triggerAutoRefresh = (dataType) => {
+    // Immediately refresh the specific data type
+    switch(dataType) {
+      case 'news':
+        loadNews();
+        break;
+      case 'ads':
+        loadAds();
+        break;
+      case 'discussions':
+        loadDiscussions();
+        break;
+      case 'users':
+        loadUsers();
+        break;
+      case 'modules':
+        loadModules();
+        break;
+      case 'lecturers':
+        loadLecturers();
+        break;
+      case 'timetable':
+        loadTimetable();
+        break;
+      case 'classTimetable':
+        loadClassTimetable();
+        break;
+      case 'notes':
+        loadNotes();
+        break;
+      case 'assignments':
+        loadAssignments();
+        break;
+    }
+    
+    // Show refresh notification
+    showRefreshNotification(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} updated successfully!`);
+  };
+  
+  const showRefreshNotification = (message) => {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'refresh-notification';
+    notification.innerHTML = `
+      <i class="fas fa-sync-alt"></i> ${message}
+      <button onclick="this.parentElement.remove()" class="notification-close">&times;</button>
+    `;
+    
+    // Add styles
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 9999;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease-out;
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 3000);
+  };
+  
+  // Add CSS animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .refresh-notification {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .notification-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+  `;
+  document.head.appendChild(style);
+
   // Initialize discussion management
   document.addEventListener('DOMContentLoaded', function() {
     const createDiscussionForm = document.getElementById('createDiscussionForm');
@@ -2220,6 +2393,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load discussions when page loads
     loadDiscussions();
+    
+    // Start auto-refresh for discussions
+    startAutoRefresh('discussions', 30000); // Refresh every 30 seconds
   });
 
 })();

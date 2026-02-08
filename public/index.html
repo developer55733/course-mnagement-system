@@ -1657,7 +1657,67 @@
             // Load news and ads when their tabs are clicked
             document.querySelector('[data-tab="news"]')?.addEventListener('click', loadNews);
             document.querySelector('[data-tab="ads"]')?.addEventListener('click', loadAds);
+            document.querySelector('[data-tab="discussion-forum"]')?.addEventListener('click', loadDiscussions);
+            
+            // Start auto-refresh intervals
+            setInterval(() => {
+                // Check if tabs are active and refresh data
+                if (document.getElementById('news').classList.contains('active')) {
+                    loadNews();
+                }
+                if (document.getElementById('ads').classList.contains('active')) {
+                    loadAds();
+                }
+                if (document.getElementById('discussion-forum').classList.contains('active')) {
+                    loadDiscussions();
+                }
+            }, 30000); // Refresh every 30 seconds
         });
+        
+        // Auto-refresh discussions function for main interface
+        async function loadDiscussions() {
+            try {
+                const response = await fetch('/api/discussions');
+                const data = await response.json();
+                
+                const discussionsContainer = document.getElementById('discussions-container');
+                if (data.success && data.data && data.data.length > 0) {
+                    discussionsContainer.innerHTML = data.data.map(discussion => `
+                        <div class="discussion-item" onclick="viewDiscussion(${discussion.id})">
+                            <div class="discussion-header">
+                                <h4>${discussion.title}</h4>
+                                <div class="discussion-meta">
+                                    <span class="discussion-module">${discussion.module_code || 'General'}</span>
+                                    <span class="discussion-date">${new Date(discussion.created_at).toLocaleDateString()}</span>
+                                    <span class="discussion-author">By ${discussion.author_name || 'Admin'}</span>
+                                </div>
+                            </div>
+                            <div class="discussion-content">
+                                <p>${discussion.content.substring(0, 200)}${discussion.content.length > 200 ? '...' : ''}</p>
+                            </div>
+                            <div class="discussion-stats">
+                                <span><i class="fas fa-comments"></i> ${discussion.reply_count || 0} replies</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    discussionsContainer.innerHTML = `
+                        <div class="no-discussions">
+                            <i class="fas fa-comments"></i>
+                            <p>No discussions yet. Admin will post discussions here.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading discussions:', error);
+            }
+        }
+        
+        // View discussion function
+        function viewDiscussion(id) {
+            // Open discussion modal or navigate to discussion detail
+            window.openDiscussionModal(id);
+        }
    </script>
 </body>
 </html>
