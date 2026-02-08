@@ -1635,12 +1635,12 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     try {
-      const response = await axios.post('/api/news', newsData);
-      if (response.data.success) {
+      const response = await request('post', '/api/news', newsData);
+      if (response.success) {
         showMessage('newsMsg', 'News posted successfully!', false);
         document.getElementById('addNewsForm').reset();
       } else {
-        showMessage('newsMsg', response.data.message || 'Failed to post news', true);
+        showMessage('newsMsg', response.error?.message || 'Failed to post news', true);
       }
     } catch (error) {
       console.error('Error posting news:', error);
@@ -1687,13 +1687,13 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     try {
-      const response = await axios.post('/api/ads', adData);
-      if (response.data.success) {
+      const response = await request('post', '/api/ads', adData);
+      if (response.success) {
         showMessage('adMsg', 'Ad created successfully!', false);
         document.getElementById('addAdForm').reset();
         document.getElementById('adAutoPlay').checked = true;
       } else {
-        showMessage('adMsg', response.data.message || 'Failed to create ad', true);
+        showMessage('adMsg', response.error?.message || 'Failed to create ad', true);
       }
     } catch (error) {
       console.error('Error creating ad:', error);

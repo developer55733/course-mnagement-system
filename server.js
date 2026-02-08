@@ -43,6 +43,8 @@ const notesRoutes = require('./routes/notes');
 const discussionRoutes = require('./routes/discussions');
 const assignmentRoutes = require('./routes/assignments');
 const classTimetableRoutes = require('./routes/class-timetable');
+const newsRoutes = require('./routes/news');
+const adsRoutes = require('./routes/ads');
 
 const app = express();
 
@@ -108,6 +110,17 @@ app.get('/api', (req, res) => {
       createTimetable: 'POST /api/timetable (body: {test, module, date, time, venue})',
       getAllLecturers: 'GET /api/lecturers',
       createLecturer: 'POST /api/lecturers (header: x-admin-secret, body: {name, module, phone})',
+      getAllNews: 'GET /api/news',
+      createNews: 'POST /api/news (body: {title, content, category, priority, image_url})',
+      updateNews: 'PUT /api/news/:id (body: {title, content, category, priority, image_url, is_active})',
+      deleteNews: 'DELETE /api/news/:id',
+      getAllAds: 'GET /api/ads',
+      createAd: 'POST /api/ads (body: {title, description, video_url, redirect_url, ad_type, position, auto_play})',
+      updateAd: 'PUT /api/ads/:id (body: {title, description, video_url, redirect_url, ad_type, position, auto_play, is_active})',
+      deleteAd: 'DELETE /api/ads/:id',
+      trackAdView: 'POST /api/ads/track-view (body: {ad_id, user_id})',
+      trackAdClick: 'POST /api/ads/track-click (body: {ad_id, user_id})',
+      getAdAnalytics: 'GET /api/ads/:id/analytics',
     },
   });
 });
@@ -123,6 +136,8 @@ app.use('/api/notes', notesRoutes);
 app.use('/api/discussions', discussionRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/class-timetable', classTimetableRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/ads', adsRoutes);
 
 // 404 handler
 app.use((req, res) => {
