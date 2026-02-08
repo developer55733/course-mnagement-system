@@ -68,13 +68,20 @@
 
   const request = async (method, url, data) => {
     try {
-      console.log(`🌐 Making ${method.toUpperCase()} request to ${url}`); // Debug log
+      // Use debug server if available, otherwise use current host
+      const baseURL = window.location.port === '3001' ? 
+        `${window.location.protocol}//${window.location.hostname}:3001` : 
+        window.location.origin;
+      
+      const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
+      
+      console.log(`🌐 Making ${method.toUpperCase()} request to ${fullUrl}`); // Debug log
       console.log('📤 Request data:', data); // Debug log
       console.log('🔑 Admin secret available:', !!ADMIN_SECRET); // Debug log
       
       const res = await axios({ 
         method, 
-        url, 
+        url: fullUrl, 
         data, 
         headers: { 
           'x-admin-secret': ADMIN_SECRET,
@@ -1624,7 +1631,11 @@ document.addEventListener('DOMContentLoaded', function() {
   async function checkServerStatus() {
     try {
       console.log('🔍 Checking server status...'); // Debug log
-      const response = await axios.get('/health', { timeout: 5000 });
+      const baseURL = window.location.port === '3001' ? 
+        `${window.location.protocol}//${window.location.hostname}:3001` : 
+        window.location.origin;
+      
+      const response = await axios.get(`${baseURL}/health`, { timeout: 5000 });
       console.log('✅ Server is running - API endpoints available'); // Debug log
       console.log('📊 Server health:', response.data); // Debug log
       return true;
