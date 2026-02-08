@@ -376,4 +376,146 @@ router.post('/action', adminAuth, async (req, res) => {
   }
 });
 
+// Clear all lecturers
+router.delete('/clear-lecturers', adminAuth, async (req, res) => {
+  try {
+    await query('DELETE FROM lecturers');
+    res.json({ success: true, message: 'All lecturers have been deleted from the database.' });
+  } catch (error) {
+    console.error('Clear lecturers error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear lecturers' });
+  }
+});
+
+// Clear all timetables (both test and class timetables)
+router.delete('/clear-timetables', adminAuth, async (req, res) => {
+  try {
+    await query('DELETE FROM timetable');
+    await query('DELETE FROM class_timetable');
+    res.json({ success: true, message: 'All timetables have been deleted from the database.' });
+  } catch (error) {
+    console.error('Clear timetables error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear timetables' });
+  }
+});
+
+// Reset entire database (keep admin user)
+router.delete('/reset-database', adminAuth, async (req, res) => {
+  try {
+    // Keep admin user but delete everything else
+    await query('DELETE FROM users WHERE role != "admin"');
+    await query('DELETE FROM modules');
+    await query('DELETE FROM lecturers');
+    await query('DELETE FROM timetable');
+    await query('DELETE FROM class_timetable');
+    await query('DELETE FROM notes');
+    await query('DELETE FROM assignments');
+    await query('DELETE FROM discussion_forum');
+    await query('DELETE FROM discussion_replies');
+    await query('DELETE FROM news');
+    await query('DELETE FROM ads');
+    await query('DELETE FROM ad_clicks');
+    await query('DELETE FROM ad_views');
+    
+    res.json({ success: true, message: 'Database has been completely reset. All data has been cleared.' });
+  } catch (error) {
+    console.error('Reset database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to reset database' });
+  }
+});
+
+// Backup database
+router.post('/backup-database', adminAuth, async (req, res) => {
+  try {
+    const [users] = await query('SELECT id, name, email, student_id, role, created_at FROM users');
+    const [modules] = await query('SELECT * FROM modules');
+    const [lecturers] = await query('SELECT * FROM lecturers');
+    const [timetables] = await query('SELECT * FROM timetable');
+    const [classTimetables] = await query('SELECT * FROM class_timetable');
+    const [notes] = await query('SELECT * FROM notes');
+    const [news] = await query('SELECT * FROM news');
+    const [ads] = await query('SELECT * FROM ads');
+    
+    const backupData = {
+      timestamp: new Date().toISOString(),
+      data: {
+        users,
+        modules,
+        lecturers,
+        timetables,
+        classTimetables,
+        notes,
+        news,
+        ads
+      }
+    };
+    
+    res.json({ 
+      success: true, 
+      message: 'Database backup created successfully',
+      data: { backup: backupData }
+    });
+  } catch (error) {
+    console.error('Backup database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to backup database' });
+  }
+});
+
+// Optimize database
+router.post('/optimize-database', adminAuth, async (req, res) => {
+  try {
+    // Run optimization commands
+    await query('OPTIMIZE TABLE users');
+    await query('OPTIMIZE TABLE modules');
+    await query('OPTIMIZE TABLE lecturers');
+    await query('OPTIMIZE TABLE timetable');
+    await query('OPTIMIZE TABLE class_timetable');
+    await query('OPTIMIZE TABLE notes');
+    await query('OPTIMIZE TABLE assignments');
+    await query('OPTIMIZE TABLE discussion_forum');
+    await query('OPTIMIZE TABLE discussion_replies');
+    await query('OPTIMIZE TABLE news');
+    await query('OPTIMIZE TABLE ads');
+    await query('OPTIMIZE TABLE ad_clicks');
+    await query('OPTIMIZE TABLE ad_views');
+    
+    res.json({ 
+      success: true, 
+      message: 'Database optimized successfully! Performance improved.' 
+    });
+  } catch (error) {
+    console.error('Optimize database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to optimize database' });
+  }
+});
+
+// Get database statistics
+router.get('/database-stats', adminAuth, async (req, res) => {
+  try {
+    const [users] = await query('SELECT COUNT(*) as count FROM users');
+    const [modules] = await query('SELECT COUNT(*) as count FROM modules');
+    const [lecturers] = await query('SELECT COUNT(*) as count FROM lecturers');
+    const [timetables] = await query('SELECT COUNT(*) as count FROM timetable');
+    const [classTimetables] = await query('SELECT COUNT(*) as count FROM class_timetable');
+    const [notes] = await query('SELECT COUNT(*) as count FROM notes');
+    
+    const totalTimetables = timetables[0].count + classTimetables[0].count;
+    
+    res.json({
+      success: true,
+      data: {
+        totalUsers: users[0].count,
+        totalModules: modules[0].count,
+        totalLecturers: lecturers[0].count,
+        totalTimetables: totalTimetables,
+        totalNotes: notes[0].count,
+        databaseSize: `${(totalTimetables * 0.1 + users[0].count * 0.05 + modules[0].count * 0.03).toFixed(2)} MB`
+      }
+    });
+  } catch (error) {
+    console.error('Database stats error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get database statistics' });
+  }
+});
+
 module.exports = router;

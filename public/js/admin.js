@@ -518,50 +518,25 @@
   const btnExecuteDbOperation = document.getElementById('btnExecuteDbOperation');
   if (btnExecuteDbOperation) {
     btnExecuteDbOperation.addEventListener('click', async () => {
-      const operationType = document.getElementById('dbOperationType').value.trim();
-      const confirmation = document.getElementById('dbOperationConfirm').value.trim();
-      
-      hideMessage('dbOperationMsg');
+      const operationType = document.getElementById('dbOperationType').value;
+      const confirmText = document.getElementById('dbOperationConfirm').value;
       
       if (!operationType) {
         showMessage('dbOperationMsg', 'Please select an operation type.', true);
         return;
       }
       
-      if (confirmation !== 'CONFIRM') {
-        showMessage('dbOperationMsg', 'Please type "CONFIRM" to proceed with this operation.', true);
+      if (confirmText !== 'DELETE') {
+        showMessage('dbOperationMsg', 'Please type "DELETE" to confirm this operation.', true);
         return;
       }
       
-      const operationMessages = {
-        clearUsers: 'This will delete ALL users from the database. This action cannot be undone!',
-        clearModules: 'This will delete ALL modules from the database. This action cannot be undone!',
-        clearLecturers: 'This will delete ALL lecturers from the database. This action cannot be undone!',
-        clearTimetables: 'This will delete ALL timetables from the database. This action cannot be undone!',
-        resetDatabase: 'This will RESET THE ENTIRE DATABASE. All data will be lost. This action cannot be undone!'
-      };
-      
-      const finalConfirmation = confirm(`⚠️ DANGER: ${operationMessages[operationType]}\n\nAre you absolutely sure you want to proceed?`);
-      if (!finalConfirmation) return;
-      
-      btnExecuteDbOperation.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
+      // Disable button and show loading
+      btnExecuteDbOperation.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       btnExecuteDbOperation.disabled = true;
       
-      try {
-        const res = await request('post', '/admin/database-operation', { operationType });
-        
-        if (res && res.success) {
-          showMessage('dbOperationMsg', res.message || 'Database operation completed successfully!', false);
-          await loadDatabaseStats(); // Refresh stats after operation
-        } else {
-          // Simulate operation for demo
-          simulateDatabaseOperation(operationType);
-        }
-      } catch (error) {
-        console.error('Error executing database operation:', error);
-        // Simulate operation for demo
-        simulateDatabaseOperation(operationType);
-      }
+      // Perform the actual database operation
+      await performDatabaseOperation(operationType);
       
       setTimeout(() => {
         btnExecuteDbOperation.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Execute Operation';
@@ -570,48 +545,6 @@
         document.getElementById('dbOperationConfirm').value = '';
       }, 2000);
     });
-  }
-
-  function simulateDatabaseOperation(operationType) {
-    const operationResults = {
-      clearUsers: 'All users have been deleted from the database.',
-      clearModules: 'All modules have been deleted from the database.',
-      clearLecturers: 'All lecturers have been deleted from the database.',
-      clearTimetables: 'All timetables have been deleted from the database.',
-      resetDatabase: 'Database has been completely reset. All data has been cleared.'
-    };
-    
-    showMessage('dbOperationMsg', operationResults[operationType], false);
-    
-    // Update stats to reflect the operation
-    setTimeout(() => {
-      switch (operationType) {
-        case 'clearUsers':
-          document.getElementById('totalUsers').textContent = '0';
-          break;
-        case 'clearModules':
-          document.getElementById('totalModules').textContent = '0';
-          break;
-        case 'clearLecturers':
-          document.getElementById('totalLecturers').textContent = '0';
-          break;
-        case 'clearTimetables':
-          // Update database size
-          const currentSize = document.getElementById('databaseSize').textContent;
-          if (currentSize !== '--') {
-            const sizeValue = parseFloat(currentSize);
-            const newSize = (sizeValue * 0.7).toFixed(2);
-            document.getElementById('databaseSize').textContent = newSize + ' MB';
-          }
-          break;
-        case 'resetDatabase':
-          document.getElementById('totalUsers').textContent = '0';
-          document.getElementById('totalModules').textContent = '0';
-          document.getElementById('totalLecturers').textContent = '0';
-          document.getElementById('databaseSize').textContent = '0.1 MB';
-          break;
-      }
-    }, 1000);
   }
 
   // Load database stats on login
