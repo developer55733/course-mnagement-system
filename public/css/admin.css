@@ -1,5 +1,8 @@
 body {
-  background: #f6f8fa;
+  background: linear-gradient(135deg, rgba(246, 246, 246, 0.9), rgba(246, 246, 246, 0.8)), url('/images/flavio-zWERT5ADMsk-unsplash.jpg') center/cover no-repeat fixed;
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
 }
 
 .card {
