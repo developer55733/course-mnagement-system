@@ -394,74 +394,50 @@ async function query(sql, params = []) {
 
     
 
-    // If AUTO_INCREMENT error, force table recreation
-
+    // If AUTO_INCREMENT error, only recreate if it's a new table
     if (error.code === 'ER_NO_DEFAULT_FOR_FIELD' || (error.message && error.message.includes("Field 'id' doesn't have a default value"))) {
-
-      console.log('🔄 AUTO_INCREMENT error detected, forcing table recreation...');
-
+      console.log('🔄 AUTO_INCREMENT error detected, checking if this is a new table...');
       console.log(`   Error Code: ${error.code}`);
-
       console.log(`   Error Message: ${error.message}`);
-
-      try {
-
-        await initializeDatabase();
-
-        console.log('✅ Tables recreated successfully, retrying query...');
-
-        // Retry the original query
-
-        const retryResult = await pool.query(sql, params);
-
-        const [retryRows] = retryResult;
-
-        const safeRetryRows = retryRows || [];
-
-        return [safeRetryRows, []];
-
-      } catch (initError) {
-
-        console.error('❌ Failed to recreate tables:', initError.message);
-
-        throw error; // Throw original error if recreation fails
-
+      
+      // Only recreate if it's a news or ads table (new tables)
+      if (sql.includes('news') || sql.includes('ads') || sql.includes('ad_clicks') || sql.includes('ad_views')) {
+        console.log('🔄 New table detected, recreating...');
+        try {
+          await initializeDatabase();
+          console.log('✅ New tables recreated successfully, retrying query...');
+          // Retry the original query
+          const retryResult = await pool.query(sql, params);
+          const [retryRows] = retryResult;
+          const safeRetryRows = retryRows || [];
+          return [safeRetryRows, []];
+        } catch (initError) {
+          console.error('❌ Failed to recreate new tables:', initError.message);
+          throw error; // Throw original error if recreation fails
+        }
+      } else {
+        console.log('ℹ️  Existing table detected, not recreating to preserve data');
+        throw error; // Throw original error for existing tables
       }
-
     }
 
     
 
     // If table doesn't exist, try to create it
-
     if (error.code === 'ER_NO_SUCH_TABLE') {
-
       console.log('🔄 Table does not exist, attempting to create database tables...');
-
       try {
-
         await initializeDatabase();
-
         console.log('✅ Database tables created successfully, retrying query...');
-
         // Retry the original query
-
         const retryResult = await pool.query(sql, params);
-
         const [retryRows] = retryResult;
-
         const safeRetryRows = retryRows || [];
-
         return [safeRetryRows, []];
-
       } catch (initError) {
-
         console.error('❌ Failed to initialize database:', initError.message);
-
         throw error; // Throw original error if initialization fails
-
       }
-
     }
 
     
@@ -508,390 +484,90 @@ async function query(sql, params = []) {
 
 
 
-// Initialize database tables
-
+// Initialize database tables - only create new tables, don't recreate existing ones
 async function initializeDatabase() {
-
-  // First try to recreate tables to fix AUTO_INCREMENT issues
-
-  await recreateTablesWithAutoIncrement();
-
+  // Only create the new news and ads tables, don't recreate existing tables
+  console.log('🔄 Creating new news and ads tables...');
   
-
-  const createTables = [
-
-    `CREATE TABLE users (
-
+  const createNewTables = [
+    `CREATE TABLE IF NOT EXISTS news (
       id INT AUTO_INCREMENT PRIMARY KEY,
-
-      name VARCHAR(100) NOT NULL,
-
-      email VARCHAR(100) UNIQUE NOT NULL,
-
-      student_id VARCHAR(50) UNIQUE,
-
-      password VARCHAR(255) NOT NULL,
-
-      role ENUM('user', 'admin') DEFAULT 'user',
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE modules (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      code VARCHAR(50) UNIQUE NOT NULL,
-
-      name VARCHAR(100) NOT NULL,
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE lecturers (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      name VARCHAR(100) NOT NULL,
-
-      module VARCHAR(100) NOT NULL,
-
-      phone VARCHAR(20),
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE timetable (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      test VARCHAR(100) NOT NULL,
-
-      module VARCHAR(100) NOT NULL,
-
-      date DATE NOT NULL,
-
-      time TIME NOT NULL,
-
-      venue VARCHAR(100) NOT NULL,
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE settings (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      academic_year VARCHAR(20),
-
-      semester INT,
-
-      institution_name VARCHAR(100),
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE notes (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      title VARCHAR(255) NOT NULL,
-
-      content TEXT NOT NULL,
-
-      formatted_content TEXT,
-
-      module_code VARCHAR(50) NOT NULL,
-
-      module_name VARCHAR(100) NOT NULL,
-
-      type ENUM('lecture', 'tutorial', 'assignment', 'exam', 'reference') DEFAULT 'lecture',
-
-      tags VARCHAR(255),
-
-      visibility ENUM('public', 'private') DEFAULT 'public',
-
-      created_by INT NOT NULL,
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-      INDEX idx_module (module_code),
-
-      INDEX idx_type (type),
-
-      INDEX idx_visibility (visibility),
-
-      INDEX idx_created_by (created_by),
-
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE class_timetable (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
-      module_code VARCHAR(50) NOT NULL,
-
-      module_name VARCHAR(100) NOT NULL,
-
-      lecturer_name VARCHAR(100) NOT NULL,
-
-      venue VARCHAR(100) NOT NULL,
-
-      day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
-
-      start_time TIME NOT NULL,
-
-      end_time TIME NOT NULL,
-
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-      INDEX idx_module_code (module_code),
-
-      INDEX idx_day (day_of_week),
-
-      INDEX idx_lecturer (lecturer_name)
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    
-
-    `CREATE TABLE news (
-
-      id INT AUTO_INCREMENT PRIMARY KEY,
-
       title VARCHAR(200) NOT NULL,
-
       content TEXT NOT NULL,
-
       category ENUM('general', 'academic', 'events', 'announcements') DEFAULT 'general',
-
       priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
-
       image_url VARCHAR(500),
-
       is_active BOOLEAN DEFAULT TRUE,
-
       created_by INT,
-
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
       INDEX idx_category (category),
-
       INDEX idx_priority (priority),
-
       INDEX idx_is_active (is_active),
-
       INDEX idx_created_at (created_at),
-
       FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
-
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
     
-
-    `CREATE TABLE ads (
-
+    `CREATE TABLE IF NOT EXISTS ads (
       id INT AUTO_INCREMENT PRIMARY KEY,
-
       title VARCHAR(200) NOT NULL,
-
       description TEXT,
-
       video_url VARCHAR(500) NOT NULL,
-
       redirect_url VARCHAR(500) NOT NULL,
-
       ad_type ENUM('video', 'banner', 'popup') DEFAULT 'video',
-
       position ENUM('top', 'sidebar', 'bottom', 'popup') DEFAULT 'sidebar',
-
       is_active BOOLEAN DEFAULT TRUE,
-
       auto_play BOOLEAN DEFAULT TRUE,
-
       click_count INT DEFAULT 0,
-
       view_count INT DEFAULT 0,
-
       created_by INT,
-
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
       INDEX idx_ad_type (ad_type),
-
       INDEX idx_position (position),
-
       INDEX idx_is_active (is_active),
-
       INDEX idx_created_at (created_at),
-
       FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
-
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
     
-
-    `CREATE TABLE ad_clicks (
-
+    `CREATE TABLE IF NOT EXISTS ad_clicks (
       id INT AUTO_INCREMENT PRIMARY KEY,
-
       ad_id INT NOT NULL,
-
       user_id INT,
-
       ip_address VARCHAR(45),
-
       user_agent TEXT,
-
       clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
       INDEX idx_ad (ad_id),
-
       INDEX idx_user (user_id),
-
       INDEX idx_clicked_at (clicked_at),
-
       FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
-
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
     
-
-    `CREATE TABLE ad_views (
-
+    `CREATE TABLE IF NOT EXISTS ad_views (
       id INT AUTO_INCREMENT PRIMARY KEY,
-
       ad_id INT NOT NULL,
-
       user_id INT,
-
       ip_address VARCHAR(45),
-
       viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
       INDEX idx_ad (ad_id),
-
       INDEX idx_user (user_id),
-
       INDEX idx_viewed_at (viewed_at),
-
       FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
-
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
-
   ];
 
-
-
-  for (const sql of createTables) {
-
+  for (const sql of createNewTables) {
     try {
-
       await pool.query(sql);
-
-      console.log('✅ Table created successfully');
-
+      console.log('✅ New table created successfully');
     } catch (error) {
-
       console.log('⚠️  Table creation warning:', error.message);
-
     }
-
   }
 
-  
-
-  // Insert default data if tables are empty
-
-  try {
-
-    const userResult = await pool.query('SELECT COUNT(*) as count FROM users');
-
-    const userCount = userResult[0];
-
-    if (userCount && userCount[0] && userCount[0].count === 0) {
-
-      console.log('🔄 Inserting default data...');
-
-      
-
-      // Insert default users
-
-      await pool.query(
-
-        `INSERT INTO users (name, email, student_id, password, role) VALUES 
-
-         ('Admin User', 'admin@system.edu', 'ADMIN001', '$2b$10$sqG0niYZXluB1zwBdD4CMO23Tc1VJ5BOh3y8mjHia7l65bENYwEOe', 'admin')`
-
-      );
-
-      
-
-      // Insert default modules
-
-      await pool.query(
-
-        `INSERT INTO modules (code, name) VALUES 
-
-         ('IT101', 'Introduction to Programming'),
-
-         ('IT102', 'Web Development Fundamentals')`
-
-      );
-
-      
-
-      console.log('✅ Default data inserted successfully');
-
-    }
-
-  } catch (error) {
-
-    console.log('⚠️  Default data insertion warning:', error.message);
-
-  }
-
+  console.log('✅ News and ads tables initialized successfully');
 }
 
 
