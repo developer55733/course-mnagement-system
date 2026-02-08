@@ -1745,6 +1745,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="col-md-4">
               <p><strong>Created:</strong> ${new Date(article.created_at).toLocaleDateString()}</p>
               <p><strong>Author:</strong> ${article.created_by_name || 'Unknown'}</p>
+              <p><strong>Views:</strong> <span class="badge badge-primary">${article.view_count || 0}</span></p>
             </div>
           </div>
         </div>

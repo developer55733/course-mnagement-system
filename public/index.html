@@ -1570,7 +1570,7 @@
                 const newsList = document.getElementById('news-list');
                 if (data.success && data.data && data.data.length > 0) {
                     newsList.innerHTML = data.data.map(news => `
-                        <div class="news-item">
+                        <div class="news-item" data-news-id="${news.id}">
                             <div class="news-item-header">
                                 <div>
                                     <h3 class="news-item-title">${news.title}</h3>
@@ -1585,6 +1585,9 @@
                             <div class="news-item-content">${news.content}</div>
                         </div>
                     `).join('');
+                    
+                    // Track views for all loaded news articles immediately
+                    data.data.forEach(news => trackNewsView(news.id));
                 } else {
                     newsList.innerHTML = `
                         <div class="no-news-message">
