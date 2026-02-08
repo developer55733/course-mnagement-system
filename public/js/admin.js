@@ -1577,6 +1577,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addNewsForm) {
       addNewsForm.addEventListener('submit', handleAddNews);
     }
+    
+    // Load existing news when admin panel initializes
+    loadNews();
   }
 
   async function handleAddNews(e) {
