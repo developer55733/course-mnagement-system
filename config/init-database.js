@@ -14,11 +14,14 @@ async function initializeDatabase() {
                 title VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
                 module_code VARCHAR(50),
-                created_by INT NOT NULL,
+                created_by INT,
+                author VARCHAR(100),
+                author_role VARCHAR(20) DEFAULT 'user',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_module (module_code),
                 INDEX idx_created_by (created_by),
+                INDEX idx_author_role (author_role),
                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
             )
         `);
@@ -30,7 +33,7 @@ async function initializeDatabase() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 discussion_id INT NOT NULL,
                 content TEXT NOT NULL,
-                created_by INT NOT NULL,
+                created_by INT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_discussion (discussion_id),
