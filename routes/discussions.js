@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
 // Create new discussion post (admin only)
 router.post('/', async (req, res) => {
   try {
-    const { title, content, module, author, author_role } = req.body;
+    const { title, content, module_code, author, author_role } = req.body;
     
     // Check if user is admin
     const adminSecret = req.headers['x-admin-secret'];
@@ -109,7 +109,7 @@ router.post('/', async (req, res) => {
     // For admin posts, we'll use a special admin user ID or NULL
     const adminUserId = null; // You can set this to a specific admin user ID if needed
     
-    const [result] = await query(sql, [title, content, module || null, adminUserId, author || 'Admin', author_role || 'admin']);
+    const [result] = await query(sql, [title, content, module_code || null, adminUserId, author || 'Admin', author_role || 'admin']);
     
     res.json({ 
       success: true, 
@@ -117,7 +117,7 @@ router.post('/', async (req, res) => {
         id: result.insertId,
         title,
         content,
-        module,
+        module_code,
         author: author || 'Admin',
         author_role: author_role || 'admin',
         created_at: new Date()
