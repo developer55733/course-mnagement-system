@@ -1616,6 +1616,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addAdForm) {
       addAdForm.addEventListener('submit', handleAddAd);
     }
+    
+    // Load ads dashboard on initialization
+    loadAds();
   }
 
   async function handleAddAd(e) {
@@ -1669,6 +1672,11 @@ document.addEventListener('DOMContentLoaded', function() {
         showMessage('adMsg', 'Ad created successfully!', false);
         document.getElementById('addAdForm').reset();
         document.getElementById('adAutoPlay').checked = true;
+        
+        // Refresh ads dashboard to show the newly created ad
+        loadAds();
+        document.getElementById('totalAds').textContent = 
+          (parseInt(document.getElementById('totalAds').textContent) + 1);
       } else {
         showMessage('adMsg', response.data.message || 'Failed to create ad', true);
       }
