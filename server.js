@@ -139,6 +139,36 @@ app.use('/api/class-timetable', classTimetableRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/ads', adsRoutes);
 
+// Health check endpoint for debugging
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    const database = require('./config/database');
+    await database.execute('SELECT 1');
+    
+    res.json({
+      success: true,
+      status: 'Server is running',
+      database: 'Connected',
+      timestamp: new Date().toISOString(),
+      available_routes: [
+        '/api/news',
+        '/api/ads',
+        '/api/users',
+        '/api/modules',
+        '/admin/info'
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 'Server running but database error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, error: 'Route not found' });

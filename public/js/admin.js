@@ -1624,11 +1624,17 @@ document.addEventListener('DOMContentLoaded', function() {
   async function checkServerStatus() {
     try {
       console.log('🔍 Checking server status...'); // Debug log
-      const response = await axios.get('/api/users', { timeout: 5000 });
+      const response = await axios.get('/health', { timeout: 5000 });
       console.log('✅ Server is running - API endpoints available'); // Debug log
+      console.log('📊 Server health:', response.data); // Debug log
       return true;
     } catch (error) {
       console.error('❌ Server is not running or API endpoints not available:', error); // Debug log
+      console.log('🔍 Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      }); // Debug log
       return false;
     }
   }
@@ -1643,6 +1649,8 @@ document.addEventListener('DOMContentLoaded', function() {
             checkServerStatus().then(isRunning => {
               if (!isRunning) {
                 showMessage('actionMsg', '⚠️ Server is not running. News and ads creation will use demo mode.', true);
+              } else {
+                showMessage('actionMsg', '✅ Server is running. You can create news and ads.', false);
               }
             });
             initAssignmentManagement();
@@ -1650,12 +1658,148 @@ document.addEventListener('DOMContentLoaded', function() {
             loadModules();
             initNewsManagement();
             initAdsManagement();
+            
+            // Add test buttons for debugging
+            addTestButtons();
           }
         }
       });
     });
     observer.observe(panel, { attributes: true });
   }
+
+  // Add test buttons for debugging
+  function addTestButtons() {
+    const existingTestButtons = document.getElementById('test-buttons');
+    if (existingTestButtons) return; // Don't add twice
+    
+    const testButtonsDiv = document.createElement('div');
+    testButtonsDiv.id = 'test-buttons';
+    testButtonsDiv.className = 'card mb-4';
+    testButtonsDiv.innerHTML = `
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">🔧 Debugging Tools</h5>
+      </div>
+      <div class="card-body">
+        <button class="btn btn-sm btn-outline-primary me-2" onclick="testNewsAPI()">Test News API</button>
+        <button class="btn btn-sm btn-outline-warning me-2" onclick="testAdsAPI()">Test Ads API</button>
+        <button class="btn btn-sm btn-outline-success me-2" onclick="testHealthCheck()">Health Check</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="createTestNews()">Create Test News</button>
+        <div id="test-results" class="mt-3"></div>
+      </div>
+    `;
+    
+    // Insert after the first card
+    const firstCard = document.querySelector('.card');
+    if (firstCard) {
+      firstCard.parentNode.insertBefore(testButtonsDiv, firstCard.nextSibling);
+    }
+  }
+
+  // Test functions for debugging
+  window.testNewsAPI = async function() {
+    try {
+      console.log('🧪 Testing News API...');
+      const response = await axios.get('/api/news');
+      console.log('✅ News API test successful:', response.data);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-success">
+          <strong>✅ News API Working</strong><br>
+          Status: ${response.status}<br>
+          Data: ${JSON.stringify(response.data).substring(0, 200)}...
+        </div>
+      `;
+    } catch (error) {
+      console.error('❌ News API test failed:', error);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-danger">
+          <strong>❌ News API Failed</strong><br>
+          Error: ${error.message}<br>
+          Status: ${error.response?.status || 'No response'}
+        </div>
+      `;
+    }
+  };
+
+  window.testAdsAPI = async function() {
+    try {
+      console.log('🧪 Testing Ads API...');
+      const response = await axios.get('/api/ads');
+      console.log('✅ Ads API test successful:', response.data);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-success">
+          <strong>✅ Ads API Working</strong><br>
+          Status: ${response.status}<br>
+          Data: ${JSON.stringify(response.data).substring(0, 200)}...
+        </div>
+      `;
+    } catch (error) {
+      console.error('❌ Ads API test failed:', error);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-danger">
+          <strong>❌ Ads API Failed</strong><br>
+          Error: ${error.message}<br>
+          Status: ${error.response?.status || 'No response'}
+        </div>
+      `;
+    }
+  };
+
+  window.testHealthCheck = async function() {
+    try {
+      console.log('🧪 Testing Health Check...');
+      const response = await axios.get('/health');
+      console.log('✅ Health check successful:', response.data);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-success">
+          <strong>✅ Server Health</strong><br>
+          Status: ${response.data.status}<br>
+          Database: ${response.data.database}<br>
+          Available Routes: ${response.data.available_routes.join(', ')}
+        </div>
+      `;
+    } catch (error) {
+      console.error('❌ Health check failed:', error);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-danger">
+          <strong>❌ Health Check Failed</strong><br>
+          Error: ${error.message}<br>
+          Status: ${error.response?.status || 'No response'}
+        </div>
+      `;
+    }
+  };
+
+  window.createTestNews = async function() {
+    try {
+      console.log('🧪 Creating test news...');
+      const testData = {
+        title: 'Test News Article',
+        content: 'This is a test news article created for debugging purposes.',
+        category: 'general',
+        priority: 'medium',
+        is_active: true
+      };
+      
+      const response = await request('post', '/api/news', testData);
+      console.log('✅ Test news created:', response);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-success">
+          <strong>✅ Test News Created</strong><br>
+          Response: ${JSON.stringify(response)}
+        </div>
+      `;
+    } catch (error) {
+      console.error('❌ Test news creation failed:', error);
+      document.getElementById('test-results').innerHTML = `
+        <div class="alert alert-danger">
+          <strong>❌ Test News Failed</strong><br>
+          Error: ${error.message}<br>
+          Details: ${JSON.stringify(error.response?.data || 'No details')}
+        </div>
+      `;
+    }
+  };
 
   // News Management Functions
   function initNewsManagement() {
