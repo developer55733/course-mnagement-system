@@ -1311,44 +1311,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Show loading state immediately
       btnLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
-      btnLogout.disabled = true;
-      console.log('Loading state activated'); // Debug log
-      
-      // Perform logout synchronously
-      try {
-        // Clear admin secret
-        ADMIN_SECRET = '';
-        console.log('Admin secret cleared'); // Debug log
-        
-        // Hide panel and show login card
-        if (panel) panel.style.display = 'none';
-        const loginCard = document.getElementById('loginCard');
-        if (loginCard) loginCard.style.display = 'block';
-        console.log('Panel hidden, login card shown'); // Debug log
-        
-        // Hide logout button
-        btnLogout.style.display = 'none';
-        console.log('Logout button hidden'); // Debug log
-        
-        // Hide edit profile button
-        const editProfileBtn = document.getElementById('btnEditProfile');
-        if (editProfileBtn) {
-          editProfileBtn.style.display = 'none';
-          console.log('Edit profile button hidden'); // Debug log
-        }
-        
-        // Clear login form
-        if (secretInput) secretInput.value = '';
-        if (loginMsg) {
-          loginMsg.textContent = 'Logged out successfully!';
-          loginMsg.style.color = '#28a745';
-        }
-        console.log('Login form updated'); // Debug log
-        
-        // Clear output
-        if (outPre) outPre.textContent = 'Use buttons above to perform admin actions.';
-        console.log('Output cleared'); // Debug log
-        
         // Show success message briefly, then clear it
         setTimeout(() => {
           if (loginMsg) {
