@@ -1024,14 +1024,42 @@
                 <h2 class="page-title"><i class="fas fa-comments"></i> Discussion Forum</h2>
                 <div class="message" id="forum-message"></div>
                 
-                <!-- Discussions List Only -->
+                <!-- Create New Discussion -->
+                <div class="create-discussion-section">
+                    <h3><i class="fas fa-plus-circle"></i> Start New Discussion</h3>
+                    <form id="create-discussion-form">
+                        <div class="form-group">
+                            <label for="discussion-title">Discussion Title</label>
+                            <input type="text" id="discussion-title" required placeholder="Enter discussion title">
+                        </div>
+                        <div class="form-group">
+                            <label for="discussion-module">Module (Optional)</label>
+                            <select id="discussion-module">
+                                <option value="">General Discussion</option>
+                                <option value="IT101">IT101 - Introduction to Programming</option>
+                                <option value="IT102">IT102 - Web Development Fundamentals</option>
+                                <option value="IT103">IT103 - Database Management Systems</option>
+                                <option value="IT104">IT104 - Data Structures & Algorithms</option>
+                                <option value="IT105">IT105 - Computer Networks</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="discussion-content">Message</label>
+                            <textarea id="discussion-content" required placeholder="Write your discussion message..." rows="6"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Post Discussion
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Discussions List -->
                 <div class="discussions-list">
                     <h3><i class="fas fa-list"></i> Recent Discussions</h3>
                     <div id="discussions-container">
                         <div class="no-discussions">
                             <i class="fas fa-comments"></i>
-                            <p>No discussions available yet.</p>
-                            <p>Discussions will be posted by administrators.</p>
+                            <p>No discussions yet. Be the first to start one!</p>
                         </div>
                     </div>
                 </div>
@@ -1385,24 +1413,18 @@
                             <p>No news articles available yet.</p>
                             <p>Admin will post news and updates here.</p>
                         </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading news:', error);
+            }
+        }
 
-// News and Ads Management Functions
-async function loadNews() {
-    try {
-        const response = await fetch('/api/news');
-        const data = await response.json();
-        
-        const newsList = document.getElementById('news-list');
-        if (data.success && data.data && data.data.length > 0) {
-            newsList.innerHTML = data.data.map(news => `
-                <div class="news-item" data-news-id="${news.id}">
-                    <div class="news-item-header">
-                        <div>
-                            <h3 class="news-item-title">${news.title}</h3>
-                            <div class="news-item-meta">
-                                <span class="news-date">${new Date(news.created_at).toLocaleDateString()}</span>
-                                <span class="news-views">${news.view_count || 0} views</span>
-                                <span class="news-author">By ${news.created_by_name || 'Unknown'}</span>
+        async function loadAds() {
+            try {
+                const response = await fetch('/api/ads');
+                const data = await response.json();
+                
                 // Get all containers
                 const videoAdsContainer = document.getElementById('video-ads');
                 const bannerAdsContainer = document.getElementById('banner-ads');
@@ -1664,7 +1686,6 @@ async function loadNews() {
             // Load news and ads when their tabs are clicked
             document.querySelector('[data-tab="news"]')?.addEventListener('click', loadNews);
             document.querySelector('[data-tab="ads"]')?.addEventListener('click', loadAds);
-            document.querySelector('[data-tab="discussion-forum"]')?.addEventListener('click', loadDiscussions);
         });
    </script>
 </body>
