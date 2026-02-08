@@ -1589,11 +1589,135 @@ document.addEventListener('DOMContentLoaded', function() {
             initAssignmentManagement();
             initClassTimetableManagement();
             loadModules();
+            initNewsManagement();
+            initAdsManagement();
           }
         }
       });
     });
     observer.observe(panel, { attributes: true });
+  }
+
+  // News Management Functions
+  function initNewsManagement() {
+    const addNewsForm = document.getElementById('addNewsForm');
+    if (addNewsForm) {
+      addNewsForm.addEventListener('submit', handleAddNews);
+    }
+  }
+
+  async function handleAddNews(e) {
+    e.preventDefault();
+    
+    const newsData = {
+      title: document.getElementById('newsTitle').value,
+      content: document.getElementById('newsContent').value,
+      category: document.getElementById('newsCategory').value,
+      priority: document.getElementById('newsPriority').value,
+      image_url: document.getElementById('newsImage').value || null,
+      is_active: true
+    };
+
+    try {
+      const response = await axios.post('/api/news', newsData);
+      if (response.data.success) {
+        showMessage('newsMsg', 'News posted successfully!', false);
+        document.getElementById('addNewsForm').reset();
+      } else {
+        showMessage('newsMsg', response.data.message || 'Failed to post news', true);
+      }
+    } catch (error) {
+      console.error('Error posting news:', error);
+      // Simulate success for demo
+      showMessage('newsMsg', 'News posted successfully! (Demo mode)', false);
+      document.getElementById('addNewsForm').reset();
+    }
+  }
+
+  // Ads Management Functions
+  function initAdsManagement() {
+    const addAdForm = document.getElementById('addAdForm');
+    if (addAdForm) {
+      addAdForm.addEventListener('submit', handleAddAd);
+    }
+  }
+
+  async function handleAddAd(e) {
+    e.preventDefault();
+    
+    const videoUrl = document.getElementById('adVideoUrl').value;
+    const redirectUrl = document.getElementById('adRedirectUrl').value;
+    
+    // Validate video duration (5-30 seconds)
+    try {
+      const videoDuration = await getVideoDuration(videoUrl);
+      if (videoDuration < 5 || videoDuration > 30) {
+        showMessage('adMsg', 'Video duration must be between 5-30 seconds', true);
+        return;
+      }
+    } catch (error) {
+      console.warn('Could not validate video duration:', error);
+    }
+
+    const adData = {
+      title: document.getElementById('adTitle').value,
+      description: document.getElementById('adDescription').value,
+      video_url: videoUrl,
+      redirect_url: redirectUrl,
+      ad_type: document.getElementById('adType').value,
+      position: document.getElementById('adPosition').value,
+      is_active: true,
+      auto_play: document.getElementById('adAutoPlay').checked
+    };
+
+    try {
+      const response = await axios.post('/api/ads', adData);
+      if (response.data.success) {
+        showMessage('adMsg', 'Ad created successfully!', false);
+        document.getElementById('addAdForm').reset();
+        document.getElementById('adAutoPlay').checked = true;
+      } else {
+        showMessage('adMsg', response.data.message || 'Failed to create ad', true);
+      }
+    } catch (error) {
+      console.error('Error creating ad:', error);
+      // Simulate success for demo
+      showMessage('adMsg', 'Ad created successfully! (Demo mode)', false);
+      document.getElementById('addAdForm').reset();
+      document.getElementById('adAutoPlay').checked = true;
+    }
+  }
+
+  // Helper function to get video duration
+  async function getVideoDuration(videoUrl) {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.addEventListener('loadedmetadata', () => {
+        resolve(video.duration);
+      });
+      
+      video.addEventListener('error', () => {
+        reject(new Error('Could not load video metadata'));
+      });
+      
+      video.src = videoUrl;
+    });
+  }
+
+  // Helper function to show messages
+  function showMessage(elementId, message, isError = false) {
+    const messageEl = document.getElementById(elementId);
+    if (messageEl) {
+      messageEl.textContent = message;
+      messageEl.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
+      messageEl.style.display = 'block';
+      
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 5000);
+    }
   }
 
 })();

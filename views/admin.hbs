@@ -543,6 +543,117 @@
             <pre id="outPre">Use buttons above to perform admin actions.</pre>
           </div>
         </div>
+
+        <!-- News Management Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-newspaper"></i> News Management</h5>
+          </div>
+          <div class="card-body">
+            <form id="addNewsForm">
+              <div class="mb-3">
+                <label class="form-label">News Title</label>
+                <input type="text" id="newsTitle" class="form-control" required placeholder="Enter news title">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">News Content</label>
+                <textarea id="newsContent" class="form-control" required rows="6" placeholder="Enter news content..."></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Category</label>
+                  <select id="newsCategory" class="form-control" required>
+                    <option value="">Select Category</option>
+                    <option value="general">General</option>
+                    <option value="academic">Academic</option>
+                    <option value="events">Events</option>
+                    <option value="announcements">Announcements</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Priority</label>
+                  <select id="newsPriority" class="form-control" required>
+                    <option value="">Select Priority</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Image URL (Optional)</label>
+                <input type="url" id="newsImage" class="form-control" placeholder="Enter image URL">
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Post News
+              </button>
+              <div id="newsMsg" class="alert alert-info mt-3" style="display:none;"></div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Ads Management Section -->
+        <div class="card mb-4">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="fas fa-ad"></i> Ads Management</h5>
+          </div>
+          <div class="card-body">
+            <form id="addAdForm">
+              <div class="mb-3">
+                <label class="form-label">Ad Title</label>
+                <input type="text" id="adTitle" class="form-control" required placeholder="Enter ad title">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Ad Description</label>
+                <textarea id="adDescription" class="form-control" rows="4" placeholder="Enter ad description..."></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Video URL</label>
+                  <input type="url" id="adVideoUrl" class="form-control" required placeholder="Enter video URL (YouTube, Vimeo, etc.)">
+                  <small class="form-text text-muted">Video duration must be between 5-30 seconds</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Redirect URL</label>
+                  <input type="url" id="adRedirectUrl" class="form-control" required placeholder="Enter URL to redirect when clicked">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Ad Type</label>
+                  <select id="adType" class="form-control" required>
+                    <option value="">Select Type</option>
+                    <option value="video">Video Ad</option>
+                    <option value="banner">Banner Ad</option>
+                    <option value="popup">Popup Ad</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Position</label>
+                  <select id="adPosition" class="form-control" required>
+                    <option value="">Select Position</option>
+                    <option value="top">Top</option>
+                    <option value="sidebar">Sidebar</option>
+                    <option value="bottom">Bottom</option>
+                    <option value="popup">Popup</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="adAutoPlay" checked>
+                  <label class="form-check-label" for="adAutoPlay">
+                    Auto-play video when users visit platform
+                  </label>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-warning">
+                <i class="fas fa-plus"></i> Create Ad
+              </button>
+              <div id="adMsg" class="alert alert-warning mt-3" style="display:none;"></div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 

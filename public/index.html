@@ -1560,6 +1560,177 @@
         if (userProfileHeader) {
             observer.observe(userProfileHeader, { attributes: true });
         }
+
+        // News and Ads Management Functions
+        async function loadNews() {
+            try {
+                const response = await fetch('/api/news');
+                const data = await response.json();
+                
+                const newsList = document.getElementById('news-list');
+                if (data.success && data.data && data.data.length > 0) {
+                    newsList.innerHTML = data.data.map(news => `
+                        <div class="news-item">
+                            <div class="news-item-header">
+                                <div>
+                                    <h3 class="news-item-title">${news.title}</h3>
+                                    <div class="news-item-meta">
+                                        <span class="news-category">${news.category}</span>
+                                        <span class="news-priority ${news.priority}">${news.priority}</span>
+                                        <span class="news-date">${new Date(news.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${news.image_url ? `<img src="${news.image_url}" alt="${news.title}" class="news-item-image">` : ''}
+                            <div class="news-item-content">${news.content}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    newsList.innerHTML = `
+                        <div class="no-news-message">
+                            <i class="fas fa-newspaper"></i>
+                            <p>No news articles available yet.</p>
+                            <p>Admin will post news and updates here.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading news:', error);
+            }
+        }
+
+        async function loadAds() {
+            try {
+                const response = await fetch('/api/ads');
+                const data = await response.json();
+                
+                const videoAdsContainer = document.getElementById('video-ads');
+                const bannerAdsContainer = document.getElementById('banner-ads');
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    const videoAds = data.data.filter(ad => ad.ad_type === 'video');
+                    const bannerAds = data.data.filter(ad => ad.ad_type === 'banner');
+                    
+                    // Load video ads
+                    if (videoAds.length > 0) {
+                        videoAdsContainer.innerHTML = videoAds.map(ad => `
+                            <div class="video-ad" data-ad-id="${ad.id}">
+                                <div class="video-player">
+                                    <video ${ad.auto_play ? 'autoplay muted loop' : ''} controls>
+                                        <source src="${ad.video_url}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="video-controls">
+                                        <button class="mute-btn" onclick="toggleMute(this)">
+                                            <i class="fas fa-volume-mute"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <h4 class="ad-title">${ad.title}</h4>
+                                <p class="ad-description">${ad.description}</p>
+                                <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                    Learn More <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        `).join('');
+                    } else {
+                        videoAdsContainer.innerHTML = `
+                            <div class="no-ads-message">
+                                <i class="fas fa-video"></i>
+                                <p>No video ads available at the moment.</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // Load banner ads
+                    if (bannerAds.length > 0) {
+                        bannerAdsContainer.innerHTML = bannerAds.map(ad => `
+                            <div class="banner-ad" data-ad-id="${ad.id}">
+                                <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                <h4 class="ad-title">${ad.title}</h4>
+                                <p class="ad-description">${ad.description}</p>
+                                <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                    Learn More <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        `).join('');
+                    } else {
+                        bannerAdsContainer.innerHTML = `
+                            <div class="no-ads-message">
+                                <i class="fas fa-image"></i>
+                                <p>No banner ads available at the moment.</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // Track ad views
+                    data.data.forEach(ad => trackAdView(ad.id));
+                } else {
+                    videoAdsContainer.innerHTML = `
+                        <div class="no-ads-message">
+                            <i class="fas fa-video"></i>
+                            <p>No video ads available at the moment.</p>
+                        </div>
+                    `;
+                    bannerAdsContainer.innerHTML = `
+                        <div class="no-ads-message">
+                            <i class="fas fa-image"></i>
+                            <p>No banner ads available at the moment.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading ads:', error);
+            }
+        }
+
+        function toggleMute(button) {
+            const video = button.closest('.video-ad').querySelector('video');
+            const icon = button.querySelector('i');
+            
+            if (video.muted) {
+                video.muted = false;
+                icon.className = 'fas fa-volume-up';
+            } else {
+                video.muted = true;
+                icon.className = 'fas fa-volume-mute';
+            }
+        }
+
+        async function trackAdView(adId) {
+            try {
+                await fetch('/api/ads/track-view', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ad_id: adId })
+                });
+            } catch (error) {
+                console.error('Error tracking ad view:', error);
+            }
+        }
+
+        async function trackAdClick(adId) {
+            try {
+                await fetch('/api/ads/track-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ad_id: adId })
+                });
+            } catch (error) {
+                console.error('Error tracking ad click:', error);
+            }
+        }
+
+        // Filter functionality
+        document.getElementById('news-category-filter')?.addEventListener('change', loadNews);
+        document.getElementById('news-priority-filter')?.addEventListener('change', loadNews);
+
+        // Load news and ads when tabs are opened
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load news and ads when their tabs are clicked
+            document.querySelector('[data-tab="news"]')?.addEventListener('click', loadNews);
+            document.querySelector('[data-tab="ads"]')?.addEventListener('click', loadAds);
+        });
    </script>
 </body>
 </html>
