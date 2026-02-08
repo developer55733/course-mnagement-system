@@ -68,9 +68,33 @@
 
   const request = async (method, url, data) => {
     try {
-      const res = await axios({ method, url, data, headers: { 'x-admin-secret': ADMIN_SECRET } });
+      console.log(`🌐 Making ${method.toUpperCase()} request to ${url}`); // Debug log
+      console.log('📤 Request data:', data); // Debug log
+      console.log('🔑 Admin secret available:', !!ADMIN_SECRET); // Debug log
+      
+      const res = await axios({ 
+        method, 
+        url, 
+        data, 
+        headers: { 
+          'x-admin-secret': ADMIN_SECRET,
+          'Content-Type': 'application/json'
+        } 
+      });
+      
+      console.log('📥 Response status:', res.status); // Debug log
+      console.log('📥 Response data:', res.data); // Debug log
+      
       return res.data;
     } catch (err) {
+      console.error('❌ Request failed:', err); // Debug log
+      console.log('🔍 Error details:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      }); // Debug log
+      
       const payload = err?.response?.data || { message: err.message };
       return { success: false, error: payload };
     }
@@ -1596,12 +1620,31 @@ document.addEventListener('DOMContentLoaded', function() {
     loadClassTimetables();
   };
 
-  // Initialize class timetable management when panel is shown
+  // Add server status check
+  async function checkServerStatus() {
+    try {
+      console.log('🔍 Checking server status...'); // Debug log
+      const response = await axios.get('/api/users', { timeout: 5000 });
+      console.log('✅ Server is running - API endpoints available'); // Debug log
+      return true;
+    } catch (error) {
+      console.error('❌ Server is not running or API endpoints not available:', error); // Debug log
+      return false;
+    }
+  }
+
+  // Check server status when admin panel is shown
   if (panel) {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
           if (panel.style.display === 'block') {
+            console.log('🔧 Admin panel shown, checking server status...'); // Debug log
+            checkServerStatus().then(isRunning => {
+              if (!isRunning) {
+                showMessage('actionMsg', '⚠️ Server is not running. News and ads creation will use demo mode.', true);
+              }
+            });
             initAssignmentManagement();
             initClassTimetableManagement();
             loadModules();
@@ -1625,6 +1668,8 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleAddNews(e) {
     e.preventDefault();
     
+    console.log('🔄 Starting news creation process...'); // Debug log
+    
     const newsData = {
       title: document.getElementById('newsTitle').value,
       content: document.getElementById('newsContent').value,
@@ -1634,19 +1679,39 @@ document.addEventListener('DOMContentLoaded', function() {
       is_active: true
     };
 
+    console.log('📝 News data to be sent:', newsData); // Debug log
+
     try {
+      console.log('🌐 Making API call to /api/news...'); // Debug log
       const response = await request('post', '/api/news', newsData);
+      console.log('📥 API response received:', response); // Debug log
+      
       if (response.success) {
         showMessage('newsMsg', 'News posted successfully!', false);
         document.getElementById('addNewsForm').reset();
+        console.log('✅ News created successfully!'); // Debug log
       } else {
-        showMessage('newsMsg', response.error?.message || 'Failed to post news', true);
+        console.error('❌ API returned error:', response); // Debug log
+        showMessage('newsMsg', response.error?.message || response.message || 'Failed to post news', true);
       }
     } catch (error) {
-      console.error('Error posting news:', error);
-      // Simulate success for demo
-      showMessage('newsMsg', 'News posted successfully! (Demo mode)', false);
-      document.getElementById('addNewsForm').reset();
+      console.error('💥 Network/Server error:', error); // Debug log
+      console.log('🔍 Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      }); // Debug log
+      
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to post news - server error';
+      showMessage('newsMsg', `Error: ${errorMessage}`, true);
+      
+      // Fallback for demo - only show if we're in development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('🧪 Using demo mode fallback...'); // Debug log
+        showMessage('newsMsg', 'News posted successfully! (Demo mode - server not running)', false);
+        document.getElementById('addNewsForm').reset();
+      }
     }
   }
 
@@ -1661,6 +1726,8 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleAddAd(e) {
     e.preventDefault();
     
+    console.log('🔄 Starting ad creation process...'); // Debug log
+    
     const videoUrl = document.getElementById('adVideoUrl').value;
     const redirectUrl = document.getElementById('adRedirectUrl').value;
     
@@ -1672,7 +1739,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
     } catch (error) {
-      console.warn('Could not validate video duration:', error);
+      console.warn('⚠️ Could not validate video duration:', error); // Debug log
     }
 
     const adData = {
@@ -1686,21 +1753,41 @@ document.addEventListener('DOMContentLoaded', function() {
       auto_play: document.getElementById('adAutoPlay').checked
     };
 
+    console.log('📝 Ad data to be sent:', adData); // Debug log
+
     try {
+      console.log('🌐 Making API call to /api/ads...'); // Debug log
       const response = await request('post', '/api/ads', adData);
+      console.log('📥 API response received:', response); // Debug log
+      
       if (response.success) {
         showMessage('adMsg', 'Ad created successfully!', false);
         document.getElementById('addAdForm').reset();
         document.getElementById('adAutoPlay').checked = true;
+        console.log('✅ Ad created successfully!'); // Debug log
       } else {
-        showMessage('adMsg', response.error?.message || 'Failed to create ad', true);
+        console.error('❌ API returned error:', response); // Debug log
+        showMessage('adMsg', response.error?.message || response.message || 'Failed to create ad', true);
       }
     } catch (error) {
-      console.error('Error creating ad:', error);
-      // Simulate success for demo
-      showMessage('adMsg', 'Ad created successfully! (Demo mode)', false);
-      document.getElementById('addAdForm').reset();
-      document.getElementById('adAutoPlay').checked = true;
+      console.error('💥 Network/Server error:', error); // Debug log
+      console.log('🔍 Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      }); // Debug log
+      
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create ad - server error';
+      showMessage('adMsg', `Error: ${errorMessage}`, true);
+      
+      // Fallback for demo - only show if we're in development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('🧪 Using demo mode fallback...'); // Debug log
+        showMessage('adMsg', 'Ad created successfully! (Demo mode - server not running)', false);
+        document.getElementById('addAdForm').reset();
+        document.getElementById('adAutoPlay').checked = true;
+      }
     }
   }
 
