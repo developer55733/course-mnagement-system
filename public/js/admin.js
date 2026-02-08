@@ -2185,7 +2185,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  const deleteDiscussion = async (id) => {
+  // Make deleteDiscussion globally accessible
+  window.deleteDiscussion = async (id) => {
     if (!confirm('Are you sure you want to delete this discussion?')) {
       return;
     }

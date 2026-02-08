@@ -1718,6 +1718,129 @@
             // Open discussion modal or navigate to discussion detail
             window.openDiscussionModal(id);
         }
+        
+        // Discussion Modal Functions
+        window.openDiscussionModal = async (id) => {
+            try {
+                const response = await fetch(`/api/discussions/${id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const discussion = data.data.discussion;
+                    const replies = data.data.replies;
+                    
+                    // Display discussion details
+                    document.getElementById('discussion-detail-content').innerHTML = `
+                        <div class="discussion-detail">
+                            <h4>${discussion.title}</h4>
+                            <div class="discussion-meta">
+                                <span class="discussion-module">${discussion.module_code || 'General'}</span>
+                                <span class="discussion-date">${new Date(discussion.created_at).toLocaleDateString()}</span>
+                                <span class="discussion-author">By ${discussion.author_name || 'Admin'}</span>
+                            </div>
+                            <div class="discussion-content-full">
+                                <p>${discussion.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Display replies
+                    const repliesContainer = document.getElementById('replies-container');
+                    if (replies && replies.length > 0) {
+                        repliesContainer.innerHTML = replies.map(reply => `
+                            <div class="reply-item">
+                                <div class="reply-header">
+                                    <strong>${reply.author_name || 'Anonymous'}</strong>
+                                    <small class="reply-date">${new Date(reply.created_at).toLocaleDateString()}</small>
+                                </div>
+                                <div class="reply-content">
+                                    <p>${reply.content}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        repliesContainer.innerHTML = '<p class="text-muted">No replies yet. Be the first to reply!</p>';
+                    }
+                    
+                    // Show modal
+                    document.getElementById('discussion-modal').style.display = 'block';
+                    
+                    // Set up reply form
+                    setupReplyForm(id);
+                } else {
+                    console.error('Failed to load discussion:', data.message);
+                }
+            } catch (error) {
+                console.error('Error loading discussion:', error);
+            }
+        };
+        
+        window.closeDiscussionModal = () => {
+            document.getElementById('discussion-modal').style.display = 'none';
+        };
+        
+        function setupReplyForm(discussionId) {
+            const replyForm = document.getElementById('reply-form');
+            
+            // Remove existing event listener
+            const newReplyForm = replyForm.cloneNode(true);
+            replyForm.parentNode.replaceChild(newReplyForm, replyForm);
+            
+            // Add new event listener
+            newReplyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const replyContent = document.getElementById('reply-content').value;
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                
+                if (!replyContent.trim()) {
+                    alert('Please write a reply before submitting.');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/discussions/${discussionId}/replies`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content: replyContent,
+                            user_id: currentUser.id || null
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Clear form
+                        document.getElementById('reply-content').value = '';
+                        
+                        // Reload discussion to show new reply
+                        window.openDiscussionModal(discussionId);
+                        
+                        // Show success message
+                        alert('Reply posted successfully!');
+                        
+                        // Refresh discussions list
+                        loadDiscussions();
+                    } else {
+                        alert('Failed to post reply: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error posting reply:', error);
+                    alert('Failed to post reply. Please try again.');
+                }
+            });
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('discussion-modal');
+            if (e.target === modal) {
+                closeDiscussionModal();
+            }
+        });
    </script>
 </body>
 </html>
