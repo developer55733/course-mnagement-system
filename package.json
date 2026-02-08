@@ -16,6 +16,10 @@
 
     "debug": "node start-server.js",
 
+    "simple": "node simple-working-server.js",
+
+    "verify": "node verify-working.js",
+
     "build": "echo 'Build completed'",
 
     "heroku-postbuild": "npm install",
