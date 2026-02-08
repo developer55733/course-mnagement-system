@@ -602,6 +602,56 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Popup Ads Section -->
+                    <div class="ads-section">
+                        <h3><i class="fas fa-window-restore"></i> Popup Ads</h3>
+                        <div class="popup-ads-container" id="popup-ads">
+                            <div class="no-ads-message">
+                                <i class="fas fa-window-restore"></i>
+                                <p>No popup ads available at the moment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Position-based Ads -->
+                    <div class="ads-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Position-based Ads</h3>
+                        <div class="position-ads-container">
+                            <div class="position-section">
+                                <h4><i class="fas fa-arrow-up"></i> Top Position</h4>
+                                <div id="top-ads">
+                                    <div class="no-ads-message">
+                                        <p>No top position ads available.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="position-section">
+                                <h4><i class="fas fa-arrows-alt-h"></i> Sidebar Position</h4>
+                                <div id="sidebar-ads">
+                                    <div class="no-ads-message">
+                                        <p>No sidebar position ads available.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="position-section">
+                                <h4><i class="fas fa-arrow-down"></i> Bottom Position</h4>
+                                <div id="bottom-ads">
+                                    <div class="no-ads-message">
+                                        <p>No bottom position ads available.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="position-section">
+                                <h4><i class="fas fa-window-restore"></i> Popup Position</h4>
+                                <div id="popup-position-ads">
+                                    <div class="no-ads-message">
+                                        <p>No popup position ads available.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1607,12 +1657,26 @@
                 const response = await fetch('/api/ads');
                 const data = await response.json();
                 
+                // Get all containers
                 const videoAdsContainer = document.getElementById('video-ads');
                 const bannerAdsContainer = document.getElementById('banner-ads');
+                const popupAdsContainer = document.getElementById('popup-ads');
+                const topAdsContainer = document.getElementById('top-ads');
+                const sidebarAdsContainer = document.getElementById('sidebar-ads');
+                const bottomAdsContainer = document.getElementById('bottom-ads');
+                const popupPositionAdsContainer = document.getElementById('popup-position-ads');
                 
                 if (data.success && data.data && data.data.length > 0) {
+                    // Filter ads by type
                     const videoAds = data.data.filter(ad => ad.ad_type === 'video');
                     const bannerAds = data.data.filter(ad => ad.ad_type === 'banner');
+                    const popupAds = data.data.filter(ad => ad.ad_type === 'popup');
+                    
+                    // Filter ads by position
+                    const topAds = data.data.filter(ad => ad.position === 'top');
+                    const sidebarAds = data.data.filter(ad => ad.position === 'sidebar');
+                    const bottomAds = data.data.filter(ad => ad.position === 'bottom');
+                    const popupPositionAds = data.data.filter(ad => ad.position === 'popup');
                     
                     // Load video ads
                     if (videoAds.length > 0) {
@@ -1666,21 +1730,110 @@
                         `;
                     }
                     
-                    // Track ad views
+                    // Load popup ads
+                    if (popupAds.length > 0) {
+                        popupAdsContainer.innerHTML = popupAds.map(ad => `
+                            <div class="popup-ad" data-ad-id="${ad.id}">
+                                <div class="popup-content">
+                                    <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                    <h4 class="ad-title">${ad.title}</h4>
+                                    <p class="ad-description">${ad.description}</p>
+                                    <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                        Learn More <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        popupAdsContainer.innerHTML = `
+                            <div class="no-ads-message">
+                                <i class="fas fa-window-restore"></i>
+                                <p>No popup ads available at the moment.</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // Load position-based ads
+                    const renderPositionAd = (ad, container) => {
+                        if (ad.ad_type === 'video') {
+                            container.innerHTML = `
+                                <div class="position-ad video-ad" data-ad-id="${ad.id}">
+                                    <div class="video-player">
+                                        <video ${ad.auto_play ? 'autoplay muted loop' : ''} controls>
+                                            <source src="${ad.video_url}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                    <h4 class="ad-title">${ad.title}</h4>
+                                    <p class="ad-description">${ad.description}</p>
+                                    <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                        Learn More <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            `;
+                        } else if (ad.ad_type === 'banner') {
+                            container.innerHTML = `
+                                <div class="position-ad banner-ad" data-ad-id="${ad.id}">
+                                    <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                    <h4 class="ad-title">${ad.title}</h4>
+                                    <p class="ad-description">${ad.description}</p>
+                                    <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                        Learn More <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            `;
+                        } else if (ad.ad_type === 'popup') {
+                            container.innerHTML = `
+                                <div class="position-ad popup-ad" data-ad-id="${ad.id}">
+                                    <div class="popup-content">
+                                        <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                        <h4 class="ad-title">${ad.title}</h4>
+                                        <p class="ad-description">${ad.description}</p>
+                                        <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+                                            Learn More <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    };
+                    
+                    // Render position-based ads
+                    if (topAds.length > 0) {
+                        renderPositionAd(topAds[0], topAdsContainer);
+                    } else {
+                        topAdsContainer.innerHTML = '<div class="no-ads-message"><p>No top position ads available.</p></div>';
+                    }
+                    
+                    if (sidebarAds.length > 0) {
+                        renderPositionAd(sidebarAds[0], sidebarAdsContainer);
+                    } else {
+                        sidebarAdsContainer.innerHTML = '<div class="no-ads-message"><p>No sidebar position ads available.</p></div>';
+                    }
+                    
+                    if (bottomAds.length > 0) {
+                        renderPositionAd(bottomAds[0], bottomAdsContainer);
+                    } else {
+                        bottomAdsContainer.innerHTML = '<div class="no-ads-message"><p>No bottom position ads available.</p></div>';
+                    }
+                    
+                    if (popupPositionAds.length > 0) {
+                        renderPositionAd(popupPositionAds[0], popupPositionAdsContainer);
+                    } else {
+                        popupPositionAdsContainer.innerHTML = '<div class="no-ads-message"><p>No popup position ads available.</p></div>';
+                    }
+                    
+                    // Track views for all ads
                     data.data.forEach(ad => trackAdView(ad.id));
                 } else {
-                    videoAdsContainer.innerHTML = `
-                        <div class="no-ads-message">
-                            <i class="fas fa-video"></i>
-                            <p>No video ads available at the moment.</p>
-                        </div>
-                    `;
-                    bannerAdsContainer.innerHTML = `
-                        <div class="no-ads-message">
-                            <i class="fas fa-image"></i>
-                            <p>No banner ads available at the moment.</p>
-                        </div>
-                    `;
+                    // Clear all containers
+                    videoAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-video"></i><p>No video ads available at the moment.</p></div>';
+                    bannerAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-image"></i><p>No banner ads available at the moment.</p></div>';
+                    popupAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-window-restore"></i><p>No popup ads available at the moment.</p></div>';
+                    topAdsContainer.innerHTML = '<div class="no-ads-message"><p>No top position ads available.</p></div>';
+                    sidebarAdsContainer.innerHTML = '<div class="no-ads-message"><p>No sidebar position ads available.</p></div>';
+                    bottomAdsContainer.innerHTML = '<div class="no-ads-message"><p>No bottom position ads available.</p></div>';
+                    popupPositionAdsContainer.innerHTML = '<div class="no-ads-message"><p>No popup position ads available.</p></div>';
                 }
             } catch (error) {
                 console.error('Error loading ads:', error);
