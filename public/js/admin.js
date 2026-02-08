@@ -1600,6 +1600,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (response.data.success) {
         showMessage('newsMsg', 'News posted successfully!', false);
         document.getElementById('addNewsForm').reset();
+        
+        // Refresh news dashboard to show the newly created news
+        loadNews();
+        document.getElementById('totalNews').textContent = 
+          (parseInt(document.getElementById('totalNews').textContent) + 1);
       } else {
         showMessage('newsMsg', response.data.message || 'Failed to post news', true);
       }
