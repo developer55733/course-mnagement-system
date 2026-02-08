@@ -2,6 +2,38 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../config/database');
 
+// GET single news article by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [rows] = await query(`
+      SELECT n.*, u.name as created_by_name 
+      FROM news n 
+      LEFT JOIN users u ON n.created_by = u.id 
+      WHERE n.id = ?
+    `, [id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'News article not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rows[0]
+    });
+  } catch (error) {
+    console.error('Error fetching news article:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch news article'
+    });
+  }
+});
+
 // GET all news
 router.get('/', async (req, res) => {
   try {
@@ -22,6 +54,46 @@ router.get('/', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch news'
+    });
+  }
+});
+
+// PUT update news article
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, category, priority, image_url } = req.body;
+    
+    // Validate required fields
+    if (!title || !content || !category || !priority) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, content, category, and priority are required'
+      });
+    }
+    
+    const [result] = await query(`
+      UPDATE news 
+      SET title = ?, content = ?, category = ?, priority = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [title, content, category, priority, image_url || null, id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'News article not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'News article updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating news article:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update news article'
     });
   }
 });

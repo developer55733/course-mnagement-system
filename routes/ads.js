@@ -2,6 +2,78 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../config/database');
 
+// GET single ad by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [rows] = await query(`
+      SELECT a.*, u.name as created_by_name 
+      FROM ads a 
+      LEFT JOIN users u ON a.created_by = u.id 
+      WHERE a.id = ?
+    `, [id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Ad not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rows[0]
+    });
+  } catch (error) {
+    console.error('Error fetching ad:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch ad'
+    });
+  }
+});
+
+// PUT update ad
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, video_url, redirect_url, ad_type, position, auto_play } = req.body;
+    
+    // Validate required fields
+    if (!title || !video_url || !redirect_url) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, video URL, and redirect URL are required'
+      });
+    }
+    
+    const [result] = await query(`
+      UPDATE ads 
+      SET title = ?, description = ?, video_url = ?, redirect_url = ?, ad_type = ?, position = ?, auto_play = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [title, description || null, video_url, redirect_url, ad_type, position, auto_play !== undefined ? auto_play : false, id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Ad not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Ad updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating ad:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update ad'
+    });
+  }
+});
+
 // GET all ads
 router.get('/', async (req, res) => {
   try {

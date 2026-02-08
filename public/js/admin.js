@@ -1585,6 +1585,9 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleAddNews(e) {
     e.preventDefault();
     
+    const form = e.target;
+    const editingId = form.getAttribute('data-editing-id');
+    
     const newsData = {
       title: document.getElementById('newsTitle').value,
       content: document.getElementById('newsContent').value,
@@ -1594,27 +1597,51 @@ document.addEventListener('DOMContentLoaded', function() {
       is_active: true
     };
 
-    console.log('🔍 Creating news with data:', newsData);
+    console.log('🔍 Saving news with data:', newsData);
 
     try {
-      const response = await axios.post('/api/news', newsData);
-      console.log('✅ News creation response:', response.data);
+      let response;
+      
+      if (editingId) {
+        // Update existing news article
+        response = await axios.put(`/api/news/${editingId}`, newsData, {
+          headers: {
+            'x-admin-secret': ADMIN_SECRET
+          }
+        });
+        console.log('✅ News update response:', response.data);
+      } else {
+        // Create new news article
+        response = await axios.post('/api/news', newsData);
+        console.log('✅ News creation response:', response.data);
+      }
       
       if (response.data.success) {
-        showMessage('newsMsg', 'News posted successfully!', false);
-        document.getElementById('addNewsForm').reset();
+        const message = editingId ? 'News updated successfully!' : 'News posted successfully!';
+        showMessage('newsMsg', message, false);
+        form.reset();
         
-        // Refresh news dashboard to show the newly created news
+        // Clear editing state
+        form.removeAttribute('data-editing-id');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i class="fas fa-plus"></i> Post News';
+        }
+        
+        // Refresh news dashboard to show the updated/newly created news
         loadNews();
-        document.getElementById('totalNews').textContent = 
-          (parseInt(document.getElementById('totalNews').textContent) + 1);
+        if (!editingId) {
+          document.getElementById('totalNews').textContent = 
+            (parseInt(document.getElementById('totalNews').textContent) + 1);
+        }
       } else {
-        showMessage('newsMsg', response.data.message || 'Failed to post news', true);
+        showMessage('newsMsg', response.data.message || 'Failed to save news', true);
       }
     } catch (error) {
-      console.error('❌ Error posting news:', error);
+      console.error('❌ Error saving news:', error);
       console.error('❌ Error details:', error.response?.data || error.message);
-      showMessage('newsMsg', `Failed to post news: ${error.response?.data?.message || error.message}`, true);
+      const message = editingId ? 'Failed to update news' : 'Failed to post news';
+      showMessage('newsMsg', `${message}: ${error.response?.data?.message || error.message}`, true);
     }
   }
 
@@ -1632,10 +1659,13 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleAddAd(e) {
     e.preventDefault();
     
+    const form = e.target;
+    const editingId = form.getAttribute('data-editing-id');
+    
     const videoUrl = document.getElementById('adVideoUrl').value;
     const redirectUrl = document.getElementById('adRedirectUrl').value;
     
-    console.log('🔍 Creating ad with data:', {
+    console.log('🔍 Saving ad with data:', {
       title: document.getElementById('adTitle').value,
       description: document.getElementById('adDescription').value,
       video_url: videoUrl,
@@ -1666,32 +1696,55 @@ document.addEventListener('DOMContentLoaded', function() {
       redirect_url: redirectUrl,
       ad_type: document.getElementById('adType').value,
       position: document.getElementById('adPosition').value,
-      is_active: true,
       auto_play: document.getElementById('adAutoPlay').checked
     };
 
     console.log('🔍 Sending ad data to API:', adData);
 
     try {
-      const response = await axios.post('/api/ads', adData);
-      console.log('✅ Ad creation response:', response.data);
+      let response;
+      
+      if (editingId) {
+        // Update existing ad
+        response = await axios.put(`/api/ads/${editingId}`, adData, {
+          headers: {
+            'x-admin-secret': ADMIN_SECRET
+          }
+        });
+        console.log('✅ Ad update response:', response.data);
+      } else {
+        // Create new ad
+        response = await axios.post('/api/ads', adData);
+        console.log('✅ Ad creation response:', response.data);
+      }
       
       if (response.data.success) {
-        showMessage('adMsg', 'Ad created successfully!', false);
-        document.getElementById('addAdForm').reset();
+        const message = editingId ? 'Ad updated successfully!' : 'Ad created successfully!';
+        showMessage('adMsg', message, false);
+        form.reset();
         document.getElementById('adAutoPlay').checked = true;
         
-        // Refresh ads dashboard to show the newly created ad
+        // Clear editing state
+        form.removeAttribute('data-editing-id');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Ad';
+        }
+        
+        // Refresh ads dashboard to show the updated/newly created ad
         loadAds();
-        document.getElementById('totalAds').textContent = 
-          (parseInt(document.getElementById('totalAds').textContent) + 1);
+        if (!editingId) {
+          document.getElementById('totalAds').textContent = 
+            (parseInt(document.getElementById('totalAds').textContent) + 1);
+        }
       } else {
-        showMessage('adMsg', response.data.message || 'Failed to create ad', true);
+        showMessage('adMsg', response.data.message || 'Failed to save ad', true);
       }
     } catch (error) {
-      console.error('❌ Error creating ad:', error);
+      console.error('❌ Error saving ad:', error);
       console.error('❌ Error details:', error.response?.data || error.message);
-      showMessage('adMsg', `Failed to create ad: ${error.response?.data?.message || error.message}`, true);
+      const message = editingId ? 'Failed to update ad' : 'Failed to create ad';
+      showMessage('adMsg', `${message}: ${error.response?.data?.message || error.message}`, true);
     }
   }
 
@@ -1810,9 +1863,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Edit News function (placeholder for future implementation)
-  window.editNews = (id) => {
-    showMessage('newsMsg', 'Edit functionality coming soon!', false);
+  // Edit News function
+  window.editNews = async (id) => {
+    try {
+      // Fetch the news article data
+      const response = await axios.get(`/api/news/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        const news = response.data.data;
+        
+        // Populate the form with existing data
+        document.getElementById('newsTitle').value = news.title;
+        document.getElementById('newsContent').value = news.content;
+        document.getElementById('newsCategory').value = news.category;
+        document.getElementById('newsPriority').value = news.priority;
+        document.getElementById('newsImage').value = news.image_url || '';
+        
+        // Store the editing ID
+        document.getElementById('addNewsForm').setAttribute('data-editing-id', id);
+        
+        // Change button text to indicate editing
+        const submitBtn = document.querySelector('#addNewsForm button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.textContent = 'Update News';
+          submitBtn.innerHTML = '<i class="fas fa-save"></i> Update News';
+        }
+        
+        // Scroll to the form
+        document.getElementById('addNewsForm').scrollIntoView({ behavior: 'smooth' });
+        
+        showMessage('newsMsg', 'Editing news article. Make changes and click Update News.', false);
+      } else {
+        showMessage('newsMsg', response.data.message || 'Failed to load news article', true);
+      }
+    } catch (error) {
+      console.error('Error loading news article for editing:', error);
+      showMessage('newsMsg', `Failed to load news article: ${error.response?.data?.message || error.message}`, true);
+    }
   };
 
   // Helper function to get video duration
@@ -1950,9 +2041,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // Edit Ad function (placeholder for future implementation)
-  window.editAd = (id) => {
-    showMessage('adMsg', 'Edit functionality coming soon!', false);
+  // Edit Ad function
+  window.editAd = async (id) => {
+    try {
+      // Fetch the ad data
+      const response = await axios.get(`/api/ads/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        const ad = response.data.data;
+        
+        // Populate the form with existing data
+        document.getElementById('adTitle').value = ad.title;
+        document.getElementById('adDescription').value = ad.description || '';
+        document.getElementById('adVideoUrl').value = ad.video_url;
+        document.getElementById('adRedirectUrl').value = ad.redirect_url;
+        document.getElementById('adType').value = ad.ad_type;
+        document.getElementById('adPosition').value = ad.position;
+        document.getElementById('adAutoPlay').checked = ad.auto_play;
+        
+        // Store the editing ID
+        document.getElementById('addAdForm').setAttribute('data-editing-id', id);
+        
+        // Change button text to indicate editing
+        const submitBtn = document.querySelector('#addAdForm button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.textContent = 'Update Ad';
+          submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Ad';
+        }
+        
+        // Scroll to the form
+        document.getElementById('addAdForm').scrollIntoView({ behavior: 'smooth' });
+        
+        showMessage('adMsg', 'Editing ad. Make changes and click Update Ad.', false);
+      } else {
+        showMessage('adMsg', response.data.message || 'Failed to load ad', true);
+      }
+    } catch (error) {
+      console.error('Error loading ad for editing:', error);
+      showMessage('adMsg', `Failed to load ad: ${error.response?.data?.message || error.message}`, true);
+    }
   };
 
 })();
