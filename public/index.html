@@ -1481,7 +1481,7 @@
                     if (bannerAds.length > 0) {
                         bannerAdsContainer.innerHTML = bannerAds.map(ad => `
                             <div class="banner-ad" data-ad-id="${ad.id}">
-                                <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
                                 <h4 class="ad-title">${ad.title}</h4>
                                 <p class="ad-description">${ad.description}</p>
                                 <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
@@ -1503,7 +1503,7 @@
                         popupAdsContainer.innerHTML = popupAds.map(ad => `
                             <div class="popup-ad" data-ad-id="${ad.id}">
                                 <div class="popup-content">
-                                    <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                    <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
                                     <h4 class="ad-title">${ad.title}</h4>
                                     <p class="ad-description">${ad.description}</p>
                                     <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
@@ -1542,7 +1542,7 @@
                         } else if (ad.ad_type === 'banner') {
                             container.innerHTML = `
                                 <div class="position-ad banner-ad" data-ad-id="${ad.id}">
-                                    <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                    <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
                                     <h4 class="ad-title">${ad.title}</h4>
                                     <p class="ad-description">${ad.description}</p>
                                     <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
@@ -1554,7 +1554,7 @@
                             container.innerHTML = `
                                 <div class="position-ad popup-ad" data-ad-id="${ad.id}">
                                     <div class="popup-content">
-                                        <img src="${ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;">
+                                        <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
                                         <h4 class="ad-title">${ad.title}</h4>
                                         <p class="ad-description">${ad.description}</p>
                                         <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">

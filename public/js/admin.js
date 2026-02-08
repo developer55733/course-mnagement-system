@@ -1663,38 +1663,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const editingId = form.getAttribute('data-editing-id');
     
     const videoUrl = document.getElementById('adVideoUrl').value;
+    const imageUrl = document.getElementById('adImageUrl').value;
     const redirectUrl = document.getElementById('adRedirectUrl').value;
+    const adType = document.getElementById('adType').value;
     
     console.log('🔍 Saving ad with data:', {
       title: document.getElementById('adTitle').value,
       description: document.getElementById('adDescription').value,
       video_url: videoUrl,
+      image_url: imageUrl,
       redirect_url: redirectUrl,
-      ad_type: document.getElementById('adType').value,
+      ad_type: adType,
       position: document.getElementById('adPosition').value,
       auto_play: document.getElementById('adAutoPlay').checked
     });
 
+    // Validate based on ad type
+    if (adType === 'video' && !videoUrl) {
+      showMessage('adMsg', 'Video URL is required for video ads', true);
+      return;
+    }
+    
+    if ((adType === 'banner' || adType === 'popup') && !imageUrl) {
+      showMessage('adMsg', 'Image URL is required for banner and popup ads', true);
+      return;
+    }
+
     // Temporarily bypass video duration validation for testing
     /*
     // Validate video duration (5-30 seconds)
-    try {
-      const videoDuration = await getVideoDuration(videoUrl);
-      if (videoDuration < 5 || videoDuration > 30) {
-        showMessage('adMsg', 'Video duration must be between 5-30 seconds', true);
-        return;
+    if (adType === 'video') {
+      try {
+        const videoDuration = await getVideoDuration(videoUrl);
+        if (videoDuration < 5 || videoDuration > 30) {
+          showMessage('adMsg', 'Video duration must be between 5-30 seconds', true);
+          return;
+        }
+      } catch (error) {
+        console.warn('Could not validate video duration:', error);
       }
-    } catch (error) {
-      console.warn('Could not validate video duration:', error);
     }
     */
 
     const adData = {
       title: document.getElementById('adTitle').value,
       description: document.getElementById('adDescription').value,
-      video_url: videoUrl,
+      video_url: videoUrl || null,
+      image_url: imageUrl || null,
       redirect_url: redirectUrl,
-      ad_type: document.getElementById('adType').value,
+      ad_type: adType,
       position: document.getElementById('adPosition').value,
       auto_play: document.getElementById('adAutoPlay').checked
     };
@@ -2057,7 +2074,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Populate the form with existing data
         document.getElementById('adTitle').value = ad.title;
         document.getElementById('adDescription').value = ad.description || '';
-        document.getElementById('adVideoUrl').value = ad.video_url;
+        document.getElementById('adVideoUrl').value = ad.video_url || '';
+        document.getElementById('adImageUrl').value = ad.image_url || '';
         document.getElementById('adRedirectUrl').value = ad.redirect_url;
         document.getElementById('adType').value = ad.ad_type;
         document.getElementById('adPosition').value = ad.position;
