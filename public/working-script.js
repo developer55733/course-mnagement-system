@@ -60,7 +60,6 @@ function showMessage(elementId, message, isError = false) {
 
 
 // API call function
-
 async function apiCall(endpoint, method = 'GET', data = null) {
 
     try {
@@ -72,14 +71,16 @@ async function apiCall(endpoint, method = 'GET', data = null) {
             method,
 
             headers: {
-
                 'Content-Type': 'application/json'
-
             }
 
         };
 
-
+        // Add authentication headers if user is logged in
+        if (currentUser && currentUser.id) {
+            options.headers['x-user-id'] = currentUser.id.toString();
+            options.headers['authorization'] = `Bearer ${currentUser.id}`;
+        }
 
         if (data && (method === 'POST' || method === 'PUT')) {
 
@@ -87,10 +88,9 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
         }
 
-
-
         const fullUrl = `${API_BASE_URL}${endpoint}`;
         console.log(`🔍 Full API URL: ${fullUrl}`);
+        console.log(`🔍 Request headers:`, options.headers);
         
         const response = await fetch(fullUrl, options);
 
@@ -100,15 +100,11 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
         console.log(`🔍 Response data:`, result);
 
-
-
         if (!response.ok) {
 
             throw new Error(result.error || `HTTP Error: ${response.status}`);
 
         }
-
-
 
         return result;
 
@@ -3106,11 +3102,24 @@ function initialize() {
 
         registerForm.addEventListener('submit', handleRegister);
 
-        console.log('Register listener attached');
+        console.log('Register listener attached to:', registerForm);
+        
+        // Test if handleRegister function exists
+        console.log('handleRegister function exists:', typeof handleRegister);
+        
+        // Add a test click listener to verify button is clickable
+        const submitBtn = registerForm.querySelector('.btn-register');
+        if (submitBtn) {
+            console.log('Register submit button found:', submitBtn);
+        } else {
+            console.log('❌ Register submit button not found');
+        }
 
+    } else {
+        console.log('❌ Register form not found');
     }
 
-
+    
 
     // Navigation links
 
@@ -3438,11 +3447,20 @@ async function postReply(e) {
     const discussionId = modal.getAttribute('data-discussion-id');
     const replyContent = document.getElementById('reply-content').value;
     
+    if (!replyContent.trim()) {
+        alert('Please enter reply content');
+        return;
+    }
+    
     try {
+        console.log('🔍 Posting reply:', { discussionId, content: replyContent, userId: currentUser.id });
+        
         const result = await apiCall(`/discussions/${discussionId}/replies`, 'POST', {
             content: replyContent,
             created_by: currentUser.id
         });
+        
+        console.log('🔍 Reply response:', result);
         
         if (result.success) {
             // Clear form
@@ -3453,10 +3471,12 @@ async function postReply(e) {
             if (discussionResult.success) {
                 showDiscussionModal(discussionResult.data);
             }
+        } else {
+            alert('Failed to post reply: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
-        console.error('Error posting reply:', error);
-        alert('Failed to post reply');
+        console.error('❌ Error posting reply:', error);
+        alert('Failed to post reply: ' + error.message);
     }
 }
 

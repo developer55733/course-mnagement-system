@@ -2,6 +2,46 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../config/database');
 
+// Simple authentication middleware
+const authenticateUser = (req, res, next) => {
+  // Check for user session or token
+  const authHeader = req.headers.authorization;
+  const userId = req.headers['x-user-id'];
+  
+  console.log('🔍 Auth middleware - Headers:', {
+    authorization: authHeader,
+    'x-user-id': userId
+  });
+  
+  if (userId) {
+    req.user = { id: parseInt(userId) };
+    console.log('✅ User authenticated via x-user-id:', req.user.id);
+    return next();
+  }
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      // Simple token validation (in production, use proper JWT)
+      req.user = { id: parseInt(token) };
+      console.log('✅ User authenticated via Bearer token:', req.user.id);
+      return next();
+    } catch (e) {
+      console.log('❌ Invalid Bearer token:', e);
+      return res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+  }
+  
+  // Allow read-only access without authentication
+  if (req.method === 'GET') {
+    console.log('ℹ️  Allowing GET request without authentication');
+    return next();
+  }
+  
+  console.log('❌ Authentication required for:', req.method, req.path);
+  res.status(401).json({ success: false, error: 'Authentication required' });
+};
+
 // Get all discussion posts
 router.get('/', async (req, res) => {
   try {
@@ -113,10 +153,17 @@ router.post('/', async (req, res) => {
 });
 
 // Add reply to discussion
-router.post('/:id/replies', async (req, res) => {
+router.post('/:id/replies', authenticateUser, async (req, res) => {
   try {
     const discussionId = req.params.id;
-    const { content, user_id, user_name } = req.body;
+    const { content } = req.body;
+    
+    console.log('🔍 Reply route - Request received');
+    console.log('🔍 Reply route - Discussion ID:', discussionId);
+    console.log('🔍 Reply route - Content:', content);
+    console.log('🔍 Reply route - Request body:', req.body);
+    console.log('🔍 Reply route - Authenticated user:', req.user);
+    console.log('🔍 Reply route - Request headers:', req.headers);
     
     if (!content) {
       return res.status(400).json({ 
@@ -125,31 +172,69 @@ router.post('/:id/replies', async (req, res) => {
       });
     }
     
+    // Use authenticated user ID
+    const createdBy = req.user ? req.user.id : null;
+    
+    console.log('🔍 Reply route - Created by:', createdBy);
+    
+    if (!createdBy) {
+      console.log('❌ Reply route - No authenticated user found');
+      return res.status(401).json({ 
+        success: false, 
+        error: 'User authentication required' 
+      });
+    }
+    
+    // Use proper database schema - only existing fields
     const sql = `
-      INSERT INTO discussion_replies (discussion_id, content, user_id, user_name, created_by)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO discussion_replies (discussion_id, content, created_by)
+      VALUES (?, ?, ?)
     `;
+    
+    console.log('🔍 Reply route - Executing SQL:', sql);
+    console.log('🔍 Reply route - SQL params:', [discussionId, content, createdBy]);
     
     const [result] = await query(sql, [
       discussionId, 
       content, 
-      user_id || null, 
-      user_name || 'Anonymous'
+      createdBy
     ]);
+    
+    console.log('✅ Reply inserted with ID:', result.insertId);
+    
+    // Get the complete reply with user info
+    const replyQuery = `
+      SELECT dr.*, u.name as author_name, u.email as author_email
+      FROM discussion_replies dr
+      LEFT JOIN users u ON dr.created_by = u.id
+      WHERE dr.id = ?
+    `;
+    
+    const [replyData] = await query(replyQuery, [result.insertId]);
     
     res.json({ 
       success: true, 
-      data: { 
+      data: replyData[0] || {
         id: result.insertId,
         discussion_id: discussionId,
         content,
-        user_id,
-        user_name: user_name || 'Anonymous'
+        created_by: createdBy,
+        created_at: new Date().toISOString()
       }
     });
   } catch (error) {
-    console.error('Error adding reply:', error);
-    res.status(500).json({ success: false, error: 'Failed to add reply' });
+    console.error('❌ Error adding reply:', error);
+    console.error('❌ SQL Error Details:', {
+      code: error.code,
+      errno: error.errno,
+      sqlMessage: error.sqlMessage,
+      sqlState: error.sqlState
+    });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to add reply',
+      details: error.message 
+    });
   }
 });
 
