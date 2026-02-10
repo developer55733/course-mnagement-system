@@ -704,10 +704,8 @@ function updateDashboard() {
     // Show new tabs for all logged-in users
     const discussionTab = document.getElementById('discussion-tab');
     const assignmentsTab = document.getElementById('assignments-tab');
-    const mediaHubTab = document.getElementById('media-hub-tab');
     if (discussionTab) discussionTab.classList.remove('hidden');
     if (assignmentsTab) assignmentsTab.classList.remove('hidden');
-    if (mediaHubTab) mediaHubTab.classList.remove('hidden');
 
 
 
@@ -2681,10 +2679,8 @@ function logout() {
         // Show new tabs for all logged-in users
         const discussionTab = document.getElementById('discussion-tab');
         const assignmentsTab = document.getElementById('assignments-tab');
-        const mediaHubTab = document.getElementById('media-hub-tab');
         if (discussionTab) discussionTab.classList.remove('hidden');
         if (assignmentsTab) assignmentsTab.classList.remove('hidden');
-        if (mediaHubTab) mediaHubTab.classList.remove('hidden');
 
         
 
@@ -2697,7 +2693,6 @@ function logout() {
         // Hide new tabs when logging out
         if (discussionTab) discussionTab.classList.add('hidden');
         if (assignmentsTab) assignmentsTab.classList.add('hidden');
-        if (mediaHubTab) mediaHubTab.classList.add('hidden');
 
         
 
