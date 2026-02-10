@@ -195,6 +195,9 @@
                     <i class="fas fa-exclamation-circle"></i>
                 </span>
             </button>
+            <button class="tab-btn hidden" data-tab="media-hub" id="media-hub-tab">
+                <i class="fas fa-photo-video"></i> Media Hub
+            </button>
         </div>
         
         <!-- About Page -->
@@ -1136,6 +1139,49 @@
             </div>
         </div>
         
+        <!-- Media Hub Tab -->
+        <div class="tab-content" id="media-hub">
+            <div class="media-hub-container">
+                <h2 class="page-title"><i class="fas fa-photo-video"></i> Media Hub</h2>
+                <p class="media-hub-subtitle">Access videos, images, and multimedia resources</p>
+                
+                <div class="media-hub-content">
+                    <div class="media-section">
+                        <h3><i class="fas fa-video"></i> Video Resources</h3>
+                        <div class="media-grid" id="video-resources">
+                            <div class="no-media-message">
+                                <i class="fas fa-video"></i>
+                                <p>No video resources available yet.</p>
+                                <p>Admin will add video content here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="media-section">
+                        <h3><i class="fas fa-image"></i> Image Gallery</h3>
+                        <div class="media-grid" id="image-gallery">
+                            <div class="no-media-message">
+                                <i class="fas fa-image"></i>
+                                <p>No images available yet.</p>
+                                <p>Admin will add images here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="media-section">
+                        <h3><i class="fas fa-file-alt"></i> Documents</h3>
+                        <div class="media-grid" id="document-library">
+                            <div class="no-media-message">
+                                <i class="fas fa-file-alt"></i>
+                                <p>No documents available yet.</p>
+                                <p>Admin will add documents here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav" id="mobile-nav">
             <div class="mobile-nav-content">
@@ -1175,6 +1221,9 @@
                     </button>
                     <button class="mobile-nav-tab hidden" data-tab="assignments">
                         <i class="fas fa-tasks"></i> Assignments
+                    </button>
+                    <button class="mobile-nav-tab hidden" data-tab="media-hub">
+                        <i class="fas fa-photo-video"></i> Media Hub
                     </button>
                 </div>
             </div>
@@ -1253,7 +1302,7 @@
                 
                 if (isLoggedIn) {
                     // Show logged-in tabs
-                    if (['dashboard', 'discussion-forum', 'assignments'].includes(tabName)) {
+                    if (['dashboard', 'discussion-forum', 'assignments', 'media-hub'].includes(tabName)) {
                         tab.classList.remove('hidden');
                     }
                     if (['login', 'register'].includes(tabName)) {
@@ -1264,7 +1313,7 @@
                     if (['login', 'register', 'news', 'ads'].includes(tabName)) {
                         tab.classList.remove('hidden');
                     }
-                    if (['dashboard', 'discussion-forum', 'assignments'].includes(tabName)) {
+                    if (['dashboard', 'discussion-forum', 'assignments', 'media-hub'].includes(tabName)) {
                         tab.classList.add('hidden');
                     }
                 }
