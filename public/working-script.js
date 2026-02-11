@@ -231,88 +231,55 @@ async function handleLogin(e) {
             
 
             // Hide all auth forms after successful login
-
             setTimeout(() => {
-
                 hideAllAuthForms();
-
                 switchToTab('dashboard');
-
                 updateDashboard();
-
             }, 1000);
 
         } else {
-
             console.log('❌ Login failed:', response);
             // Fallback for testing - check if admin credentials
-
             if (loginEmail === 'admin@course.edu' && loginPassword === 'admin123') {
-
                 currentUser = {
-
                     name: 'System Administrator',
-
                     email: 'admin@course.edu',
-
                     studentId: 'ADMIN001',
-
                     role: 'admin'
-
                 };
-
                 sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                showMessage('login-message', 'Admin login successful! Redirecting to dashboard...');
-
+                console.log('✅ Admin login successful (fallback):', currentUser);
+                showMessage('login-message', 'Login successful! Redirecting to dashboard...');
                 
-
                 setTimeout(() => {
-
                     hideAllAuthForms();
-
                     switchToTab('dashboard');
-
                     updateDashboard();
-
                 }, 1000);
-
-            } else if (loginEmail === 'john@student.edu' && loginPassword === 'password123') {
-
-                currentUser = {
-
-                    name: 'John Student',
-
-                    email: 'john@student.edu',
-
-                    studentId: 'IT2023001',
-
-                    role: 'student'
-
-                };
-
-                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                showMessage('login-message', 'Student login successful! Redirecting to dashboard...');
-
-                
-
-                setTimeout(() => {
-
-                    hideAllAuthForms();
-
-                    switchToTab('dashboard');
-
-                    updateDashboard();
-
-                }, 1000);
-
-            } else {
-
-                showMessage('login-message', 'Invalid credentials. Please check your email/ID and password.', true);
-
+                return;
             }
-
+            
+            // Fallback for testing - check if student credentials
+            if (loginEmail === 'student@course.edu' && loginPassword === 'student123') {
+                currentUser = {
+                    name: 'Test Student',
+                    email: 'student@course.edu',
+                    studentId: 'NIT/CICT/2023/1001',
+                    role: 'student'
+                };
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                console.log('✅ Student login successful (fallback):', currentUser);
+                showMessage('login-message', 'Login successful! Redirecting to dashboard...');
+                
+                setTimeout(() => {
+                    hideAllAuthForms();
+                    switchToTab('dashboard');
+                    updateDashboard();
+                }, 1000);
+                return;
+            }
+            
+            showMessage('login-message', response.message || 'Login failed. Please check your credentials.', true);
         }
 
     } catch (error) {
@@ -2816,15 +2783,36 @@ function showAllAuthForms() {
 
 function initialize() {
 
-    console.log('Initializing application...');
-
+    console.log('🚀 Initializing application...');
+    console.log('📝 Test Credentials Available:');
+    console.log('   Admin: admin@course.edu / admin123');
+    console.log('   Student: student@course.edu / student123');
     
+    // CRITICAL: Attach form event listeners first
+    const loginFormElement = document.getElementById('login-form');
+    const registerFormElement = document.getElementById('register-form');
+    
+    console.log('🔍 Login form found:', !!loginFormElement);
+    console.log('🔍 Register form found:', !!registerFormElement);
+    
+    if (loginFormElement) {
+        loginFormElement.addEventListener('submit', handleLogin);
+        console.log('✅ Login listener attached successfully');
+    } else {
+        console.log('❌ Login form not found');
+    }
+    
+    if (registerFormElement) {
+        registerFormElement.addEventListener('submit', handleRegister);
+        console.log('✅ Register listener attached successfully');
+    } else {
+        console.log('❌ Register form not found');
+    }
 
     // Show mobile auth message on startup if not logged in
 
     showMobileAuthMessage();
 
-    
 
     // Debug logout button immediately
 
@@ -3045,114 +3033,36 @@ function initialize() {
     document.addEventListener('keydown', (e) => {
 
         if ((e.ctrlKey || e.metaKey) && e.key === 'l' && currentUser) {
-
             e.preventDefault();
-
             console.log('Keyboard shortcut triggered, calling logout()');
-
             logout();
-
         }
-
     });
-
-    
 
     // Tab switching
-
     document.querySelectorAll('.tab-btn').forEach(btn => {
-
         btn.addEventListener('click', () => {
-
             const tabId = btn.getAttribute('data-tab');
-
             switchToTab(tabId);
-
         });
-
     });
 
-
-
-    // Form submissions
-
-    const loginForm = document.getElementById('login-form');
-
-    const registerForm = document.getElementById('register-form');
-
-    
-
-    console.log('Login form found:', !!loginForm);
-
-    console.log('Register form found:', !!registerForm);
-
-    
-
-    if (loginForm) {
-
-        loginForm.addEventListener('submit', handleLogin);
-
-        console.log('Login listener attached');
-
-    }
-
-    
-
-    if (registerForm) {
-
-        registerForm.addEventListener('submit', handleRegister);
-
-        console.log('Register listener attached to:', registerForm);
-        
-        // Test if handleRegister function exists
-        console.log('handleRegister function exists:', typeof handleRegister);
-        
-        // Add a test click listener to verify button is clickable
-        const submitBtn = registerForm.querySelector('.btn-register');
-        if (submitBtn) {
-            console.log('Register submit button found:', submitBtn);
-        } else {
-            console.log('❌ Register submit button not found');
-        }
-
-    } else {
-        console.log('❌ Register form not found');
-    }
-
-    
-
-    // Navigation links
-
+    // Navigation between login and register forms
     const goToRegister = document.getElementById('go-to-register');
-
     const goToLogin = document.getElementById('go-to-login');
-
     
-
     if (goToRegister) {
-
         goToRegister.addEventListener('click', (e) => {
-
             e.preventDefault();
-
             switchToTab('register');
-
         });
-
     }
-
     
-
     if (goToLogin) {
-
         goToLogin.addEventListener('click', (e) => {
-
             e.preventDefault();
-
             switchToTab('login');
-
         });
-
     }
 
 }
@@ -4197,5 +4107,12 @@ function getTimeAgo(date) {
     if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
     if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
     return Math.floor(seconds / 86400) + ' days ago';
+}
+
+// Initialize the application when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+} else {
+    initialize();
 }
 
