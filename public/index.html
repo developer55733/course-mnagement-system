@@ -544,6 +544,10 @@
                 </div>
                 
                 <div class="news-filters">
+                    <div class="news-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="news-search-input" placeholder="Search news by title or content...">
+                    </div>
                     <div class="filter-group">
                         <select id="news-category-filter" class="filter-select">
                             <option value="">All Categories</option>
@@ -562,10 +566,87 @@
                 </div>
                 
                 <div class="news-list" id="news-list">
-                    <div class="no-news-message">
-                        <i class="fas fa-newspaper"></i>
-                        <p>No news articles available yet.</p>
-                        <p>Admin will post news and updates here.</p>
+                    <!-- Sample News Item 1 -->
+                    <div class="news-item" data-category="academic" data-priority="high">
+                        <div class="news-item-header">
+                            <div>
+                                <h3 class="news-item-title">New Programming Course Available</h3>
+                                <div class="news-item-meta">
+                                    <span class="news-category">Academic</span>
+                                    <span class="news-priority high">High Priority</span>
+                                    <span class="news-date"><i class="fas fa-calendar"></i> December 15, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="https://picsum.photos/seed/programming-course/400/220.jpg" alt="Programming Course" class="news-item-image">
+                        <div class="news-item-content">
+                            We are excited to announce a new advanced programming course starting next semester. This comprehensive course covers modern web development, including React, Node.js, and cloud deployment strategies. Perfect for students looking to enhance their technical skills.
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="news-btn news-btn-primary">Read More</button>
+                        </div>
+                    </div>
+
+                    <!-- Sample News Item 2 -->
+                    <div class="news-item" data-category="events" data-priority="medium">
+                        <div class="news-item-header">
+                            <div>
+                                <h3 class="news-item-title">Annual Tech Conference 2024</h3>
+                                <div class="news-item-meta">
+                                    <span class="news-category">Events</span>
+                                    <span class="news-priority medium">Medium Priority</span>
+                                    <span class="news-date"><i class="fas fa-calendar"></i> December 10, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="https://picsum.photos/seed/tech-conference/400/220.jpg" alt="Tech Conference" class="news-item-image">
+                        <div class="news-item-content">
+                            Join us for the annual technology conference featuring industry leaders, workshops, and networking opportunities. Early bird registration is now open. Don't miss this chance to connect with tech professionals and learn about the latest trends.
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="news-btn news-btn-primary">Register Now</button>
+                        </div>
+                    </div>
+
+                    <!-- Sample News Item 3 -->
+                    <div class="news-item" data-category="announcements" data-priority="high">
+                        <div class="news-item-header">
+                            <div>
+                                <h3 class="news-item-title">System Maintenance Notice</h3>
+                                <div class="news-item-meta">
+                                    <span class="news-category">Announcements</span>
+                                    <span class="news-priority high">High Priority</span>
+                                    <span class="news-date"><i class="fas fa-calendar"></i> December 8, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="news-item-content">
+                            Scheduled system maintenance will occur this weekend from Saturday 10 PM to Sunday 2 AM. During this time, the course management system will be unavailable. Please plan your activities accordingly and save any important work before the maintenance window.
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="news-btn news-btn-primary">Learn More</button>
+                        </div>
+                    </div>
+
+                    <!-- Sample News Item 4 -->
+                    <div class="news-item" data-category="general" data-priority="low">
+                        <div class="news-item-header">
+                            <div>
+                                <h3 class="news-item-title">Student Success Story</h3>
+                                <div class="news-item-meta">
+                                    <span class="news-category">General</span>
+                                    <span class="news-priority low">Low Priority</span>
+                                    <span class="news-date"><i class="fas fa-calendar"></i> December 5, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="https://picsum.photos/seed/student-success/400/220.jpg" alt="Student Success" class="news-item-image">
+                        <div class="news-item-content">
+                            Congratulations to our recent graduate who secured a position at a leading tech company! Their journey through our IT program showcases the quality of education and opportunities available to our students.
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="news-btn news-btn-primary">Read Story</button>
+                        </div>
                     </div>
                 </div>
             </div>
