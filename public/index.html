@@ -195,6 +195,12 @@
                     <i class="fas fa-exclamation-circle"></i>
                 </span>
             </button>
+            <button class="tab-btn hidden" data-tab="blog" id="blog-tab">
+                <i class="fas fa-video"></i> Creator Studio
+            </button>
+            <button class="tab-btn hidden" data-tab="portfolio" id="portfolio-tab">
+                <i class="fas fa-user-circle"></i> Channel
+            </button>
         </div>
         
         <!-- About Page -->
@@ -1249,6 +1255,254 @@
             </div>
         </div>
         
+        <!-- Creator Studio (Blog) Tab -->
+        <div class="tab-content" id="blog">
+            <div class="youtube-studio-container">
+                <div class="studio-header">
+                    <div class="studio-banner">
+                        <div class="banner-content">
+                            <h2 class="studio-title"><i class="fas fa-video"></i> Creator Studio</h2>
+                            <p class="studio-subtitle">Create amazing content and build your audience</p>
+                            <div class="studio-stats">
+                                <div class="stat-item">
+                                    <span class="stat-number" id="total-videos">0</span>
+                                    <span class="stat-label">Videos</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number" id="total-views">0</span>
+                                    <span class="stat-label">Views</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number" id="total-subscribers">0</span>
+                                    <span class="stat-label">Subscribers</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="studio-main">
+                    <div class="studio-sidebar">
+                        <div class="creator-profile">
+                            <div class="profile-avatar">
+                                <img src="https://picsum.photos/seed/creator/150/150.jpg" alt="Creator Avatar" class="avatar-img">
+                                <div class="live-indicator">
+                                    <span class="live-dot"></span>
+                                    <span>LIVE</span>
+                                </div>
+                            </div>
+                            <div class="profile-info">
+                                <h3 class="channel-name">Your Channel</h3>
+                                <p class="channel-subscribers">0 subscribers</p>
+                                <button class="btn btn-customize" id="customize-channel">
+                                    <i class="fas fa-palette"></i> Customize Channel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+                            <button class="quick-action-btn" id="upload-video">
+                                <i class="fas fa-upload"></i> Upload Video
+                            </button>
+                            <button class="quick-action-btn" id="go-live">
+                                <i class="fas fa-broadcast-tower"></i> Go Live
+                            </button>
+                            <button class="quick-action-btn" id="create-post">
+                                <i class="fas fa-plus"></i> Create Post
+                            </button>
+                            <button class="quick-action-btn" id="analytics">
+                                <i class="fas fa-chart-line"></i> Analytics
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="studio-content">
+                        <div class="content-creation">
+                            <h3><i class="fas fa-plus-circle"></i> Create New Content</h3>
+                            <div class="creation-options">
+                                <div class="creation-card video-card" id="video-upload-card">
+                                    <div class="card-icon">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Upload Video</h4>
+                                        <p>Share your knowledge through video content</p>
+                                        <button class="btn btn-primary" onclick="showVideoUpload()">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="creation-card post-card" id="blog-post-card">
+                                    <div class="card-icon">
+                                        <i class="fas fa-pen"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Write Post</h4>
+                                        <p>Create engaging blog posts and articles</p>
+                                        <button class="btn btn-primary" onclick="showBlogPostForm()">
+                                            <i class="fas fa-edit"></i> Write Post
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="creation-card stream-card" id="live-stream-card">
+                                    <div class="card-icon">
+                                        <i class="fas fa-broadcast-tower"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Go Live</h4>
+                                        <p>Start a live stream for your audience</p>
+                                        <button class="btn btn-danger" onclick="startLiveStream()">
+                                            <i class="fas fa-broadcast-tower"></i> Go Live
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="content-management" id="content-management" style="display: none;">
+                            <h3><i class="fas fa-list"></i> Your Content</h3>
+                            <div class="content-filters">
+                                <input type="text" id="content-search" placeholder="Search your content...">
+                                <select id="content-filter">
+                                    <option value="all">All Content</option>
+                                    <option value="videos">Videos</option>
+                                    <option value="posts">Posts</option>
+                                    <option value="streams">Live Streams</option>
+                                </select>
+                            </div>
+                            <div class="content-grid" id="content-grid">
+                                <!-- Content items will be dynamically added here -->
+                                <div class="no-content">
+                                    <i class="fas fa-video"></i>
+                                    <p>No content yet. Start creating to see your videos and posts here!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Channel (Portfolio) Tab -->
+        <div class="tab-content" id="portfolio">
+            <div class="youtube-channel-container">
+                <div class="channel-header">
+                    <div class="channel-banner">
+                        <img src="https://picsum.photos/seed/channel-banner/1200/300.jpg" alt="Channel Banner" class="banner-img">
+                        <div class="channel-overlay">
+                            <div class="channel-info">
+                                <div class="channel-avatar">
+                                    <img src="https://picsum.photos/seed/channel/150/150.jpg" alt="Channel Avatar" class="channel-avatar-img">
+                                </div>
+                                <div class="channel-details">
+                                    <h1 class="channel-title">Your Channel</h1>
+                                    <p class="channel-handle">@yourchannel</p>
+                                    <div class="channel-stats">
+                                        <span class="stat"><i class="fas fa-users"></i> 0 subscribers</span>
+                                        <span class="stat"><i class="fas fa-video"></i> 0 videos</span>
+                                        <span class="stat"><i class="fas fa-eye"></i> 0 total views</span>
+                                    </div>
+                                    <div class="channel-actions">
+                                        <button class="btn btn-subscribe" id="subscribe-btn">
+                                            <i class="fas fa-bell"></i> Subscribe
+                                        </button>
+                                        <button class="btn btn-share" id="share-channel">
+                                            <i class="fas fa-share"></i> Share
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-main">
+                    <div class="channel-tabs">
+                        <button class="channel-tab active" data-tab="videos">Videos</button>
+                        <button class="channel-tab" data-tab="playlists">Playlists</button>
+                        <button class="channel-tab" data-tab="about">About</button>
+                        <button class="channel-tab" data-tab="community">Community</button>
+                    </div>
+                    
+                    <div class="channel-content">
+                        <!-- Videos Tab -->
+                        <div class="tab-pane active" id="videos-tab">
+                            <div class="video-grid" id="video-grid">
+                                <div class="no-videos">
+                                    <i class="fas fa-video-slash"></i>
+                                    <p>No videos uploaded yet. Start creating content to build your channel!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Playlists Tab -->
+                        <div class="tab-pane" id="playlists-tab">
+                            <div class="playlist-grid" id="playlist-grid">
+                                <div class="no-playlists">
+                                    <i class="fas fa-list"></i>
+                                    <p>No playlists created yet. Organize your videos into playlists!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- About Tab -->
+                        <div class="tab-pane" id="about-tab">
+                            <div class="about-section">
+                                <h3><i class="fas fa-info-circle"></i> Channel Description</h3>
+                                <p class="channel-description">Welcome to your channel! Here you'll find amazing educational content, tutorials, and insights about technology and programming.</p>
+                                
+                                <div class="channel-details-grid">
+                                    <div class="detail-item">
+                                        <h4><i class="fas fa-calendar"></i> Joined</h4>
+                                        <p>February 2024</p>
+                                    </div>
+                                    <div class="detail-item">
+                                        <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                                        <p>Global</p>
+                                    </div>
+                                    <div class="detail-item">
+                                        <h4><i class="fas fa-link"></i> Links</h4>
+                                        <div class="links-list">
+                                            <a href="#" class="channel-link"><i class="fab fa-twitter"></i></a>
+                                            <a href="#" class="channel-link"><i class="fab fa-instagram"></i></a>
+                                            <a href="#" class="channel-link"><i class="fab fa-github"></i></a>
+                                            <a href="#" class="channel-link"><i class="fas fa-globe"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Community Tab -->
+                        <div class="tab-pane" id="community-tab">
+                            <div class="community-section">
+                                <h3><i class="fas fa-users"></i> Community</h3>
+                                <div class="community-stats">
+                                    <div class="community-stat">
+                                        <span class="stat-number">0</span>
+                                        <span class="stat-label">Members</span>
+                                    </div>
+                                    <div class="community-stat">
+                                        <span class="stat-number">0</span>
+                                        <span class="stat-label">Posts</span>
+                                    </div>
+                                </div>
+                                <div class="community-posts" id="community-posts">
+                                    <div class="no-community-posts">
+                                        <i class="fas fa-comments"></i>
+                                        <p>No community posts yet. Start engaging with your audience!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav" id="mobile-nav">
             <div class="mobile-nav-content">
@@ -1288,6 +1542,12 @@
                     </button>
                     <button class="mobile-nav-tab hidden" data-tab="assignments">
                         <i class="fas fa-tasks"></i> Assignments
+                    </button>
+                    <button class="mobile-nav-tab hidden" data-tab="blog">
+                        <i class="fas fa-video"></i> Creator Studio
+                    </button>
+                    <button class="mobile-nav-tab hidden" data-tab="portfolio">
+                        <i class="fas fa-user-circle"></i> Channel
                     </button>
                 </div>
             </div>

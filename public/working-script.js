@@ -4116,3 +4116,122 @@ if (document.readyState === 'loading') {
     initialize();
 }
 
+// YouTube-Inspired Functions
+let studioData = {
+    videos: [],
+    posts: [],
+    streams: [],
+    channelInfo: {
+        name: 'Your Channel',
+        handle: '@yourchannel',
+        subscribers: 0,
+        totalViews: 0,
+        joinedDate: 'February 2024'
+    }
+};
+
+function showVideoUpload() {
+    alert('Video upload feature coming soon! This will allow you to upload and manage video content.');
+}
+
+function showBlogPostForm() {
+    document.getElementById('content-management').style.display = 'block';
+    document.getElementById('blog-post-card').classList.add('active');
+}
+
+function startLiveStream() {
+    alert('Live streaming feature coming soon! This will allow you to broadcast live to your audience.');
+}
+
+function updateStudioStats() {
+    document.getElementById('total-videos').textContent = studioData.videos.length;
+    document.getElementById('total-views').textContent = studioData.channelInfo.totalViews.toLocaleString();
+    document.getElementById('total-subscribers').textContent = studioData.channelInfo.subscribers.toLocaleString();
+}
+
+function customizeChannel() {
+    const newName = prompt('Enter your channel name:', studioData.channelInfo.name);
+    if (newName) {
+        studioData.channelInfo.name = newName;
+        document.querySelector('.channel-name').textContent = newName;
+        showMessage('blog-message', 'Channel name updated successfully!');
+    }
+}
+
+function subscribeToChannel() {
+    studioData.channelInfo.subscribers++;
+    updateStudioStats();
+    showMessage('blog-message', 'Subscribed to channel successfully!');
+}
+
+function shareChannel() {
+    const shareUrl = `${window.location.origin}/portfolio`;
+    if (navigator.share) {
+        navigator.share({
+            title: studioData.channelInfo.name,
+            text: `Check out ${studioData.channelInfo.name} on our course platform!`,
+            url: shareUrl
+        });
+    } else {
+        navigator.clipboard.writeText(shareUrl);
+        showMessage('blog-message', 'Channel link copied to clipboard!');
+    }
+}
+
+// Channel tab switching
+function switchChannelTab(tabName) {
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    // Remove active class from all channel tabs
+    document.querySelectorAll('.channel-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab pane
+    const selectedPane = document.getElementById(`${tabName}-tab`);
+    if (selectedPane) {
+        selectedPane.classList.add('active');
+    }
+    
+    // Add active class to clicked tab
+    const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+}
+
+// Initialize channel tabs
+document.addEventListener('DOMContentLoaded', function() {
+    const channelTabs = document.querySelectorAll('.channel-tab');
+    channelTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            switchChannelTab(tabName);
+        });
+    });
+    
+    // Initialize studio stats
+    updateStudioStats();
+    
+    // Initialize customize button
+    const customizeBtn = document.getElementById('customize-channel');
+    if (customizeBtn) {
+        customizeBtn.addEventListener('click', customizeChannel);
+    }
+    
+    // Initialize subscribe button
+    const subscribeBtn = document.getElementById('subscribe-btn');
+    if (subscribeBtn) {
+        subscribeBtn.addEventListener('click', subscribeToChannel);
+    }
+    
+    // Initialize share button
+    const shareBtn = document.getElementById('share-channel');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', shareChannel);
+    }
+});
+
