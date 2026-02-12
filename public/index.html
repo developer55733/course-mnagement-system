@@ -1431,6 +1431,388 @@
             </div>
         </div>
         
+        <!-- Portfolio Tab -->
+        <div class="tab-content" id="portfolio">
+            <div class="portfolio-container">
+                <div class="portfolio-header">
+                    <h2 class="page-title"><i class="fas fa-briefcase"></i> Portfolio Management</h2>
+                    <p class="portfolio-subtitle">Create and manage your professional portfolio - visible to everyone</p>
+                    <div class="portfolio-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-eye"></i>
+                            <span class="stat-number" id="portfolio-views">0</span>
+                            <span class="stat-label">Profile Views</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-project-diagram"></i>
+                            <span class="stat-number" id="total-projects">0</span>
+                            <span class="stat-label">Projects</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <span class="stat-number" id="portfolio-rating">0</span>
+                            <span class="stat-label">Average Rating</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="portfolio-main">
+                    <!-- Portfolio Overview Section -->
+                    <div class="portfolio-overview-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-user"></i> Profile Overview</h3>
+                            <button class="btn btn-toggle" id="toggle-profile-form">
+                                <i class="fas fa-chevron-down"></i> Edit Profile
+                            </button>
+                        </div>
+                        
+                        <div class="profile-display" id="profile-display">
+                            <div class="profile-card">
+                                <div class="profile-avatar-section">
+                                    <img src="https://picsum.photos/seed/portfolio-avatar/200/200.jpg" alt="Profile Avatar" class="profile-avatar" id="profile-avatar-img">
+                                    <button class="btn btn-upload" onclick="uploadProfilePicture()">
+                                        <i class="fas fa-camera"></i> Change Photo
+                                    </button>
+                                </div>
+                                <div class="profile-info">
+                                    <h3 class="profile-name" id="profile-name-display">Your Name</h3>
+                                    <p class="profile-title" id="profile-title-display">Professional Title</p>
+                                    <p class="profile-bio" id="profile-bio-display">Your professional bio and description goes here...</p>
+                                    <div class="profile-contact">
+                                        <p><i class="fas fa-envelope"></i> <span id="profile-email-display">email@example.com</span></p>
+                                        <p><i class="fas fa-phone"></i> <span id="profile-phone-display">+1234567890</span></p>
+                                        <p><i class="fas fa-map-marker-alt"></i> <span id="profile-location-display">City, Country</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-form-container" id="profile-form-container" style="display: none;">
+                            <form id="edit-profile-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profile-name">Full Name</label>
+                                        <input type="text" id="profile-name" required placeholder="Enter your full name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-title">Professional Title</label>
+                                        <input type="text" id="profile-title" placeholder="e.g., Software Developer, Designer, etc.">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profile-bio">Professional Bio</label>
+                                    <textarea id="profile-bio" required placeholder="Describe your professional background, skills, and experience..." rows="6"></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profile-email">Email</label>
+                                        <input type="email" id="profile-email" required placeholder="your.email@example.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-phone">Phone</label>
+                                        <input type="tel" id="profile-phone" placeholder="+1234567890">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profile-location">Location</label>
+                                        <input type="text" id="profile-location" placeholder="City, Country">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-website">Website/Portfolio</label>
+                                        <input type="url" id="profile-website" placeholder="https://yourwebsite.com">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profile-category">Portfolio Category</label>
+                                    <select id="profile-category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="business">Business</option>
+                                        <option value="services">Services</option>
+                                        <option value="student">Student</option>
+                                        <option value="freelancer">Freelancer</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="academic">Academic</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Save Profile
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="cancelProfileEdit()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Skills Section -->
+                    <div class="portfolio-skills-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-cogs"></i> Skills & Expertise</h3>
+                            <button class="btn btn-primary" onclick="showAddSkillForm()">
+                                <i class="fas fa-plus"></i> Add Skill
+                            </button>
+                        </div>
+                        
+                        <div class="skills-form-container" id="skills-form-container" style="display: none;">
+                            <form id="add-skill-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="skill-name">Skill Name</label>
+                                        <input type="text" id="skill-name" required placeholder="e.g., JavaScript, Project Management">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skill-level">Proficiency Level</label>
+                                        <select id="skill-level" required>
+                                            <option value="">Select Level</option>
+                                            <option value="beginner">Beginner</option>
+                                            <option value="intermediate">Intermediate</option>
+                                            <option value="advanced">Advanced</option>
+                                            <option value="expert">Expert</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="skill-category">Category</label>
+                                    <select id="skill-category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="technical">Technical Skills</option>
+                                        <option value="soft">Soft Skills</option>
+                                        <option value="language">Languages</option>
+                                        <option value="tool">Tools & Software</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Add Skill
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="hideSkillForm()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="skills-grid" id="skills-grid">
+                            <div class="no-skills-message">
+                                <i class="fas fa-cogs"></i>
+                                <h3>No skills added yet</h3>
+                                <p>Add your skills to showcase your expertise!</p>
+                                <button class="btn btn-primary" onclick="showAddSkillForm()">
+                                    <i class="fas fa-plus"></i> Add Your First Skill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Experience Section -->
+                    <div class="portfolio-experience-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                            <button class="btn btn-primary" onclick="showAddExperienceForm()">
+                                <i class="fas fa-plus"></i> Add Experience
+                            </button>
+                        </div>
+                        
+                        <div class="experience-form-container" id="experience-form-container" style="display: none;">
+                            <form id="add-experience-form">
+                                <div class="form-group">
+                                    <label for="exp-company">Company Name</label>
+                                    <input type="text" id="exp-company" required placeholder="e.g., Tech Company Inc.">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="exp-position">Position/Role</label>
+                                    <input type="text" id="exp-position" required placeholder="e.g., Software Developer">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="exp-start-date">Start Date</label>
+                                        <input type="date" id="exp-start-date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exp-end-date">End Date</label>
+                                        <input type="date" id="exp-end-date" placeholder="Leave empty if current">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="exp-description">Job Description</label>
+                                    <textarea id="exp-description" required placeholder="Describe your responsibilities and achievements..." rows="6"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Add Experience
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="hideExperienceForm()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="experience-timeline" id="experience-timeline">
+                            <div class="no-experience-message">
+                                <i class="fas fa-briefcase"></i>
+                                <h3>No experience added yet</h3>
+                                <p>Add your work experience to build your professional profile!</p>
+                                <button class="btn btn-primary" onclick="showAddExperienceForm()">
+                                    <i class="fas fa-plus"></i> Add Your First Experience
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Section -->
+                    <div class="portfolio-projects-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-project-diagram"></i> Projects Showcase</h3>
+                            <button class="btn btn-primary" onclick="showAddProjectForm()">
+                                <i class="fas fa-plus"></i> Add Project
+                            </button>
+                        </div>
+                        
+                        <div class="project-form-container" id="project-form-container" style="display: none;">
+                            <form id="add-project-form">
+                                <div class="form-group">
+                                    <label for="project-name">Project Name</label>
+                                    <input type="text" id="project-name" required placeholder="e.g., E-commerce Platform">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="project-description">Project Description</label>
+                                    <textarea id="project-description" required placeholder="Describe project, your role, and technologies used..." rows="6"></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="project-tech">Technologies Used</label>
+                                        <input type="text" id="project-tech" required placeholder="e.g., React, Node.js, MongoDB">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="project-link">Project Link</label>
+                                        <input type="url" id="project-link" placeholder="https://github.com/username/project">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="project-image">Project Image URL</label>
+                                    <input type="url" id="project-image" placeholder="https://example.com/project-screenshot.jpg">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Add Project
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="hideProjectForm()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="projects-grid" id="projects-grid">
+                            <div class="no-projects-message">
+                                <i class="fas fa-project-diagram"></i>
+                                <h3>No projects added yet</h3>
+                                <p>Showcase your amazing work to potential employers!</p>
+                                <button class="btn btn-primary" onclick="showAddProjectForm()">
+                                    <i class="fas fa-plus"></i> Add Your First Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CV Builder Section -->
+                    <div class="portfolio-cv-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-file-alt"></i> CV Builder</h3>
+                            <button class="btn btn-primary" onclick="showCVBuilder()">
+                                <i class="fas fa-edit"></i> Create CV
+                            </button>
+                        </div>
+                        
+                        <div class="cv-builder-container" id="cv-builder-container" style="display: none;">
+                            <div class="cv-preview-section">
+                                <h4><i class="fas fa-eye"></i> CV Preview</h4>
+                                <div class="cv-preview" id="cv-preview">
+                                    <div class="cv-header">
+                                        <h2 id="cv-name-preview">Your Name</h2>
+                                        <p id="cv-title-preview">Professional Title</p>
+                                        <div class="cv-contact">
+                                            <p><i class="fas fa-envelope"></i> <span id="cv-email-preview">email@example.com</span></p>
+                                            <p><i class="fas fa-phone"></i> <span id="cv-phone-preview">+1234567890</span></p>
+                                            <p><i class="fas fa-map-marker-alt"></i> <span id="cv-location-preview">City, Country</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="cv-sections">
+                                        <div class="cv-section">
+                                            <h3>Professional Summary</h3>
+                                            <p id="cv-summary-preview">Your professional summary will appear here...</p>
+                                        </div>
+                                        <div class="cv-section">
+                                            <h3>Skills</h3>
+                                            <div id="cv-skills-preview">Skills will be listed here...</div>
+                                        </div>
+                                        <div class="cv-section">
+                                            <h3>Experience</h3>
+                                            <div id="cv-experience-preview">Experience will be listed here...</div>
+                                        </div>
+                                        <div class="cv-section">
+                                            <h3>Education</h3>
+                                            <div id="cv-education-preview">Education details will appear here...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cv-actions">
+                                    <button class="btn btn-primary" onclick="downloadCV()">
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="printCV()">
+                                        <i class="fas fa-print"></i> Print CV
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="cv-form-section">
+                                <form id="cv-builder-form">
+                                    <div class="form-group">
+                                        <label for="cv-summary">Professional Summary</label>
+                                        <textarea id="cv-summary" placeholder="Write a compelling professional summary..." rows="4"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cv-education">Education</label>
+                                        <textarea id="cv-education" placeholder="List your educational qualifications..." rows="4"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-primary" onclick="updateCVPreview()">
+                                            <i class="fas fa-sync"></i> Update Preview
+                                        </button>
+                                        <button type="button" class="btn btn-outline" onclick="hideCVBuilder()">
+                                            <i class="fas fa-times"></i> Close
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav" id="mobile-nav">
             <div class="mobile-nav-content">
