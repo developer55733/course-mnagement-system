@@ -671,8 +671,13 @@ function updateDashboard() {
     // Show new tabs for all logged-in users
     const discussionTab = document.getElementById('discussion-tab');
     const assignmentsTab = document.getElementById('assignments-tab');
+    const blogTab = document.getElementById('blog-tab');
+    const portfolioTab = document.getElementById('portfolio-tab');
+    
     if (discussionTab) discussionTab.classList.remove('hidden');
     if (assignmentsTab) assignmentsTab.classList.remove('hidden');
+    if (blogTab) blogTab.classList.remove('hidden');
+    if (portfolioTab) portfolioTab.classList.remove('hidden');
 
 
 
@@ -2646,8 +2651,13 @@ function logout() {
         // Show new tabs for all logged-in users
         const discussionTab = document.getElementById('discussion-tab');
         const assignmentsTab = document.getElementById('assignments-tab');
+        const blogTab = document.getElementById('blog-tab');
+        const portfolioTab = document.getElementById('portfolio-tab');
+        
         if (discussionTab) discussionTab.classList.remove('hidden');
         if (assignmentsTab) assignmentsTab.classList.remove('hidden');
+        if (blogTab) blogTab.classList.remove('hidden');
+        if (portfolioTab) portfolioTab.classList.remove('hidden');
 
         
 
