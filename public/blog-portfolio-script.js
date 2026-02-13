@@ -762,6 +762,59 @@ function showCVBuilder() {
     const formContainer = document.getElementById('cv-builder-container');
     if (formContainer) {
         formContainer.style.display = 'block';
+        
+        // Load existing CV data and profile data
+        loadCVData();
+        loadProfileDataForCV();
+        updateCVPreview();
+    }
+}
+
+async function loadCVData() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/cv`);
+        if (response.ok) {
+            const cvData = await response.json();
+            
+            // Populate form fields with existing data
+            const summaryField = document.getElementById('cv-summary');
+            const educationField = document.getElementById('cv-education');
+            const certificationsField = document.getElementById('cv-certifications');
+            const languagesField = document.getElementById('cv-languages');
+            const referencesField = document.getElementById('cv-references');
+            
+            if (summaryField) summaryField.value = cvData.summary || '';
+            if (educationField) educationField.value = cvData.education ? cvData.education.join('\n') : '';
+            if (certificationsField) certificationsField.value = cvData.certifications ? cvData.certifications.join('\n') : '';
+            if (languagesField) languagesField.value = cvData.languages ? cvData.languages.join('\n') : '';
+            if (referencesField) referencesField.value = cvData.references ? cvData.references.join('\n') : '';
+        }
+    } catch (error) {
+        console.error('Error loading CV data:', error);
+    }
+}
+
+async function loadProfileDataForCV() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        if (response.ok) {
+            const profile = await response.json();
+            
+            // Update CV preview with profile data
+            const namePreview = document.getElementById('cv-name-preview');
+            const titlePreview = document.getElementById('cv-title-preview');
+            const emailPreview = document.getElementById('cv-email-preview');
+            const phonePreview = document.getElementById('cv-phone-preview');
+            const locationPreview = document.getElementById('cv-location-preview');
+            
+            if (namePreview) namePreview.textContent = profile.name || 'Your Name';
+            if (titlePreview) titlePreview.textContent = profile.title || 'Professional Title';
+            if (emailPreview) emailPreview.textContent = profile.email || 'email@example.com';
+            if (phonePreview) phonePreview.textContent = profile.phone || '+1234567890';
+            if (locationPreview) locationPreview.textContent = profile.location || 'City, Country';
+        }
+    } catch (error) {
+        console.error('Error loading profile data for CV:', error);
     }
 }
 
@@ -773,28 +826,205 @@ function hideCVBuilder() {
 }
 
 function updateCVPreview() {
-    // Update CV preview with form data
-    const name = document.getElementById('cv-name')?.value || 'Your Name';
-    const title = document.getElementById('cv-title')?.value || 'Professional Title';
-    const email = document.getElementById('cv-email')?.value || 'email@example.com';
+    // Update CV preview with form data and existing portfolio data
+    const summary = document.getElementById('cv-summary')?.value || '';
+    const education = document.getElementById('cv-education')?.value || '';
+    const certifications = document.getElementById('cv-certifications')?.value || '';
+    const languages = document.getElementById('cv-languages')?.value || '';
+    const references = document.getElementById('cv-references')?.value || '';
     
-    const namePreview = document.getElementById('cv-name-preview');
-    const titlePreview = document.getElementById('cv-title-preview');
-    const emailPreview = document.getElementById('cv-email-preview');
+    // Update summary preview
+    const summaryPreview = document.getElementById('cv-summary-preview');
+    if (summaryPreview) summaryPreview.textContent = summary || 'Your professional summary will appear here...';
     
-    if (namePreview) namePreview.textContent = name;
-    if (titlePreview) titlePreview.textContent = title;
-    if (emailPreview) emailPreview.textContent = email;
+    // Update education preview
+    const educationPreview = document.getElementById('cv-education-preview');
+    if (educationPreview) {
+        if (education) {
+            const educationLines = education.split('\n').filter(line => line.trim());
+            educationPreview.innerHTML = educationLines.map(line => `<p>${line}</p>`).join('');
+        } else {
+            educationPreview.textContent = 'Education details will appear here...';
+        }
+    }
+    
+    // Load and display skills from portfolio
+    loadSkillsForCV();
+    
+    // Load and display experience from portfolio
+    loadExperienceForCV();
+}
+
+async function loadSkillsForCV() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/skills`);
+        if (response.ok) {
+            const skills = await response.json();
+            const skillsPreview = document.getElementById('cv-skills-preview');
+            if (skillsPreview) {
+                if (skills.length > 0) {
+                    skillsPreview.innerHTML = skills.map(skill => 
+                        `<div class="cv-skill-item">
+                            <strong>${skill.name}</strong> - ${skill.level}
+                            ${skill.description ? `<br><small>${skill.description}</small>` : ''}
+                        </div>`
+                    ).join('');
+                } else {
+                    skillsPreview.textContent = 'Skills will be listed here...';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading skills for CV:', error);
+    }
+}
+
+async function loadExperienceForCV() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/experience`);
+        if (response.ok) {
+            const experience = await response.json();
+            const experiencePreview = document.getElementById('cv-experience-preview');
+            if (experiencePreview) {
+                if (experience.length > 0) {
+                    experiencePreview.innerHTML = experience.map(exp => 
+                        `<div class="cv-experience-item">
+                            <strong>${exp.position}</strong> at ${exp.company}<br>
+                            <small>${exp.start_date} - ${exp.end_date || 'Present'}</small><br>
+                            ${exp.description}
+                        </div>`
+                    ).join('');
+                } else {
+                    experiencePreview.textContent = 'Experience will be listed here...';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading experience for CV:', error);
+    }
+}
+
+async function saveCV(event) {
+    event.preventDefault();
+    
+    try {
+        const form = document.getElementById('cv-builder-form');
+        const formData = new FormData(form);
+        
+        const cvData = {
+            summary: formData.get('cv-summary') || '',
+            education: formData.get('cv-education') ? formData.get('cv-education').split('\n').filter(line => line.trim()) : [],
+            certifications: formData.get('cv-certifications') ? formData.get('cv-certifications').split('\n').filter(line => line.trim()) : [],
+            languages: formData.get('cv-languages') ? formData.get('cv-languages').split('\n').filter(line => line.trim()) : [],
+            references: formData.get('cv-references') ? formData.get('cv-references').split('\n').filter(line => line.trim()) : []
+        };
+        
+        const response = await fetch(`${API_BASE}/portfolio/cv`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cvData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save CV');
+        }
+        
+        showMessage('portfolio-message', 'CV saved successfully!', 'success');
+        updateCVPreview();
+    } catch (error) {
+        console.error('Error saving CV:', error);
+        showMessage('portfolio-message', 'Failed to save CV', 'error');
+    }
 }
 
 function downloadCV() {
-    // Generate and download CV as PDF or text file
-    showMessage('portfolio-message', 'CV download feature coming soon!', 'info');
+    // Generate and download CV as PDF
+    const cvContent = generateCVContent();
+    
+    // Create a temporary blob and download
+    const blob = new Blob([cvContent], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'CV.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showMessage('portfolio-message', 'CV downloaded successfully!', 'success');
 }
 
 function printCV() {
-    // Print CV
-    window.print();
+    // Print CV with optimized styling
+    const printContent = generateCVContent();
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
+    printWindow.close();
+    
+    showMessage('portfolio-message', 'CV print dialog opened!', 'success');
+}
+
+function generateCVContent() {
+    const namePreview = document.getElementById('cv-name-preview')?.textContent || 'Your Name';
+    const titlePreview = document.getElementById('cv-title-preview')?.textContent || 'Professional Title';
+    const emailPreview = document.getElementById('cv-email-preview')?.textContent || 'email@example.com';
+    const phonePreview = document.getElementById('cv-phone-preview')?.textContent || '+1234567890';
+    const locationPreview = document.getElementById('cv-location-preview')?.textContent || 'City, Country';
+    const summaryPreview = document.getElementById('cv-summary-preview')?.textContent || '';
+    const educationPreview = document.getElementById('cv-education-preview')?.innerHTML || '';
+    const skillsPreview = document.getElementById('cv-skills-preview')?.innerHTML || '';
+    const experiencePreview = document.getElementById('cv-experience-preview')?.innerHTML || '';
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>CV - ${namePreview}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                .cv-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                .cv-header h1 { margin: 0; font-size: 2.5em; }
+                .cv-header p { margin: 5px 0; color: #666; }
+                .cv-section { margin-bottom: 30px; }
+                .cv-section h3 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+                .cv-skill-item, .cv-experience-item { margin-bottom: 10px; }
+                @media print { body { margin: 20px; } }
+            </style>
+        </head>
+        <body>
+            <div class="cv-header">
+                <h1>${namePreview}</h1>
+                <p><strong>${titlePreview}</strong></p>
+                <p>${emailPreview} | ${phonePreview} | ${locationPreview}</p>
+            </div>
+            
+            <div class="cv-section">
+                <h3>Professional Summary</h3>
+                <p>${summaryPreview}</p>
+            </div>
+            
+            <div class="cv-section">
+                <h3>Skills</h3>
+                ${skillsPreview}
+            </div>
+            
+            <div class="cv-section">
+                <h3>Experience</h3>
+                ${experiencePreview}
+            </div>
+            
+            <div class="cv-section">
+                <h3>Education</h3>
+                ${educationPreview}
+            </div>
+        </body>
+        </html>
+    `;
 }
 
 function uploadProfilePicture() {

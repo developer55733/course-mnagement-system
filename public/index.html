@@ -1786,19 +1786,37 @@
                             </div>
                             
                             <div class="cv-form-section">
-                                <form id="cv-builder-form">
+                                <form id="cv-builder-form" onsubmit="saveCV(event)">
                                     <div class="form-group">
                                         <label for="cv-summary">Professional Summary</label>
-                                        <textarea id="cv-summary" placeholder="Write a compelling professional summary..." rows="4"></textarea>
+                                        <textarea id="cv-summary" name="cv-summary" placeholder="Write a compelling professional summary..." rows="4"></textarea>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label for="cv-education">Education</label>
-                                        <textarea id="cv-education" placeholder="List your educational qualifications..." rows="4"></textarea>
+                                        <textarea id="cv-education" name="cv-education" placeholder="List your educational qualifications..." rows="4"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cv-certifications">Certifications</label>
+                                        <textarea id="cv-certifications" name="cv-certifications" placeholder="List your professional certifications..." rows="3"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cv-languages">Languages</label>
+                                        <textarea id="cv-languages" name="cv-languages" placeholder="List languages you speak..." rows="2"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cv-references">References</label>
+                                        <textarea id="cv-references" name="cv-references" placeholder="Professional references (optional)..." rows="3"></textarea>
                                     </div>
                                     
                                     <div class="form-actions">
-                                        <button type="button" class="btn btn-primary" onclick="updateCVPreview()">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Save CV
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="updateCVPreview()">
                                             <i class="fas fa-sync"></i> Update Preview
                                         </button>
                                         <button type="button" class="btn btn-outline" onclick="hideCVBuilder()">
