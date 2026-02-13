@@ -1,0 +1,28 @@
+{
+  "blogs": [],
+  "portfolio": {
+    "profile": {
+      "name": "",
+      "title": "",
+      "bio": "",
+      "email": "",
+      "phone": "",
+      "location": "",
+      "website": "",
+      "avatar": ""
+    },
+    "skills": [],
+    "experience": [],
+    "projects": [],
+    "cv": {
+      "education": [],
+      "certifications": [],
+      "languages": [],
+      "references": []
+    }
+  },
+  "settings": {
+    "lastUpdated": null,
+    "version": "1.0.0"
+  }
+}

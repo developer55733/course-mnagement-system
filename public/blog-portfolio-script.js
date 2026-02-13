@@ -1,38 +1,20 @@
-// Blog and Portfolio Management JavaScript
+// Blog and Portfolio Management JavaScript - Database Version
 
-// Blog Management Variables
-let blogPosts = [];
-let blogStats = {
-    totalPosts: 0,
-    totalViews: 0,
-    totalLikes: 0
-};
+// Initialize Database
+let db = null;
 
-// Portfolio Management Variables
-let portfolioData = {
-    profile: {
-        name: '',
-        title: '',
-        bio: '',
-        email: '',
-        phone: '',
-        location: '',
-        website: '',
-        category: '',
-        avatar: 'https://picsum.photos/seed/portfolio-avatar/200/200.jpg'
-    },
-    skills: [],
-    experience: [],
-    projects: [],
-    stats: {
-        views: 0,
-        projects: 0,
-        rating: 0
-    }
-};
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
+    db = new BlogPortfolioDB();
+    await db.init();
+    await loadBlogPosts();
+    await loadPortfolioData();
+    updateBlogStats();
+    updatePortfolioStats();
+});
 
 // Blog Management Functions
-function showCreateForm() {
+async function showCreateForm() {
     const formContainer = document.getElementById('blog-form-container');
     const toggleBtn = document.getElementById('toggle-blog-form');
     
@@ -53,33 +35,31 @@ function clearBlogForm() {
     document.getElementById('create-blog-form').reset();
 }
 
-function saveDraft() {
+async function saveDraft() {
     const formData = new FormData(document.getElementById('create-blog-form'));
     const draftData = {
         title: formData.get('blog-title'),
         category: formData.get('blog-category'),
         excerpt: formData.get('blog-excerpt'),
         content: formData.get('blog-content'),
-        tags: formData.get('blog-tags'),
+        tags: formData.get('blog-tags').split(',').map(tag => tag.trim()),
         featuredImage: formData.get('blog-featured-image'),
         status: 'draft',
         createdAt: new Date().toISOString()
     };
     
-    // Save to localStorage
-    let drafts = JSON.parse(localStorage.getItem('blogDrafts') || '[]');
-    drafts.push(draftData);
-    localStorage.setItem('blogDrafts', JSON.stringify(drafts));
+    // Save to database
+    await db.addBlog(draftData);
     
     showMessage('blog-message', 'Draft saved successfully!', 'success');
+    await loadBlogPosts();
 }
 
-function createBlogPost(e) {
+async function createBlogPost(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
     const blogPost = {
-        id: Date.now(),
         title: formData.get('blog-title'),
         category: formData.get('blog-category'),
         excerpt: formData.get('blog-excerpt'),
@@ -87,21 +67,18 @@ function createBlogPost(e) {
         tags: formData.get('blog-tags').split(',').map(tag => tag.trim()),
         featuredImage: formData.get('blog-featured-image'),
         status: 'published',
-        createdAt: new Date().toISOString(),
         views: 0,
         likes: 0
     };
     
-    // Save to localStorage
-    let posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
-    posts.unshift(blogPost);
-    localStorage.setItem('blogPosts', JSON.stringify(posts));
+    // Save to database
+    await db.addBlog(blogPost);
     
     // Update stats
     updateBlogStats();
     
     // Display posts
-    displayBlogPosts();
+    await displayBlogPosts();
     
     // Clear form
     e.target.reset();
@@ -109,16 +86,16 @@ function createBlogPost(e) {
     showMessage('blog-message', 'Blog post published successfully!', 'success');
 }
 
-function displayBlogPosts() {
+async function displayBlogPosts() {
     const postsGrid = document.getElementById('blog-posts-grid');
-    const posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
+    const posts = await db.getBlogs();
     
     if (posts.length === 0) {
         postsGrid.innerHTML = `
             <div class="no-posts-message">
                 <i class="fas fa-newspaper"></i>
                 <h3>No blog posts yet</h3>
-                <p>Start creating amazing content to share with the world!</p>
+                <p>Start creating amazing content to share with world!</p>
                 <button class="btn btn-primary" onclick="showCreateForm()">
                     <i class="fas fa-plus"></i> Create Your First Post
                 </button>
@@ -141,14 +118,14 @@ function displayBlogPosts() {
             <div class="blog-post-excerpt">${post.excerpt || post.content.substring(0, 150) + '...'}</div>
             <div class="blog-post-footer">
                 <div class="blog-post-stats">
-                    <span><i class="fas fa-eye"></i> ${post.views}</span>
-                    <span><i class="fas fa-heart"></i> ${post.likes}</span>
+                    <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
+                    <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
                 </div>
                 <div class="blog-post-actions">
-                    <button class="btn btn-primary" onclick="editBlogPost(${post.id})">
+                    <button class="btn btn-primary" onclick="editBlogPost('${post.id}')">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-outline" onclick="deleteBlogPost(${post.id})">
+                    <button class="btn btn-outline" onclick="deleteBlogPost('${post.id}')">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -157,19 +134,40 @@ function displayBlogPosts() {
     `).join('');
 }
 
-function updateBlogStats() {
-    const posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
-    const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0);
-    const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0), 0);
+async function updateBlogStats() {
+    const stats = await db.getStats();
     
-    document.getElementById('total-posts').textContent = posts.length;
-    document.getElementById('total-views').textContent = totalViews;
-    document.getElementById('total-likes').textContent = totalLikes;
+    document.getElementById('total-posts').textContent = stats.totalBlogs;
+    document.getElementById('total-views').textContent = 0; // Would need to track views in DB
+    document.getElementById('total-likes').textContent = 0; // Would need to track likes in DB
+}
+
+async function loadBlogPosts() {
+    await displayBlogPosts();
 }
 
 function editBlogPost(postId) {
-    const posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
-    const post = posts.find(p => p.id === postId);
+    db.getBlog(postId).then(post => {
+        if (post) {
+            // Populate form with post data
+            document.getElementById('blog-title').value = post.title;
+            document.getElementById('blog-category').value = post.category;
+            document.getElementById('blog-excerpt').value = post.excerpt;
+            document.getElementById('blog-content').value = post.content;
+            document.getElementById('blog-tags').value = post.tags.join(', ');
+            document.getElementById('blog-featured-image').value = post.featuredImage;
+            
+            // Show form
+            showCreateForm();
+            
+            // Change submit button to update
+            const form = document.getElementById('create-blog-form');
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                updateBlogPost(postId);
+            };
+        }
+    });
     
     if (post) {
         // Populate form with post data
