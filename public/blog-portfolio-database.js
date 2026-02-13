@@ -1,7 +1,7 @@
 // Database Management for Blog and Portfolio System
 class BlogPortfolioDB {
     constructor() {
-        this.dbPath = './database.json';
+        this.storageKey = 'blogPortfolioDB';
         this.data = null;
         this.init();
     }
@@ -12,6 +12,7 @@ class BlogPortfolioDB {
         } catch (error) {
             console.error('Database initialization failed:', error);
             this.data = this.getDefaultData();
+            await this.saveDatabase();
         }
     }
 
@@ -48,24 +49,24 @@ class BlogPortfolioDB {
 
     async loadDatabase() {
         try {
-            const response = await fetch(this.dbPath);
-            if (!response.ok) {
-                throw new Error('Database file not found');
+            const storedData = localStorage.getItem(this.storageKey);
+            if (storedData) {
+                this.data = JSON.parse(storedData);
+            } else {
+                this.data = this.getDefaultData();
+                await this.saveDatabase();
             }
-            this.data = await response.json();
         } catch (error) {
-            console.log('Using default data structure');
+            console.error('Failed to load database from localStorage:', error);
             this.data = this.getDefaultData();
         }
     }
 
     async saveDatabase() {
         try {
-            // In a real application, this would make a server request
-            // For now, we'll simulate saving with localStorage as fallback
-            localStorage.setItem('blogPortfolioDB', JSON.stringify(this.data));
+            localStorage.setItem(this.storageKey, JSON.stringify(this.data));
             this.data.settings.lastUpdated = new Date().toISOString();
-            console.log('Database saved successfully');
+            console.log('Database saved successfully to localStorage');
             return true;
         } catch (error) {
             console.error('Failed to save database:', error);

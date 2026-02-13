@@ -5,16 +5,41 @@ let db = null;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async function() {
-    db = new BlogPortfolioDB();
-    await db.init();
-    await loadBlogPosts();
-    await loadPortfolioData();
-    updateBlogStats();
-    updatePortfolioStats();
+    try {
+        console.log('Initializing database...');
+        db = new BlogPortfolioDB();
+        
+        // Wait a bit for database to initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log('Database initialized, loading data...');
+        await loadBlogPosts();
+        await loadPortfolioData();
+        updateBlogStats();
+        updatePortfolioStats();
+        console.log('Application initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        // Fallback to empty state
+        initializeEmptyState();
+    }
 });
+
+// Fallback initialization
+function initializeEmptyState() {
+    console.log('Using empty state fallback');
+    displayEmptyBlogPosts();
+    displayEmptyPortfolio();
+}
 
 // Blog Management Functions
 async function showCreateForm() {
+    if (!db) {
+        console.error('Database not initialized');
+        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
+        return;
+    }
+    
     const formContainer = document.getElementById('blog-form-container');
     const toggleBtn = document.getElementById('toggle-blog-form');
     
@@ -35,366 +60,497 @@ function clearBlogForm() {
     document.getElementById('create-blog-form').reset();
 }
 
-async function saveDraft() {
-    const formData = new FormData(document.getElementById('create-blog-form'));
-    const draftData = {
-        title: formData.get('blog-title'),
-        category: formData.get('blog-category'),
-        excerpt: formData.get('blog-excerpt'),
-        content: formData.get('blog-content'),
-        tags: formData.get('blog-tags').split(',').map(tag => tag.trim()),
-        featuredImage: formData.get('blog-featured-image'),
-        status: 'draft',
-        createdAt: new Date().toISOString()
-    };
-    
-    // Save to database
-    await db.addBlog(draftData);
-    
-    showMessage('blog-message', 'Draft saved successfully!', 'success');
-    await loadBlogPosts();
-}
-
-async function createBlogPost(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    const blogPost = {
-        title: formData.get('blog-title'),
-        category: formData.get('blog-category'),
-        excerpt: formData.get('blog-excerpt'),
-        content: formData.get('blog-content'),
-        tags: formData.get('blog-tags').split(',').map(tag => tag.trim()),
-        featuredImage: formData.get('blog-featured-image'),
-        status: 'published',
-        views: 0,
-        likes: 0
-    };
-    
-    // Save to database
-    await db.addBlog(blogPost);
-    
-    // Update stats
-    updateBlogStats();
-    
-    // Display posts
-    await displayBlogPosts();
-    
-    // Clear form
-    e.target.reset();
-    
-    showMessage('blog-message', 'Blog post published successfully!', 'success');
-}
-
-async function displayBlogPosts() {
+// Fallback functions
+function displayEmptyBlogPosts() {
     const postsGrid = document.getElementById('blog-posts-grid');
-    const posts = await db.getBlogs();
-    
-    if (posts.length === 0) {
+    if (postsGrid) {
         postsGrid.innerHTML = `
             <div class="no-posts-message">
                 <i class="fas fa-newspaper"></i>
                 <h3>No blog posts yet</h3>
-                <p>Start creating amazing content to share with world!</p>
+                <p>Start creating amazing content to share with the world!</p>
                 <button class="btn btn-primary" onclick="showCreateForm()">
                     <i class="fas fa-plus"></i> Create Your First Post
                 </button>
             </div>
         `;
+    }
+}
+
+function displayEmptyPortfolio() {
+    // Initialize portfolio sections with empty state
+    const skillsGrid = document.getElementById('skills-grid');
+    const experienceTimeline = document.getElementById('experience-timeline');
+    const projectsGrid = document.getElementById('projects-grid');
+    
+    if (skillsGrid) {
+        skillsGrid.innerHTML = `
+            <div class="no-skills-message">
+                <i class="fas fa-cogs"></i>
+                <h3>No skills added yet</h3>
+                <p>Add your skills to showcase your expertise!</p>
+            </div>
+        `;
+    }
+    
+    if (experienceTimeline) {
+        experienceTimeline.innerHTML = `
+            <div class="no-experience-message">
+                <i class="fas fa-briefcase"></i>
+                <h3>No experience added yet</h3>
+                <p>Add your work experience to build your professional profile!</p>
+            </div>
+        `;
+    }
+    
+    if (projectsGrid) {
+        projectsGrid.innerHTML = `
+            <div class="no-projects-message">
+                <i class="fas fa-project-diagram"></i>
+                <h3>No projects added yet</h3>
+                <p>Showcase your amazing work to potential employers!</p>
+            </div>
+        `;
+    }
+}
+
+async function saveDraft() {
+    if (!db) {
+        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
         return;
     }
     
-    postsGrid.innerHTML = posts.map(post => `
-        <div class="blog-post-card">
-            <div class="blog-post-header">
-                <h4>${post.title}</h4>
-                <div class="blog-post-meta">
-                    <span class="blog-category">${post.category}</span>
-                    <span class="blog-date">${new Date(post.createdAt).toLocaleDateString()}</span>
-                    <span class="blog-status ${post.status}">${post.status}</span>
+    try {
+        const form = document.getElementById('create-blog-form');
+        if (!form) {
+            showMessage('blog-message', 'Form not found', 'error');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const draftData = {
+            title: formData.get('blog-title') || '',
+            category: formData.get('blog-category') || '',
+            excerpt: formData.get('blog-excerpt') || '',
+            content: formData.get('blog-content') || '',
+            tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
+            featuredImage: formData.get('blog-featured-image') || '',
+            status: 'draft',
+            createdAt: new Date().toISOString()
+        };
+        
+        if (!draftData.title || !draftData.content) {
+            showMessage('blog-message', 'Please fill in at least title and content', 'error');
+            return;
+        }
+        
+        // Save to database
+        await db.addBlog(draftData);
+        
+        showMessage('blog-message', 'Draft saved successfully!', 'success');
+        await loadBlogPosts();
+    } catch (error) {
+        console.error('Error saving draft:', error);
+        showMessage('blog-message', 'Failed to save draft. Please try again.', 'error');
+    }
+}
+
+async function createBlogPost(e) {
+    e.preventDefault();
+    
+    if (!db) {
+        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
+        return;
+    }
+    
+    try {
+        const formData = new FormData(e.target);
+        const blogPost = {
+            title: formData.get('blog-title') || '',
+            category: formData.get('blog-category') || '',
+            excerpt: formData.get('blog-excerpt') || '',
+            content: formData.get('blog-content') || '',
+            tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
+            featuredImage: formData.get('blog-featured-image') || '',
+            status: 'published',
+            views: 0,
+            likes: 0
+        };
+        
+        if (!blogPost.title || !blogPost.content) {
+            showMessage('blog-message', 'Please fill in at least title and content', 'error');
+            return;
+        }
+        
+        // Save to database
+        await db.addBlog(blogPost);
+        
+        // Update stats
+        updateBlogStats();
+        
+        // Display posts
+        await displayBlogPosts();
+        
+        // Clear form
+        e.target.reset();
+        
+        showMessage('blog-message', 'Blog post published successfully!', 'success');
+    } catch (error) {
+        console.error('Error creating blog post:', error);
+        showMessage('blog-message', 'Failed to publish blog post. Please try again.', 'error');
+    }
+}
+
+async function displayBlogPosts() {
+    if (!db) {
+        displayEmptyBlogPosts();
+        return;
+    }
+    
+    try {
+        const postsGrid = document.getElementById('blog-posts-grid');
+        if (!postsGrid) {
+            console.error('Blog posts grid not found');
+            return;
+        }
+        
+        const posts = await db.getBlogs();
+        
+        if (posts.length === 0) {
+            displayEmptyBlogPosts();
+            return;
+        }
+        
+        postsGrid.innerHTML = posts.map(post => `
+            <div class="blog-post-card">
+                <div class="blog-post-header">
+                    <h4>${post.title || 'Untitled'}</h4>
+                    <div class="blog-post-meta">
+                        <span class="blog-category">${post.category || 'Uncategorized'}</span>
+                        <span class="blog-date">${new Date(post.createdAt).toLocaleDateString()}</span>
+                        <span class="blog-status ${post.status}">${post.status || 'draft'}</span>
+                    </div>
+                </div>
+                ${post.featuredImage ? `<img src="${post.featuredImage}" alt="${post.title}" class="blog-post-image">` : ''}
+                <div class="blog-post-excerpt">${post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'No excerpt available')}</div>
+                <div class="blog-post-footer">
+                    <div class="blog-post-stats">
+                        <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
+                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
+                    </div>
+                    <div class="blog-post-actions">
+                        <button class="btn btn-primary" onclick="editBlogPost('${post.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-outline" onclick="deleteBlogPost('${post.id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
                 </div>
             </div>
-            ${post.featuredImage ? `<img src="${post.featuredImage}" alt="${post.title}" class="blog-post-image">` : ''}
-            <div class="blog-post-excerpt">${post.excerpt || post.content.substring(0, 150) + '...'}</div>
-            <div class="blog-post-footer">
-                <div class="blog-post-stats">
-                    <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
-                    <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
-                </div>
-                <div class="blog-post-actions">
-                    <button class="btn btn-primary" onclick="editBlogPost('${post.id}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-outline" onclick="deleteBlogPost('${post.id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+        `).join('');
+    } catch (error) {
+        console.error('Error displaying blog posts:', error);
+        displayEmptyBlogPosts();
+    }
 }
 
 async function updateBlogStats() {
-    const stats = await db.getStats();
+    if (!db) {
+        // Set default values
+        const totalPostsEl = document.getElementById('total-posts');
+        const totalViewsEl = document.getElementById('total-views');
+        const totalLikesEl = document.getElementById('total-likes');
+        
+        if (totalPostsEl) totalPostsEl.textContent = '0';
+        if (totalViewsEl) totalViewsEl.textContent = '0';
+        if (totalLikesEl) totalLikesEl.textContent = '0';
+        return;
+    }
     
-    document.getElementById('total-posts').textContent = stats.totalBlogs;
-    document.getElementById('total-views').textContent = 0; // Would need to track views in DB
-    document.getElementById('total-likes').textContent = 0; // Would need to track likes in DB
+    try {
+        const stats = await db.getStats();
+        
+        const totalPostsEl = document.getElementById('total-posts');
+        const totalViewsEl = document.getElementById('total-views');
+        const totalLikesEl = document.getElementById('total-likes');
+        
+        if (totalPostsEl) totalPostsEl.textContent = stats.totalBlogs || 0;
+        if (totalViewsEl) totalViewsEl.textContent = '0'; // Would need to track views in DB
+        if (totalLikesEl) totalLikesEl.textContent = '0'; // Would need to track likes in DB
+    } catch (error) {
+        console.error('Error updating blog stats:', error);
+    }
 }
 
 async function loadBlogPosts() {
     await displayBlogPosts();
 }
 
-function editBlogPost(postId) {
-    db.getBlog(postId).then(post => {
+// Message display function
+function showMessage(elementId, message, type = 'info') {
+    const messageEl = document.getElementById(elementId);
+    if (!messageEl) {
+        console.error(`Message element ${elementId} not found`);
+        return;
+    }
+    
+    messageEl.innerHTML = `
+        <div class="alert alert-${type}">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            ${message}
+        </div>
+    `;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        messageEl.innerHTML = '';
+    }, 5000);
+}
+
+// Portfolio Functions
+async function loadPortfolioData() {
+    if (!db) {
+        displayEmptyPortfolio();
+        return;
+    }
+    
+    try {
+        await loadProfile();
+        await loadSkills();
+        await loadExperience();
+        await loadProjects();
+    } catch (error) {
+        console.error('Error loading portfolio data:', error);
+        displayEmptyPortfolio();
+    }
+}
+
+async function loadProfile() {
+    try {
+        const profile = await db.getProfile();
+        if (profile) {
+            // Update profile display
+            const nameEl = document.getElementById('profile-name-display');
+            const titleEl = document.getElementById('profile-title-display');
+            const bioEl = document.getElementById('profile-bio-display');
+            const emailEl = document.getElementById('profile-email-display');
+            const phoneEl = document.getElementById('profile-phone-display');
+            const locationEl = document.getElementById('profile-location-display');
+            
+            if (nameEl) nameEl.textContent = profile.name || 'Your Name';
+            if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
+            if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
+            if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
+            if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
+            if (locationEl) locationEl.textContent = profile.location || 'City, Country';
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+async function loadSkills() {
+    try {
+        const skills = await db.getSkills();
+        const skillsGrid = document.getElementById('skills-grid');
+        
+        if (!skillsGrid) return;
+        
+        if (skills.length === 0) {
+            skillsGrid.innerHTML = `
+                <div class="no-skills-message">
+                    <i class="fas fa-cogs"></i>
+                    <h3>No skills added yet</h3>
+                    <p>Add your skills to showcase your expertise!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        skillsGrid.innerHTML = skills.map(skill => `
+            <div class="skill-item">
+                <div class="skill-info">
+                    <h4>${skill.name || 'Unknown Skill'}</h4>
+                    <span class="skill-level ${skill.level || 'beginner'}">${skill.level || 'Beginner'}</span>
+                </div>
+                <div class="skill-description">${skill.description || 'No description available'}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading skills:', error);
+    }
+}
+
+async function loadExperience() {
+    try {
+        const experience = await db.getExperience();
+        const experienceTimeline = document.getElementById('experience-timeline');
+        
+        if (!experienceTimeline) return;
+        
+        if (experience.length === 0) {
+            experienceTimeline.innerHTML = `
+                <div class="no-experience-message">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>No experience added yet</h3>
+                    <p>Add your work experience to build your professional profile!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        experienceTimeline.innerHTML = experience.map(exp => `
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h4>${exp.position || 'Position'}</h4>
+                    <div class="experience-dates">${exp.startDate || 'Start'} - ${exp.endDate || 'Present'}</div>
+                </div>
+                <div class="experience-company">${exp.company || 'Company'}</div>
+                <div class="experience-description">${exp.description || 'No description available'}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading experience:', error);
+    }
+}
+
+async function loadProjects() {
+    try {
+        const projects = await db.getProjects();
+        const projectsGrid = document.getElementById('projects-grid');
+        
+        if (!projectsGrid) return;
+        
+        if (projects.length === 0) {
+            projectsGrid.innerHTML = `
+                <div class="no-projects-message">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>No projects added yet</h3>
+                    <p>Showcase your amazing work to potential employers!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        projectsGrid.innerHTML = projects.map(project => `
+            <div class="project-item">
+                <div class="project-header">
+                    <h4>${project.name || 'Project Name'}</h4>
+                </div>
+                ${project.image ? `<img src="${project.image}" alt="${project.name}" class="project-image">` : ''}
+                <div class="project-description">${project.description || 'No description available'}</div>
+                <div class="project-tech">${project.technologies || 'Technologies'}</div>
+                ${project.link ? `<div class="project-link"><a href="${project.link}" target="_blank">View Project</a></div>` : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading projects:', error);
+    }
+}
+
+function updatePortfolioStats() {
+    if (!db) return;
+    
+    // Update portfolio statistics if needed
+    console.log('Portfolio stats updated');
+}
+
+// Edit and Delete functions
+async function editBlogPost(postId) {
+    if (!db) {
+        showMessage('blog-message', 'Database not ready', 'error');
+        return;
+    }
+    
+    try {
+        const post = await db.getBlogById(postId);
         if (post) {
             // Populate form with post data
-            document.getElementById('blog-title').value = post.title;
-            document.getElementById('blog-category').value = post.category;
-            document.getElementById('blog-excerpt').value = post.excerpt;
-            document.getElementById('blog-content').value = post.content;
-            document.getElementById('blog-tags').value = post.tags.join(', ');
-            document.getElementById('blog-featured-image').value = post.featuredImage;
+            const titleEl = document.getElementById('blog-title');
+            const categoryEl = document.getElementById('blog-category');
+            const excerptEl = document.getElementById('blog-excerpt');
+            const contentEl = document.getElementById('blog-content');
+            const tagsEl = document.getElementById('blog-tags');
+            const imageEl = document.getElementById('blog-featured-image');
+            
+            if (titleEl) titleEl.value = post.title || '';
+            if (categoryEl) categoryEl.value = post.category || '';
+            if (excerptEl) excerptEl.value = post.excerpt || '';
+            if (contentEl) contentEl.value = post.content || '';
+            if (tagsEl) tagsEl.value = post.tags ? post.tags.join(', ') : '';
+            if (imageEl) imageEl.value = post.featuredImage || '';
             
             // Show form
             showCreateForm();
             
             // Change submit button to update
             const form = document.getElementById('create-blog-form');
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                updateBlogPost(postId);
-            };
+            if (form) {
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    updateBlogPost(postId);
+                };
+            }
         }
-    });
-    
-    if (post) {
-        // Populate form with post data
-        document.getElementById('blog-title').value = post.title;
-        document.getElementById('blog-category').value = post.category;
-        document.getElementById('blog-excerpt').value = post.excerpt;
-        document.getElementById('blog-content').value = post.content;
-        document.getElementById('blog-tags').value = post.tags.join(', ');
-        document.getElementById('blog-featured-image').value = post.featuredImage;
-        
-        // Show form
-        showCreateForm();
-        
-        // Change submit button to update
-        const form = document.getElementById('create-blog-form');
-        form.onsubmit = function(e) {
-            e.preventDefault();
-            updateBlogPost(postId);
-        };
+    } catch (error) {
+        console.error('Error editing blog post:', error);
+        showMessage('blog-message', 'Failed to load blog post for editing', 'error');
     }
 }
 
-function updateBlogPost(postId) {
-    const posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
-    const postIndex = posts.findIndex(p => p.id === postId);
+async function updateBlogPost(postId) {
+    if (!db) {
+        showMessage('blog-message', 'Database not ready', 'error');
+        return;
+    }
     
-    if (postIndex !== -1) {
-        posts[postIndex] = {
-            ...posts[postIndex],
-            title: document.getElementById('blog-title').value,
-            category: document.getElementById('blog-category').value,
-            excerpt: document.getElementById('blog-excerpt').value,
-            content: document.getElementById('blog-content').value,
-            tags: document.getElementById('blog-tags').value.split(',').map(tag => tag.trim()),
-            featuredImage: document.getElementById('blog-featured-image').value,
-            updatedAt: new Date().toISOString()
+    try {
+        const form = document.getElementById('create-blog-form');
+        const formData = new FormData(form);
+        
+        const updateData = {
+            title: formData.get('blog-title') || '',
+            category: formData.get('blog-category') || '',
+            excerpt: formData.get('blog-excerpt') || '',
+            content: formData.get('blog-content') || '',
+            tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
+            featuredImage: formData.get('blog-featured-image') || ''
         };
         
-        localStorage.setItem('blogPosts', JSON.stringify(posts));
-        displayBlogPosts();
-        updateBlogStats();
+        await db.updateBlog(postId, updateData);
         
         showMessage('blog-message', 'Blog post updated successfully!', 'success');
+        await loadBlogPosts();
+        
+        // Reset form to original state
+        form.onsubmit = createBlogPost;
+        form.reset();
+    } catch (error) {
+        console.error('Error updating blog post:', error);
+        showMessage('blog-message', 'Failed to update blog post', 'error');
     }
 }
 
-function deleteBlogPost(postId) {
+async function deleteBlogPost(postId) {
+    if (!db) {
+        showMessage('blog-message', 'Database not ready', 'error');
+        return;
+    }
+    
     if (confirm('Are you sure you want to delete this blog post?')) {
-        const posts = JSON.parse(localStorage.getItem('blogPosts') || '[]');
-        const filteredPosts = posts.filter(p => p.id !== postId);
-        
-        localStorage.setItem('blogPosts', JSON.stringify(filteredPosts));
-        displayBlogPosts();
-        updateBlogStats();
-        
-        showMessage('blog-message', 'Blog post deleted successfully!', 'success');
+        try {
+            await db.deleteBlog(postId);
+            showMessage('blog-message', 'Blog post deleted successfully!', 'success');
+            await loadBlogPosts();
+        } catch (error) {
+            console.error('Error deleting blog post:', error);
+            showMessage('blog-message', 'Failed to delete blog post', 'error');
+        }
     }
 }
 
-// Portfolio Management Functions
-function showAddSkillForm() {
-    const formContainer = document.getElementById('skills-form-container');
-    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function hideSkillForm() {
-    document.getElementById('skills-form-container').style.display = 'none';
-    document.getElementById('add-skill-form').reset();
-}
-
-function addSkill(e) {
-    e.preventDefault();
-    
-    const skill = {
-        id: Date.now(),
-        name: document.getElementById('skill-name').value,
-        level: document.getElementById('skill-level').value,
-        category: document.getElementById('skill-category').value
-    };
-    
-    portfolioData.skills.push(skill);
-    updatePortfolioDisplay();
-    
-    e.target.reset();
-    hideSkillForm();
-    
-    showMessage('portfolio-message', 'Skill added successfully!', 'success');
-}
-
-function removeSkill(skillId) {
-    if (confirm('Are you sure you want to remove this skill?')) {
-        portfolioData.skills = portfolioData.skills.filter(skill => skill.id !== skillId);
-        updatePortfolioDisplay();
-        
-        showMessage('portfolio-message', 'Skill removed successfully!', 'success');
-    }
-}
-
-function showAddExperienceForm() {
-    const formContainer = document.getElementById('experience-form-container');
-    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function hideExperienceForm() {
-    document.getElementById('experience-form-container').style.display = 'none';
-    document.getElementById('add-experience-form').reset();
-}
-
-function addExperience(e) {
-    e.preventDefault();
-    
-    const experience = {
-        id: Date.now(),
-        company: document.getElementById('exp-company').value,
-        position: document.getElementById('exp-position').value,
-        startDate: document.getElementById('exp-start-date').value,
-        endDate: document.getElementById('exp-end-date').value,
-        description: document.getElementById('exp-description').value
-    };
-    
-    portfolioData.experience.push(experience);
-    updatePortfolioDisplay();
-    
-    e.target.reset();
-    hideExperienceForm();
-    
-    showMessage('portfolio-message', 'Experience added successfully!', 'success');
-}
-
-function removeExperience(expId) {
-    if (confirm('Are you sure you want to remove this experience?')) {
-        portfolioData.experience = portfolioData.experience.filter(exp => exp.id !== expId);
-        updatePortfolioDisplay();
-        
-        showMessage('portfolio-message', 'Experience removed successfully!', 'success');
-    }
-}
-
-function showAddProjectForm() {
-    const formContainer = document.getElementById('project-form-container');
-    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function hideProjectForm() {
-    document.getElementById('project-form-container').style.display = 'none';
-    document.getElementById('add-project-form').reset();
-}
-
-function addProject(e) {
-    e.preventDefault();
-    
-    const project = {
-        id: Date.now(),
-        name: document.getElementById('project-name').value,
-        description: document.getElementById('project-description').value,
-        tech: document.getElementById('project-tech').value,
-        link: document.getElementById('project-link').value,
-        image: document.getElementById('project-image').value
-    };
-    
-    portfolioData.projects.push(project);
-    updatePortfolioDisplay();
-    
-    e.target.reset();
-    hideProjectForm();
-    
-    showMessage('portfolio-message', 'Project added successfully!', 'success');
-}
-
-function removeProject(projectId) {
-    if (confirm('Are you sure you want to remove this project?')) {
-        portfolioData.projects = portfolioData.projects.filter(project => project.id !== projectId);
-        updatePortfolioDisplay();
-        
-        showMessage('portfolio-message', 'Project removed successfully!', 'success');
-    }
-}
-
-function showCVBuilder() {
-    const formContainer = document.getElementById('cv-builder-container');
-    formContainer.style.display = formContainer.style.display === 'none' ? 'grid' : 'none';
-}
-
-function hideCVBuilder() {
-    document.getElementById('cv-builder-container').style.display = 'none';
-}
-
-function updateCVPreview() {
-    const summary = document.getElementById('cv-summary').value;
-    const education = document.getElementById('cv-education').value;
-    
-    // Update preview
-    document.getElementById('cv-summary-preview').textContent = summary || 'Your professional summary will appear here...';
-    document.getElementById('cv-education-preview').textContent = education || 'Education details will appear here...';
-    
-    // Update CV data
-    portfolioData.cv = { summary, education };
-    
-    showMessage('portfolio-message', 'CV preview updated!', 'success');
-}
-
-function downloadCV() {
-    // Generate CV content
-    const cvContent = generateCVContent();
-    
-    // Create download link
-    const blob = new Blob([cvContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'portfolio-cv.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showMessage('portfolio-message', 'CV downloaded successfully!', 'success');
-}
-
-function printCV() {
-    const cvContent = generateCVContent();
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(cvContent);
-    printWindow.document.close();
-    
-    showMessage('portfolio-message', 'CV sent to printer!', 'success');
-}
+// Additional portfolio functions can be added here as needed
 
 function generateCVContent() {
     const profile = portfolioData.profile;
