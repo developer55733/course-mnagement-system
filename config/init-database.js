@@ -80,6 +80,110 @@ async function initializeDatabase() {
         `);
         console.log('✅ assignment_notifications table created/verified');
 
+        // Create blogs table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS blogs (
+                id VARCHAR(255) PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                category VARCHAR(100) DEFAULT 'other',
+                excerpt TEXT,
+                content LONGTEXT,
+                tags JSON,
+                featured_image VARCHAR(500),
+                status ENUM('draft', 'published') DEFAULT 'draft',
+                views INT DEFAULT 0,
+                likes INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_status (status),
+                INDEX idx_category (category),
+                INDEX idx_created_at (created_at)
+            )
+        `);
+        console.log('✅ blogs table created/verified');
+
+        // Create portfolio profile table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portfolio_profile (
+                id INT PRIMARY KEY DEFAULT 1,
+                name VARCHAR(255),
+                title VARCHAR(255),
+                bio TEXT,
+                email VARCHAR(255),
+                phone VARCHAR(50),
+                location VARCHAR(255),
+                website VARCHAR(500),
+                avatar VARCHAR(500),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ portfolio_profile table created/verified');
+
+        // Create portfolio skills table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portfolio_skills (
+                id VARCHAR(255) PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                level ENUM('beginner', 'intermediate', 'advanced', 'expert') DEFAULT 'beginner',
+                category VARCHAR(100),
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_level (level),
+                INDEX idx_category (category)
+            )
+        `);
+        console.log('✅ portfolio_skills table created/verified');
+
+        // Create portfolio experience table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portfolio_experience (
+                id VARCHAR(255) PRIMARY KEY,
+                company VARCHAR(255),
+                position VARCHAR(255),
+                start_date DATE,
+                end_date DATE,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_start_date (start_date),
+                INDEX idx_company (company)
+            )
+        `);
+        console.log('✅ portfolio_experience table created/verified');
+
+        // Create portfolio projects table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portfolio_projects (
+                id VARCHAR(255) PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                technologies VARCHAR(500),
+                link VARCHAR(500),
+                image VARCHAR(500),
+                status ENUM('active', 'completed', 'archived') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_status (status),
+                INDEX idx_created_at (created_at)
+            )
+        `);
+        console.log('✅ portfolio_projects table created/verified');
+
+        // Create portfolio CV table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portfolio_cv (
+                id INT PRIMARY KEY DEFAULT 1,
+                education JSON,
+                certifications JSON,
+                languages JSON,
+                references JSON,
+                summary TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ portfolio_cv table created/verified');
+
         console.log('🎉 All new database tables initialized successfully!');
         return true;
         

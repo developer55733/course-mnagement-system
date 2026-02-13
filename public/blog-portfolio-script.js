@@ -1,29 +1,44 @@
-// Blog and Portfolio Management JavaScript - Database Version
+// Blog and Portfolio Management JavaScript - MySQL API Version
 
-// Initialize Database
-let db = null;
+// API Configuration
+const API_BASE = window.location.origin + '/api';
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        console.log('Initializing database...');
-        db = new BlogPortfolioDB();
+        console.log('Initializing blog and portfolio system...');
         
-        // Wait a bit for database to initialize
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Test API connection
+        await testAPIConnection();
         
-        console.log('Database initialized, loading data...');
+        // Load data
         await loadBlogPosts();
         await loadPortfolioData();
         updateBlogStats();
         updatePortfolioStats();
-        console.log('Application initialized successfully');
+        
+        console.log('Blog and portfolio system initialized successfully');
     } catch (error) {
         console.error('Failed to initialize application:', error);
         // Fallback to empty state
         initializeEmptyState();
     }
 });
+
+// Test API connection
+async function testAPIConnection() {
+    try {
+        const response = await fetch(`${API_BASE}/health`);
+        if (!response.ok) {
+            throw new Error('API not responding');
+        }
+        console.log('API connection successful');
+        return true;
+    } catch (error) {
+        console.error('API connection failed:', error);
+        throw error;
+    }
+}
 
 // Fallback initialization
 function initializeEmptyState() {
@@ -34,12 +49,6 @@ function initializeEmptyState() {
 
 // Blog Management Functions
 async function showCreateForm() {
-    if (!db) {
-        console.error('Database not initialized');
-        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
-        return;
-    }
-    
     const formContainer = document.getElementById('blog-form-container');
     const toggleBtn = document.getElementById('toggle-blog-form');
     
@@ -115,11 +124,6 @@ function displayEmptyPortfolio() {
 }
 
 async function saveDraft() {
-    if (!db) {
-        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
-        return;
-    }
-    
     try {
         const form = document.getElementById('create-blog-form');
         if (!form) {
@@ -134,9 +138,8 @@ async function saveDraft() {
             excerpt: formData.get('blog-excerpt') || '',
             content: formData.get('blog-content') || '',
             tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
-            featuredImage: formData.get('blog-featured-image') || '',
-            status: 'draft',
-            createdAt: new Date().toISOString()
+            featured_image: formData.get('blog-featured-image') || '',
+            status: 'draft'
         };
         
         if (!draftData.title || !draftData.content) {
@@ -144,8 +147,18 @@ async function saveDraft() {
             return;
         }
         
-        // Save to database
-        await db.addBlog(draftData);
+        // Save to MySQL via API
+        const response = await fetch(`${API_BASE}/blogs`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(draftData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save draft');
+        }
         
         showMessage('blog-message', 'Draft saved successfully!', 'success');
         await loadBlogPosts();
@@ -158,11 +171,6 @@ async function saveDraft() {
 async function createBlogPost(e) {
     e.preventDefault();
     
-    if (!db) {
-        showMessage('blog-message', 'Database not ready. Please refresh the page.', 'error');
-        return;
-    }
-    
     try {
         const formData = new FormData(e.target);
         const blogPost = {
@@ -171,10 +179,8 @@ async function createBlogPost(e) {
             excerpt: formData.get('blog-excerpt') || '',
             content: formData.get('blog-content') || '',
             tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
-            featuredImage: formData.get('blog-featured-image') || '',
-            status: 'published',
-            views: 0,
-            likes: 0
+            featured_image: formData.get('blog-featured-image') || '',
+            status: 'published'
         };
         
         if (!blogPost.title || !blogPost.content) {
@@ -182,8 +188,18 @@ async function createBlogPost(e) {
             return;
         }
         
-        // Save to database
-        await db.addBlog(blogPost);
+        // Save to MySQL via API
+        const response = await fetch(`${API_BASE}/blogs`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(blogPost)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to publish blog post');
+        }
         
         // Update stats
         updateBlogStats();
@@ -202,11 +218,6 @@ async function createBlogPost(e) {
 }
 
 async function displayBlogPosts() {
-    if (!db) {
-        displayEmptyBlogPosts();
-        return;
-    }
-    
     try {
         const postsGrid = document.getElementById('blog-posts-grid');
         if (!postsGrid) {
@@ -214,7 +225,13 @@ async function displayBlogPosts() {
             return;
         }
         
-        const posts = await db.getBlogs();
+        // Fetch blogs from MySQL API
+        const response = await fetch(`${API_BASE}/blogs`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch blog posts');
+        }
+        
+        const posts = await response.json();
         
         if (posts.length === 0) {
             displayEmptyBlogPosts();
@@ -227,11 +244,11 @@ async function displayBlogPosts() {
                     <h4>${post.title || 'Untitled'}</h4>
                     <div class="blog-post-meta">
                         <span class="blog-category">${post.category || 'Uncategorized'}</span>
-                        <span class="blog-date">${new Date(post.createdAt).toLocaleDateString()}</span>
+                        <span class="blog-date">${new Date(post.created_at).toLocaleDateString()}</span>
                         <span class="blog-status ${post.status}">${post.status || 'draft'}</span>
                     </div>
                 </div>
-                ${post.featuredImage ? `<img src="${post.featuredImage}" alt="${post.title}" class="blog-post-image">` : ''}
+                ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="blog-post-image">` : ''}
                 <div class="blog-post-excerpt">${post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'No excerpt available')}</div>
                 <div class="blog-post-footer">
                     <div class="blog-post-stats">
@@ -256,20 +273,13 @@ async function displayBlogPosts() {
 }
 
 async function updateBlogStats() {
-    if (!db) {
-        // Set default values
-        const totalPostsEl = document.getElementById('total-posts');
-        const totalViewsEl = document.getElementById('total-views');
-        const totalLikesEl = document.getElementById('total-likes');
-        
-        if (totalPostsEl) totalPostsEl.textContent = '0';
-        if (totalViewsEl) totalViewsEl.textContent = '0';
-        if (totalLikesEl) totalLikesEl.textContent = '0';
-        return;
-    }
-    
     try {
-        const stats = await db.getStats();
+        const response = await fetch(`${API_BASE}/stats`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch stats');
+        }
+        
+        const stats = await response.json();
         
         const totalPostsEl = document.getElementById('total-posts');
         const totalViewsEl = document.getElementById('total-views');
@@ -280,6 +290,15 @@ async function updateBlogStats() {
         if (totalLikesEl) totalLikesEl.textContent = '0'; // Would need to track likes in DB
     } catch (error) {
         console.error('Error updating blog stats:', error);
+        
+        // Set default values
+        const totalPostsEl = document.getElementById('total-posts');
+        const totalViewsEl = document.getElementById('total-views');
+        const totalLikesEl = document.getElementById('total-likes');
+        
+        if (totalPostsEl) totalPostsEl.textContent = '0';
+        if (totalViewsEl) totalViewsEl.textContent = '0';
+        if (totalLikesEl) totalLikesEl.textContent = '0';
     }
 }
 
@@ -310,11 +329,6 @@ function showMessage(elementId, message, type = 'info') {
 
 // Portfolio Functions
 async function loadPortfolioData() {
-    if (!db) {
-        displayEmptyPortfolio();
-        return;
-    }
-    
     try {
         await loadProfile();
         await loadSkills();
@@ -328,23 +342,27 @@ async function loadPortfolioData() {
 
 async function loadProfile() {
     try {
-        const profile = await db.getProfile();
-        if (profile) {
-            // Update profile display
-            const nameEl = document.getElementById('profile-name-display');
-            const titleEl = document.getElementById('profile-title-display');
-            const bioEl = document.getElementById('profile-bio-display');
-            const emailEl = document.getElementById('profile-email-display');
-            const phoneEl = document.getElementById('profile-phone-display');
-            const locationEl = document.getElementById('profile-location-display');
-            
-            if (nameEl) nameEl.textContent = profile.name || 'Your Name';
-            if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
-            if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
-            if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
-            if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
-            if (locationEl) locationEl.textContent = profile.location || 'City, Country';
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch profile');
         }
+        
+        const profile = await response.json();
+        
+        // Update profile display
+        const nameEl = document.getElementById('profile-name-display');
+        const titleEl = document.getElementById('profile-title-display');
+        const bioEl = document.getElementById('profile-bio-display');
+        const emailEl = document.getElementById('profile-email-display');
+        const phoneEl = document.getElementById('profile-phone-display');
+        const locationEl = document.getElementById('profile-location-display');
+        
+        if (nameEl) nameEl.textContent = profile.name || 'Your Name';
+        if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
+        if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
+        if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
+        if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
+        if (locationEl) locationEl.textContent = profile.location || 'City, Country';
     } catch (error) {
         console.error('Error loading profile:', error);
     }
@@ -352,7 +370,12 @@ async function loadProfile() {
 
 async function loadSkills() {
     try {
-        const skills = await db.getSkills();
+        const response = await fetch(`${API_BASE}/portfolio/skills`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch skills');
+        }
+        
+        const skills = await response.json();
         const skillsGrid = document.getElementById('skills-grid');
         
         if (!skillsGrid) return;
@@ -384,7 +407,12 @@ async function loadSkills() {
 
 async function loadExperience() {
     try {
-        const experience = await db.getExperience();
+        const response = await fetch(`${API_BASE}/portfolio/experience`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch experience');
+        }
+        
+        const experience = await response.json();
         const experienceTimeline = document.getElementById('experience-timeline');
         
         if (!experienceTimeline) return;
@@ -404,7 +432,7 @@ async function loadExperience() {
             <div class="experience-item">
                 <div class="experience-header">
                     <h4>${exp.position || 'Position'}</h4>
-                    <div class="experience-dates">${exp.startDate || 'Start'} - ${exp.endDate || 'Present'}</div>
+                    <div class="experience-dates">${exp.start_date || 'Start'} - ${exp.end_date || 'Present'}</div>
                 </div>
                 <div class="experience-company">${exp.company || 'Company'}</div>
                 <div class="experience-description">${exp.description || 'No description available'}</div>
@@ -417,7 +445,12 @@ async function loadExperience() {
 
 async function loadProjects() {
     try {
-        const projects = await db.getProjects();
+        const response = await fetch(`${API_BASE}/portfolio/projects`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch projects');
+        }
+        
+        const projects = await response.json();
         const projectsGrid = document.getElementById('projects-grid');
         
         if (!projectsGrid) return;
@@ -450,48 +483,46 @@ async function loadProjects() {
 }
 
 function updatePortfolioStats() {
-    if (!db) return;
-    
     // Update portfolio statistics if needed
     console.log('Portfolio stats updated');
 }
 
 // Edit and Delete functions
 async function editBlogPost(postId) {
-    if (!db) {
-        showMessage('blog-message', 'Database not ready', 'error');
-        return;
-    }
-    
     try {
-        const post = await db.getBlogById(postId);
-        if (post) {
-            // Populate form with post data
-            const titleEl = document.getElementById('blog-title');
-            const categoryEl = document.getElementById('blog-category');
-            const excerptEl = document.getElementById('blog-excerpt');
-            const contentEl = document.getElementById('blog-content');
-            const tagsEl = document.getElementById('blog-tags');
-            const imageEl = document.getElementById('blog-featured-image');
-            
-            if (titleEl) titleEl.value = post.title || '';
-            if (categoryEl) categoryEl.value = post.category || '';
-            if (excerptEl) excerptEl.value = post.excerpt || '';
-            if (contentEl) contentEl.value = post.content || '';
-            if (tagsEl) tagsEl.value = post.tags ? post.tags.join(', ') : '';
-            if (imageEl) imageEl.value = post.featuredImage || '';
-            
-            // Show form
-            showCreateForm();
-            
-            // Change submit button to update
-            const form = document.getElementById('create-blog-form');
-            if (form) {
-                form.onsubmit = function(e) {
-                    e.preventDefault();
-                    updateBlogPost(postId);
-                };
-            }
+        // Fetch blog post data
+        const response = await fetch(`${API_BASE}/blogs/${postId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load blog post');
+        }
+        
+        const post = await response.json();
+        
+        // Populate form with post data
+        const titleEl = document.getElementById('blog-title');
+        const categoryEl = document.getElementById('blog-category');
+        const excerptEl = document.getElementById('blog-excerpt');
+        const contentEl = document.getElementById('blog-content');
+        const tagsEl = document.getElementById('blog-tags');
+        const imageEl = document.getElementById('blog-featured-image');
+        
+        if (titleEl) titleEl.value = post.title || '';
+        if (categoryEl) categoryEl.value = post.category || '';
+        if (excerptEl) excerptEl.value = post.excerpt || '';
+        if (contentEl) contentEl.value = post.content || '';
+        if (tagsEl) tagsEl.value = post.tags ? post.tags.join(', ') : '';
+        if (imageEl) imageEl.value = post.featured_image || '';
+        
+        // Show form
+        showCreateForm();
+        
+        // Change submit button to update
+        const form = document.getElementById('create-blog-form');
+        if (form) {
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                updateBlogPost(postId);
+            };
         }
     } catch (error) {
         console.error('Error editing blog post:', error);
@@ -500,11 +531,6 @@ async function editBlogPost(postId) {
 }
 
 async function updateBlogPost(postId) {
-    if (!db) {
-        showMessage('blog-message', 'Database not ready', 'error');
-        return;
-    }
-    
     try {
         const form = document.getElementById('create-blog-form');
         const formData = new FormData(form);
@@ -515,10 +541,20 @@ async function updateBlogPost(postId) {
             excerpt: formData.get('blog-excerpt') || '',
             content: formData.get('blog-content') || '',
             tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
-            featuredImage: formData.get('blog-featured-image') || ''
+            featured_image: formData.get('blog-featured-image') || ''
         };
         
-        await db.updateBlog(postId, updateData);
+        const response = await fetch(`${API_BASE}/blogs/${postId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update blog post');
+        }
         
         showMessage('blog-message', 'Blog post updated successfully!', 'success');
         await loadBlogPosts();
@@ -533,14 +569,16 @@ async function updateBlogPost(postId) {
 }
 
 async function deleteBlogPost(postId) {
-    if (!db) {
-        showMessage('blog-message', 'Database not ready', 'error');
-        return;
-    }
-    
     if (confirm('Are you sure you want to delete this blog post?')) {
         try {
-            await db.deleteBlog(postId);
+            const response = await fetch(`${API_BASE}/blogs/${postId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete blog post');
+            }
+            
             showMessage('blog-message', 'Blog post deleted successfully!', 'success');
             await loadBlogPosts();
         } catch (error) {
