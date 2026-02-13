@@ -590,6 +590,269 @@ async function deleteBlogPost(postId) {
 
 // Additional portfolio functions can be added here as needed
 
+// Portfolio Form Functions
+function showAddSkillForm() {
+    const formContainer = document.getElementById('skills-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+}
+
+function hideSkillForm() {
+    const formContainer = document.getElementById('skills-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+async function addSkill(event) {
+    event.preventDefault();
+    
+    try {
+        const form = document.getElementById('add-skill-form');
+        const formData = new FormData(form);
+        
+        const skillData = {
+            name: formData.get('skill-name') || '',
+            level: formData.get('skill-level') || 'beginner',
+            category: formData.get('skill-category') || '',
+            description: formData.get('skill-description') || ''
+        };
+        
+        if (!skillData.name) {
+            showMessage('portfolio-message', 'Please enter skill name', 'error');
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE}/portfolio/skills`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(skillData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add skill');
+        }
+        
+        showMessage('portfolio-message', 'Skill added successfully!', 'success');
+        await loadSkills();
+        form.reset();
+        hideSkillForm();
+    } catch (error) {
+        console.error('Error adding skill:', error);
+        showMessage('portfolio-message', 'Failed to add skill', 'error');
+    }
+}
+
+function showAddExperienceForm() {
+    const formContainer = document.getElementById('experience-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+}
+
+function hideExperienceForm() {
+    const formContainer = document.getElementById('experience-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+async function addExperience(event) {
+    event.preventDefault();
+    
+    try {
+        const form = document.getElementById('add-experience-form');
+        const formData = new FormData(form);
+        
+        const experienceData = {
+            company: formData.get('exp-company') || '',
+            position: formData.get('exp-position') || '',
+            start_date: formData.get('exp-start-date') || '',
+            end_date: formData.get('exp-end-date') || '',
+            description: formData.get('exp-description') || ''
+        };
+        
+        if (!experienceData.company || !experienceData.position) {
+            showMessage('portfolio-message', 'Please enter company and position', 'error');
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE}/portfolio/experience`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(experienceData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add experience');
+        }
+        
+        showMessage('portfolio-message', 'Experience added successfully!', 'success');
+        await loadExperience();
+        form.reset();
+        hideExperienceForm();
+    } catch (error) {
+        console.error('Error adding experience:', error);
+        showMessage('portfolio-message', 'Failed to add experience', 'error');
+    }
+}
+
+function showAddProjectForm() {
+    const formContainer = document.getElementById('project-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+}
+
+function hideProjectForm() {
+    const formContainer = document.getElementById('project-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+async function addProject(event) {
+    event.preventDefault();
+    
+    try {
+        const form = document.getElementById('add-project-form');
+        const formData = new FormData(form);
+        
+        const projectData = {
+            name: formData.get('project-name') || '',
+            description: formData.get('project-description') || '',
+            technologies: formData.get('project-tech') || '',
+            link: formData.get('project-link') || '',
+            image: formData.get('project-image') || ''
+        };
+        
+        if (!projectData.name || !projectData.description) {
+            showMessage('portfolio-message', 'Please enter project name and description', 'error');
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE}/portfolio/projects`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(projectData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add project');
+        }
+        
+        showMessage('portfolio-message', 'Project added successfully!', 'success');
+        await loadProjects();
+        form.reset();
+        hideProjectForm();
+    } catch (error) {
+        console.error('Error adding project:', error);
+        showMessage('portfolio-message', 'Failed to add project', 'error');
+    }
+}
+
+function showCVBuilder() {
+    const formContainer = document.getElementById('cv-builder-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+}
+
+function hideCVBuilder() {
+    const formContainer = document.getElementById('cv-builder-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+function updateCVPreview() {
+    // Update CV preview with form data
+    const name = document.getElementById('cv-name')?.value || 'Your Name';
+    const title = document.getElementById('cv-title')?.value || 'Professional Title';
+    const email = document.getElementById('cv-email')?.value || 'email@example.com';
+    
+    const namePreview = document.getElementById('cv-name-preview');
+    const titlePreview = document.getElementById('cv-title-preview');
+    const emailPreview = document.getElementById('cv-email-preview');
+    
+    if (namePreview) namePreview.textContent = name;
+    if (titlePreview) titlePreview.textContent = title;
+    if (emailPreview) emailPreview.textContent = email;
+}
+
+function downloadCV() {
+    // Generate and download CV as PDF or text file
+    showMessage('portfolio-message', 'CV download feature coming soon!', 'info');
+}
+
+function printCV() {
+    // Print CV
+    window.print();
+}
+
+function uploadProfilePicture() {
+    // Handle profile picture upload
+    showMessage('portfolio-message', 'Profile picture upload feature coming soon!', 'info');
+}
+
+async function updateProfile(event) {
+    event.preventDefault();
+    
+    try {
+        const form = document.getElementById('edit-profile-form');
+        const formData = new FormData(form);
+        
+        const profileData = {
+            name: formData.get('profile-name') || '',
+            title: formData.get('profile-title') || '',
+            bio: formData.get('profile-bio') || '',
+            email: formData.get('profile-email') || '',
+            phone: formData.get('profile-phone') || '',
+            location: formData.get('profile-location') || '',
+            website: formData.get('profile-website') || ''
+        };
+        
+        if (!profileData.name || !profileData.email) {
+            showMessage('portfolio-message', 'Please enter name and email', 'error');
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(profileData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+        
+        showMessage('portfolio-message', 'Profile updated successfully!', 'success');
+        await loadProfile();
+        form.reset();
+        hideProfileForm();
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showMessage('portfolio-message', 'Failed to update profile', 'error');
+    }
+}
+
+function cancelProfileEdit() {
+    const formContainer = document.getElementById('profile-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
 function generateCVContent() {
     const profile = portfolioData.profile;
     const skills = portfolioData.skills;
