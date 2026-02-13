@@ -1292,15 +1292,15 @@
                         </div>
                         
                         <div class="blog-form-container" id="blog-form-container" style="display: none;">
-                            <form id="create-blog-form">
+                            <form id="create-blog-form" onsubmit="createBlogPost(event)">
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="blog-title">Blog Title</label>
-                                        <input type="text" id="blog-title" required placeholder="Enter an engaging title for your blog post">
+                                        <input type="text" id="blog-title" name="blog-title" required placeholder="Enter an engaging title for your blog post">
                                     </div>
                                     <div class="form-group">
                                         <label for="blog-category">Category</label>
-                                        <select id="blog-category" required>
+                                        <select id="blog-category" name="blog-category" required>
                                             <option value="">Select Category</option>
                                             <option value="technology">Technology</option>
                                             <option value="programming">Programming</option>
@@ -1319,12 +1319,12 @@
                                 
                                 <div class="form-group">
                                     <label for="blog-excerpt">Short Description</label>
-                                    <input type="text" id="blog-excerpt" placeholder="Brief description of your blog post (shown in previews)">
+                                    <input type="text" id="blog-excerpt" name="blog-excerpt" placeholder="Brief description of your blog post (shown in previews)">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="blog-content">Blog Content</label>
-                                    <textarea id="blog-content" required placeholder="Write your blog post content here..." rows="12"></textarea>
+                                    <textarea id="blog-content" name="blog-content" required placeholder="Write your blog post content here..." rows="12"></textarea>
                                     <div class="editor-toolbar">
                                         <button type="button" class="toolbar-btn" onclick="formatText('bold')">
                                             <i class="fas fa-bold"></i>
@@ -1346,12 +1346,12 @@
                                 
                                 <div class="form-group">
                                     <label for="blog-tags">Tags (comma separated)</label>
-                                    <input type="text" id="blog-tags" placeholder="e.g., javascript, web development, tutorial">
+                                    <input type="text" id="blog-tags" name="blog-tags" placeholder="e.g., javascript, web development, tutorial">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="blog-featured-image">Featured Image URL</label>
-                                    <input type="url" id="blog-featured-image" placeholder="https://example.com/image.jpg">
+                                    <input type="url" id="blog-featured-image" name="blog-featured-image" placeholder="https://example.com/image.jpg">
                                 </div>
                                 
                                 <div class="form-actions">
