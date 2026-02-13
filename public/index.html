@@ -1483,53 +1483,49 @@
                                         <p><i class="fas fa-phone"></i> <span id="profile-phone-display">+1234567890</span></p>
                                         <p><i class="fas fa-map-marker-alt"></i> <span id="profile-location-display">City, Country</span></p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <div class="profile-form-container" id="profile-form-container" style="display: none;">
-                            <form id="edit-profile-form">
+                            <form id="edit-profile-form" onsubmit="updateProfile(event)">
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="profile-name">Full Name</label>
-                                        <input type="text" id="profile-name" required placeholder="Enter your full name">
+                                        <input type="text" id="profile-name" name="profile-name" required placeholder="Enter your full name">
                                     </div>
                                     <div class="form-group">
                                         <label for="profile-title">Professional Title</label>
-                                        <input type="text" id="profile-title" placeholder="e.g., Software Developer, Designer, etc.">
+                                        <input type="text" id="profile-title" name="profile-title" placeholder="e.g., Software Developer, Designer, etc.">
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="profile-bio">Professional Bio</label>
-                                    <textarea id="profile-bio" required placeholder="Describe your professional background, skills, and experience..." rows="6"></textarea>
+                                    <textarea id="profile-bio" name="profile-bio" required placeholder="Describe your professional background, skills, and experience..." rows="6"></textarea>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="profile-email">Email</label>
-                                        <input type="email" id="profile-email" required placeholder="your.email@example.com">
+                                        <input type="email" id="profile-email" name="profile-email" required placeholder="your.email@example.com">
                                     </div>
                                     <div class="form-group">
                                         <label for="profile-phone">Phone</label>
-                                        <input type="tel" id="profile-phone" placeholder="+1234567890">
+                                        <input type="tel" id="profile-phone" name="profile-phone" placeholder="+1234567890">
                                     </div>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="profile-location">Location</label>
-                                        <input type="text" id="profile-location" placeholder="City, Country">
+                                        <input type="text" id="profile-location" name="profile-location" placeholder="City, Country">
                                     </div>
                                     <div class="form-group">
                                         <label for="profile-website">Website/Portfolio</label>
-                                        <input type="url" id="profile-website" placeholder="https://yourwebsite.com">
+                                        <input type="url" id="profile-website" name="profile-website" placeholder="https://yourwebsite.com">
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="profile-category">Portfolio Category</label>
-                                    <select id="profile-category" required>
+                                    <select id="profile-category" name="profile-category" required>
                                         <option value="">Select Category</option>
                                         <option value="business">Business</option>
                                         <option value="services">Services</option>
@@ -1562,15 +1558,15 @@
                         </div>
                         
                         <div class="skills-form-container" id="skills-form-container" style="display: none;">
-                            <form id="add-skill-form">
+                            <form id="add-skill-form" onsubmit="addSkill(event)">
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="skill-name">Skill Name</label>
-                                        <input type="text" id="skill-name" required placeholder="e.g., JavaScript, Project Management">
+                                        <input type="text" id="skill-name" name="skill-name" required placeholder="e.g., JavaScript, Project Management">
                                     </div>
                                     <div class="form-group">
                                         <label for="skill-level">Proficiency Level</label>
-                                        <select id="skill-level" required>
+                                        <select id="skill-level" name="skill-level" required>
                                             <option value="">Select Level</option>
                                             <option value="beginner">Beginner</option>
                                             <option value="intermediate">Intermediate</option>
@@ -1624,31 +1620,31 @@
                         </div>
                         
                         <div class="experience-form-container" id="experience-form-container" style="display: none;">
-                            <form id="add-experience-form">
+                            <form id="add-experience-form" onsubmit="addExperience(event)">
                                 <div class="form-group">
                                     <label for="exp-company">Company Name</label>
-                                    <input type="text" id="exp-company" required placeholder="e.g., Tech Company Inc.">
+                                    <input type="text" id="exp-company" name="exp-company" required placeholder="e.g., Tech Company Inc.">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="exp-position">Position/Role</label>
-                                    <input type="text" id="exp-position" required placeholder="e.g., Software Developer">
+                                    <input type="text" id="exp-position" name="exp-position" required placeholder="e.g., Software Developer">
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="exp-start-date">Start Date</label>
-                                        <input type="date" id="exp-start-date" required>
+                                        <input type="date" id="exp-start-date" name="exp-start-date" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="exp-end-date">End Date</label>
-                                        <input type="date" id="exp-end-date" placeholder="Leave empty if current">
+                                        <input type="date" id="exp-end-date" name="exp-end-date" placeholder="Leave empty if current">
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="exp-description">Job Description</label>
-                                    <textarea id="exp-description" required placeholder="Describe your responsibilities and achievements..." rows="6"></textarea>
+                                    <textarea id="exp-description" name="exp-description" required placeholder="Describe your responsibilities and achievements..." rows="6"></textarea>
                                 </div>
                                 
                                 <div class="form-actions">
@@ -1684,31 +1680,31 @@
                         </div>
                         
                         <div class="project-form-container" id="project-form-container" style="display: none;">
-                            <form id="add-project-form">
+                            <form id="add-project-form" onsubmit="addProject(event)">
                                 <div class="form-group">
                                     <label for="project-name">Project Name</label>
-                                    <input type="text" id="project-name" required placeholder="e.g., E-commerce Platform">
+                                    <input type="text" id="project-name" name="project-name" required placeholder="e.g., E-commerce Platform">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="project-description">Project Description</label>
-                                    <textarea id="project-description" required placeholder="Describe project, your role, and technologies used..." rows="6"></textarea>
+                                    <textarea id="project-description" name="project-description" required placeholder="Describe project, your role, and technologies used..." rows="6"></textarea>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="project-tech">Technologies Used</label>
-                                        <input type="text" id="project-tech" required placeholder="e.g., React, Node.js, MongoDB">
+                                        <input type="text" id="project-tech" name="project-tech" required placeholder="e.g., React, Node.js, MongoDB">
                                     </div>
                                     <div class="form-group">
                                         <label for="project-link">Project Link</label>
-                                        <input type="url" id="project-link" placeholder="https://github.com/username/project">
+                                        <input type="url" id="project-link" name="project-link" placeholder="https://github.com/username/project">
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="project-image">Project Image URL</label>
-                                    <input type="url" id="project-image" placeholder="https://example.com/project-screenshot.jpg">
+                                    <input type="url" id="project-image" name="project-image" placeholder="https://example.com/project-screenshot.jpg">
                                 </div>
                                 
                                 <div class="form-actions">
