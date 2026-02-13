@@ -46,6 +46,7 @@ const classTimetableRoutes = require('./routes/class-timetable');
 const newsRoutes = require('./routes/news');
 const adsRoutes = require('./routes/ads');
 const blogPortfolioRoutes = require('./routes/blog-portfolio');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -128,7 +129,8 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/class-timetable', classTimetableRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/ads', adsRoutes);
-app.use('/api', blogPortfolioRoutes);
+app.use('/api/blog-portfolio', blogPortfolioRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use((req, res) => {

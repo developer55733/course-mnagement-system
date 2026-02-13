@@ -9,6 +9,7 @@
     <title>IT Course Management System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="blog-portfolio-styles.css">
+    <link rel="stylesheet" href="notification-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Mobile-specific optimizations -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -127,6 +128,21 @@
             
             <!-- User Profile Header (shown when logged in) -->
             <div class="user-profile-header hidden" id="user-profile-header">
+                <div class="notification-bell-container">
+                    <button class="notification-bell" id="notification-bell" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-badge">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h4>Notifications</h4>
+                            <button class="mark-all-read-btn" onclick="markAllNotificationsAsRead()">Mark all as read</button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <div class="no-notifications">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="user-avatar" id="user-avatar">U</div>
                 <div class="user-details-popup" id="user-details-popup">
                     <div class="user-profile-header-popup">
@@ -201,6 +217,9 @@
             </button>
             <button class="tab-btn hidden" data-tab="portfolio" id="portfolio-tab">
                 <i class="fas fa-briefcase"></i> Portfolio
+            </button>
+            <button class="tab-btn hidden" data-tab="notifications" id="notifications-tab">
+                <i class="fas fa-bell"></i> Notifications
             </button>
         </div>
         
@@ -1836,6 +1855,129 @@
             </div>
         </div>
         
+        <!-- Notifications Tab -->
+        <div class="tab-content" id="notifications">
+            <div class="notification-container">
+                <div class="notification-header">
+                    <h2 class="page-title"><i class="fas fa-bell"></i> Notification Settings</h2>
+                    <p class="notification-subtitle">Manage your notification preferences and view your notification history</p>
+                </div>
+                
+                <div class="notification-preferences">
+                    <div class="preference-group">
+                        <h4><i class="fas fa-envelope"></i> Email Notifications</h4>
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-at"></i>
+                                <span>Enable Email Notifications</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="email-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-clock"></i>
+                                <span>Session Reminders</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="session-reminders" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>New Content Notifications</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="new-content-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-tasks"></i>
+                                <span>Assignment Notifications</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="assignment-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-comments"></i>
+                                <span>Discussion Notifications</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="discussion-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Test Notifications</span>
+                            </div>
+                            <div class="preference-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="test-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preference-group">
+                        <h4><i class="fas fa-clock"></i> Reminder Settings</h4>
+                        <div class="preference-item">
+                            <div class="preference-label">
+                                <i class="fas fa-hourglass-half"></i>
+                                <span>Reminder Time (minutes before session)</span>
+                            </div>
+                            <div class="preference-control">
+                                <input type="number" id="reminder-minutes" class="reminder-minutes" value="20" min="5" max="120">
+                                <span>minutes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="saveNotificationPreferences()">
+                            <i class="fas fa-save"></i> Save Preferences
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadNotificationHistory()">
+                            <i class="fas fa-history"></i> View History
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="notification-history" id="notification-history" style="display: none;">
+                    <h3><i class="fas fa-history"></i> Notification History</h3>
+                    <div class="notification-list" id="history-list">
+                        <div class="no-notifications">Loading notification history...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav" id="mobile-nav">
             <div class="mobile-nav-content">
@@ -1879,8 +2021,11 @@
                     <button class="mobile-nav-tab hidden" data-tab="blog">
                         <i class="fas fa-blog"></i> Blog
                     </button>
-                    <button class="mobile-nav-tab hidden" data-tab="portfolio">
+                    <button class="mobile-nav-tab hidden" data-tab="portfolio" id="portfolio-tab">
                         <i class="fas fa-briefcase"></i> Portfolio
+                    </button>
+                    <button class="mobile-nav-tab hidden" data-tab="notifications" id="notifications-tab">
+                        <i class="fas fa-bell"></i> Notifications
                     </button>
                 </div>
             </div>
@@ -1889,6 +2034,7 @@
    <script src="working-script.js"></script>
    <script src="blog-portfolio-database.js"></script>
    <script src="blog-portfolio-script.js"></script>
+   <script src="notification-script.js"></script>
    <script>
         // Mobile Navigation Functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -1961,7 +2107,7 @@
                 
                 if (isLoggedIn) {
                     // Show logged-in tabs
-                    if (['dashboard', 'discussion-forum', 'assignments'].includes(tabName)) {
+                    if (['dashboard', 'discussion-forum', 'assignments', 'blog', 'portfolio', 'notifications'].includes(tabName)) {
                         tab.classList.remove('hidden');
                     }
                     if (['login', 'register'].includes(tabName)) {
