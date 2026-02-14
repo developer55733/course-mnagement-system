@@ -777,11 +777,11 @@ function checkPortfolioAuthStatus() {
         } catch (error) {
             console.error('❌ Error parsing portfolio user:', error);
             localStorage.removeItem('portfolioCurrentUser');
-            showPublicPortfolio();
+            showPortfolioLogin(); // Show login/register form
         }
     } else {
-        console.log('🔍 No portfolio user found, showing public view');
-        showPublicPortfolio();
+        console.log('🔍 No portfolio user found, showing login/register form');
+        showPortfolioLogin(); // Show login/register form instead of public portfolio
     }
 }
 
