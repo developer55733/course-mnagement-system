@@ -18,18 +18,33 @@ router.get('/blogs', async (req, res) => {
 // Create new blog
 router.post('/blogs', async (req, res) => {
     try {
+        console.log('🔍 Blog creation request received');
+        console.log('🔍 Request body:', req.body);
+        
         const { title, category, excerpt, content, tags, featured_image, status, created_by, created_by_name } = req.body;
         const id = Date.now().toString();
+        
+        console.log('🔍 Parsed blog data:', { title, category, status, created_by, created_by_name });
         
         const [result] = await pool.query(
             'INSERT INTO blogs (id, title, category, excerpt, content, tags, featured_image, status, created_by, created_by_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [id, title, category || 'other', excerpt, content, JSON.stringify(tags || []), featured_image, status || 'draft', created_by || 'anonymous', created_by_name || 'Anonymous']
         );
         
+        console.log('✅ Blog inserted successfully, ID:', id);
+        console.log('🔍 Insert result:', result);
+        
         res.json({ id, ...req.body, created_at: new Date().toISOString() });
     } catch (error) {
-        console.error('Error creating blog:', error);
-        res.status(500).json({ error: 'Failed to create blog' });
+        console.error('❌ Error creating blog:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        res.status(500).json({ error: 'Failed to create blog', details: error.message });
     }
 });
 

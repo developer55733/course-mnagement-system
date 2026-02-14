@@ -171,12 +171,16 @@ async function saveDraft() {
 async function createBlogPost(e) {
     e.preventDefault();
     
+    console.log('🔍 createBlogPost function called');
+    
     try {
         // Get current user info
         let currentUser = null;
         if (window.sessionManager && window.sessionManager.isLoggedIn()) {
             currentUser = window.sessionManager.getCurrentUser();
         }
+        
+        console.log('🔍 Current user:', currentUser);
         
         const formData = new FormData(e.target);
         const blogPost = {
@@ -191,7 +195,10 @@ async function createBlogPost(e) {
             created_by_name: currentUser ? currentUser.name : 'Anonymous'
         };
         
+        console.log('🔍 Blog post data:', blogPost);
+        
         if (!blogPost.title || !blogPost.content) {
+            console.log('❌ Validation failed: missing title or content');
             if (window.notifications) {
                 window.notifications.warning('Please fill in at least title and content');
             } else {
@@ -199,6 +206,8 @@ async function createBlogPost(e) {
             }
             return;
         }
+        
+        console.log('🔍 Sending API request to:', `${API_BASE}/blogs`);
         
         // Save to MySQL via API
         const response = await fetch(`${API_BASE}/blogs`, {
@@ -209,9 +218,17 @@ async function createBlogPost(e) {
             body: JSON.stringify(blogPost)
         });
         
+        console.log('🔍 API response status:', response.status);
+        console.log('🔍 API response ok:', response.ok);
+        
         if (!response.ok) {
-            throw new Error('Failed to publish blog post');
+            const errorText = await response.text();
+            console.error('❌ API Error Response:', errorText);
+            throw new Error(`Failed to publish blog post: ${response.status} ${errorText}`);
         }
+        
+        const result = await response.json();
+        console.log('🔍 API Response data:', result);
         
         // Update stats
         updateBlogStats();
@@ -222,10 +239,18 @@ async function createBlogPost(e) {
         // Clear form
         e.target.reset();
         
-        showMessage('blog-message', 'Blog post published successfully!', 'success');
+        if (window.notifications) {
+            window.notifications.success('Blog post published successfully!');
+        } else {
+            showMessage('blog-message', 'Blog post published successfully!', 'success');
+        }
     } catch (error) {
-        console.error('Error creating blog post:', error);
-        showMessage('blog-message', 'Failed to publish blog post. Please try again.', 'error');
+        console.error('❌ Error creating blog post:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to publish blog post: ' + error.message);
+        } else {
+            showMessage('blog-message', 'Failed to publish blog post: ' + error.message, 'error');
+        }
     }
 }
 
