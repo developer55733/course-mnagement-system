@@ -218,20 +218,24 @@ router.post('/:id/replies', authenticateUser, async (req, res) => {
       WHERE dr.id = ?
     `;
     
-    const [replyData] = await query(replyQuery, [result.insertId]);
-    
-    // Use user name from request if database doesn't have it
-    const reply = replyData[0] || {
+    // Use user name from request as primary source for new replies
+    const reply = {
       id: result.insertId,
       discussion_id: discussionId,
       content,
       created_by: createdBy,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      author_name: user_name || 'Anonymous' // Always use request user name
     };
     
-    // Fallback to user name from request header if no database name
-    if (!reply.author_name && user_name) {
-      reply.author_name = user_name;
+    // Try to get database user info as fallback
+    try {
+      const [replyData] = await query(replyQuery, [result.insertId]);
+      if (replyData && replyData[0] && replyData[0].author_name) {
+        reply.author_name = replyData[0].author_name;
+      }
+    } catch (dbError) {
+      console.log('⚠️ Could not fetch user from database, using request name');
     }
     
     res.json({ 

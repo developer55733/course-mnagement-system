@@ -2564,32 +2564,6 @@
                             user_name: userName // Send user name directly to avoid database dependency
                         })
                     });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Clear form
-                        document.getElementById('reply-content').value = '';
-                        
-                        // Reload discussion to show new reply
-                        window.openDiscussionModal(discussionId);
-                        
-                        // Show success message
-                        if (window.notifications) {
-                            window.notifications.success('Reply posted successfully!');
-                        } else {
-                            alert('Reply posted successfully!');
-                        }
-                        
-                        // Refresh discussions list
-                        loadDiscussions();
-                    } else {
-                        if (window.notifications) {
-                            window.notifications.error('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
-                        } else {
-                            alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
-                        }
-                    }
                 } catch (error) {
                     console.error('Error posting reply:', error);
                     if (window.notifications) {
