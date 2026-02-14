@@ -13,17 +13,275 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Load data
         await loadBlogPosts();
+        await loadPublicBlogs(); // Load public blogs
         await loadPortfolioData();
         updateBlogStats();
         updatePortfolioStats();
         
+        // Setup event listeners
+        setupEventListeners();
+        
         console.log('Blog and portfolio system initialized successfully');
     } catch (error) {
-        console.error('Failed to initialize application:', error);
-        // Fallback to empty state
-        initializeEmptyState();
+        console.error('Error initializing blog and portfolio system:', error);
     }
 });
+
+// Load public blogs for all users to see
+async function loadPublicBlogs() {
+    try {
+        const publicBlogsGrid = document.getElementById('public-blogs-grid');
+        if (!publicBlogsGrid) {
+            console.error('Public blogs grid not found');
+            return;
+        }
+        
+        // Fetch only published blogs from API
+        const response = await fetch(`${API_BASE}/blogs?status=published`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch public blog posts');
+        }
+        
+        const posts = await response.json();
+        
+        if (posts.length === 0) {
+            displayEmptyPublicBlogs();
+            return;
+        }
+        
+        publicBlogsGrid.innerHTML = posts.map(post => `
+            <div class="blog-post-card public-blog-card">
+                <div class="blog-post-header">
+                    <h4>${post.title || 'Untitled'}</h4>
+                    <div class="blog-post-meta">
+                        <span class="blog-category">${post.category || 'Uncategorized'}</span>
+                        <span class="blog-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                        <span class="blog-author">By ${post.created_by_name || 'Anonymous'}</span>
+                    </div>
+                </div>
+                ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="blog-post-image">` : ''}
+                <div class="blog-post-excerpt">${post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'No excerpt available')}</div>
+                <div class="blog-post-footer">
+                    <div class="blog-post-stats">
+                        <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
+                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
+                    </div>
+                    <div class="blog-post-actions">
+                        <button class="btn btn-primary" onclick="viewFullBlogPost('${post.id}')">
+                            <i class="fas fa-book-open"></i> Read More
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Setup search and filter for public blogs
+        setupPublicBlogFilters();
+        
+    } catch (error) {
+        console.error('Error loading public blogs:', error);
+        displayEmptyPublicBlogs();
+    }
+}
+
+// Display empty state for public blogs
+function displayEmptyPublicBlogs() {
+    const publicBlogsGrid = document.getElementById('public-blogs-grid');
+    if (publicBlogsGrid) {
+        publicBlogsGrid.innerHTML = `
+            <div class="no-posts-message">
+                <i class="fas fa-newspaper"></i>
+                <h3>No Published Blogs Yet</h3>
+                <p>Be the first to publish a blog post and share your knowledge!</p>
+            </div>
+        `;
+    }
+}
+
+// View full blog post in modal
+function viewFullBlogPost(blogId) {
+    fetch(`${API_BASE}/blogs/${blogId}`)
+        .then(response => response.json())
+        .then(post => {
+            createBlogModal(post);
+            // Increment view count
+            incrementBlogViews(blogId);
+        })
+        .catch(error => {
+            console.error('Error loading blog post:', error);
+            if (window.notifications) {
+                window.notifications.error('Failed to load blog post');
+            }
+        });
+}
+
+// Create modal to display full blog post
+function createBlogModal(post) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-content blog-modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3><i class="fas fa-blog"></i> ${post.title || 'Untitled'}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="blog-full-content">
+                    <div class="blog-meta-info">
+                        <span class="blog-category">${post.category || 'Uncategorized'}</span>
+                        <span class="blog-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                        <span class="blog-author">By ${post.created_by_name || 'Anonymous'}</span>
+                    </div>
+                    ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="blog-full-image" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin: 20px 0;">` : ''}
+                    ${post.excerpt ? `<div class="blog-excerpt-full" style="color: #666; font-style: italic; margin-bottom: 20px;">${post.excerpt}</div>` : ''}
+                    <div class="blog-content-full" style="line-height: 1.8; white-space: pre-wrap;">${post.content || 'No content available'}</div>
+                    ${post.tags && post.tags.length > 0 ? `
+                        <div class="blog-tags" style="margin-top: 20px;">
+                            <strong>Tags:</strong> ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="blog-post-stats">
+                    <span><i class="fas fa-eye"></i> ${post.views || 0} Views</span>
+                    <span><i class="fas fa-heart"></i> ${post.likes || 0} Likes</span>
+                </div>
+                <button class="btn btn-outline" onclick="this.closest('.modal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on outside click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Increment blog view count
+async function incrementBlogViews(blogId) {
+    try {
+        await fetch(`${API_BASE}/blogs/${blogId}/views`, {
+            method: 'POST'
+        });
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+    }
+}
+
+// Refresh public blogs
+function refreshPublicBlogs() {
+    loadPublicBlogs();
+    if (window.notifications) {
+        window.notifications.info('Refreshing public blogs...');
+    }
+}
+
+// Setup search and filter for public blogs
+function setupPublicBlogFilters() {
+    const searchInput = document.getElementById('public-blog-search');
+    const categoryFilter = document.getElementById('public-blog-filter-category');
+    const sortFilter = document.getElementById('public-blog-filter-sort');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterPublicBlogs);
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', filterPublicBlogs);
+    }
+    
+    if (sortFilter) {
+        sortFilter.addEventListener('change', filterPublicBlogs);
+    }
+}
+
+// Filter public blogs
+async function filterPublicBlogs() {
+    try {
+        const searchTerm = document.getElementById('public-blog-search')?.value.toLowerCase() || '';
+        const categoryFilter = document.getElementById('public-blog-filter-category')?.value || '';
+        const sortFilter = document.getElementById('public-blog-filter-sort')?.value || 'newest';
+        
+        // Fetch all published blogs
+        const response = await fetch(`${API_BASE}/blogs?status=published`);
+        const posts = await response.json();
+        
+        // Filter posts
+        let filteredPosts = posts.filter(post => {
+            const matchesSearch = !searchTerm || 
+                post.title.toLowerCase().includes(searchTerm) ||
+                post.content.toLowerCase().includes(searchTerm) ||
+                (post.excerpt && post.excerpt.toLowerCase().includes(searchTerm));
+            
+            const matchesCategory = !categoryFilter || post.category === categoryFilter;
+            
+            return matchesSearch && matchesCategory;
+        });
+        
+        // Sort posts
+        filteredPosts.sort((a, b) => {
+            switch (sortFilter) {
+                case 'newest':
+                    return new Date(b.created_at) - new Date(a.created_at);
+                case 'oldest':
+                    return new Date(a.created_at) - new Date(b.created_at);
+                case 'most-viewed':
+                    return (b.views || 0) - (a.views || 0);
+                case 'most-liked':
+                    return (b.likes || 0) - (a.likes || 0);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Display filtered posts
+        const publicBlogsGrid = document.getElementById('public-blogs-grid');
+        if (filteredPosts.length === 0) {
+            publicBlogsGrid.innerHTML = `
+                <div class="no-posts-message">
+                    <i class="fas fa-search"></i>
+                    <h3>No Blogs Found</h3>
+                    <p>Try adjusting your search or filter criteria</p>
+                </div>
+            `;
+        } else {
+            publicBlogsGrid.innerHTML = filteredPosts.map(post => `
+                <div class="blog-post-card public-blog-card">
+                    <div class="blog-post-header">
+                        <h4>${post.title || 'Untitled'}</h4>
+                        <div class="blog-post-meta">
+                            <span class="blog-category">${post.category || 'Uncategorized'}</span>
+                            <span class="blog-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                            <span class="blog-author">By ${post.created_by_name || 'Anonymous'}</span>
+                        </div>
+                    </div>
+                    ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="blog-post-image">` : ''}
+                    <div class="blog-post-excerpt">${post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'No excerpt available')}</div>
+                    <div class="blog-post-footer">
+                        <div class="blog-post-stats">
+                            <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
+                            <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
+                        </div>
+                        <div class="blog-post-actions">
+                            <button class="btn btn-primary" onclick="viewFullBlogPost('${post.id}')">
+                                <i class="fas fa-book-open"></i> Read More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+    } catch (error) {
+        console.error('Error filtering public blogs:', error);
+    }
+}
 
 // Test API connection
 async function testAPIConnection() {
@@ -1767,3 +2025,5 @@ window.insertLink = insertLink;
 window.insertImage = insertImage;
 window.toggleBlogForm = toggleBlogForm;
 window.previewBlogPost = previewBlogPost;
+window.viewFullBlogPost = viewFullBlogPost;
+window.refreshPublicBlogs = refreshPublicBlogs;

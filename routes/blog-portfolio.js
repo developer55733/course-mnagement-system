@@ -7,7 +7,30 @@ const { pool } = require('../config/database');
 // Get all blogs
 router.get('/blogs', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM blogs ORDER BY created_at DESC');
+        const { status, category } = req.query;
+        let query = 'SELECT * FROM blogs';
+        const params = [];
+        
+        // Build WHERE clause for filtering
+        const whereConditions = [];
+        
+        if (status) {
+            whereConditions.push('status = ?');
+            params.push(status);
+        }
+        
+        if (category) {
+            whereConditions.push('category = ?');
+            params.push(category);
+        }
+        
+        if (whereConditions.length > 0) {
+            query += ' WHERE ' + whereConditions.join(' AND ');
+        }
+        
+        query += ' ORDER BY created_at DESC';
+        
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (error) {
         console.error('Error fetching blogs:', error);
@@ -127,13 +150,37 @@ router.get('/blogs/:id', async (req, res) => {
             return res.status(404).json({ error: 'Blog not found' });
         }
         
-        // Increment views
-        await pool.query('UPDATE blogs SET views = views + 1 WHERE id = ?', [id]);
-        
         res.json(rows[0]);
     } catch (error) {
         console.error('Error fetching blog:', error);
         res.status(500).json({ error: 'Failed to fetch blog' });
+    }
+});
+
+// Increment blog views
+router.post('/blogs/:id/views', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Check if blog exists
+        const [blogRows] = await pool.query('SELECT id FROM blogs WHERE id = ?', [id]);
+        if (blogRows.length === 0) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        
+        // Increment views
+        await pool.query('UPDATE blogs SET views = views + 1 WHERE id = ?', [id]);
+        
+        // Get updated view count
+        const [updatedRows] = await pool.query('SELECT views FROM blogs WHERE id = ?', [id]);
+        
+        res.json({ 
+            success: true, 
+            views: updatedRows[0]?.views || 0 
+        });
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+        res.status(500).json({ error: 'Failed to increment views' });
     }
 });
 
