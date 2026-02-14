@@ -960,7 +960,615 @@ async function loadPublicProjects() {
     }
 }
 
-// Track viewed blogs for current session
+// Portfolio Management Functions
+
+// Load portfolio data for authenticated user
+async function loadPortfolioData() {
+    try {
+        console.log('🔍 Loading portfolio data for user:', portfolioCurrentUser);
+        
+        // Load profile data
+        await loadProfile();
+        
+        // Load skills
+        await loadSkills();
+        
+        // Load experience
+        await loadExperience();
+        
+        // Load projects
+        await loadProjects();
+        
+        // Update portfolio stats
+        updatePortfolioStats();
+        
+    } catch (error) {
+        console.error('❌ Error loading portfolio data:', error);
+    }
+}
+
+// Load profile data for authenticated user
+async function loadProfile() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch profile');
+        }
+        
+        const profile = await response.json();
+        
+        // Update profile display
+        const nameEl = document.getElementById('profile-name-display');
+        const titleEl = document.getElementById('profile-title-display');
+        const bioEl = document.getElementById('profile-bio-display');
+        const emailEl = document.getElementById('profile-email-display');
+        const phoneEl = document.getElementById('profile-phone-display');
+        const locationEl = document.getElementById('profile-location-display');
+        const websiteEl = document.getElementById('profile-website-display');
+        const avatarEl = document.getElementById('profile-avatar-img');
+        
+        if (nameEl) nameEl.textContent = profile.name || 'Your Name';
+        if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
+        if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
+        if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
+        if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
+        if (locationEl) locationEl.textContent = profile.location || 'City, Country';
+        if (websiteEl) {
+            websiteEl.textContent = profile.website || 'Website';
+            websiteEl.href = profile.website || '#';
+        }
+        if (avatarEl && profile.avatar) {
+            avatarEl.src = profile.avatar;
+        }
+        
+        // Update form fields
+        const nameInput = document.getElementById('profile-name');
+        const titleInput = document.getElementById('profile-title');
+        const bioInput = document.getElementById('profile-bio');
+        const emailInput = document.getElementById('profile-email');
+        const phoneInput = document.getElementById('profile-phone');
+        const locationInput = document.getElementById('profile-location');
+        const websiteInput = document.getElementById('profile-website');
+        const categoryInput = document.getElementById('profile-category');
+        
+        if (nameInput) nameInput.value = profile.name || '';
+        if (titleInput) titleInput.value = profile.title || '';
+        if (bioInput) bioInput.value = profile.bio || '';
+        if (emailInput) emailInput.value = profile.email || '';
+        if (phoneInput) phoneInput.value = profile.phone || '';
+        if (locationInput) locationInput.value = profile.location || '';
+        if (websiteInput) websiteInput.value = profile.website || '';
+        if (categoryInput) categoryInput.value = profile.category || '';
+        
+    } catch (error) {
+        console.error('❌ Error loading profile:', error);
+    }
+}
+
+// Load skills for authenticated user
+async function loadSkills() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/skills`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch skills');
+        }
+        
+        const skills = await response.json();
+        const skillsGrid = document.getElementById('skills-grid');
+        
+        if (!skillsGrid) return;
+        
+        if (skills.length === 0) {
+            skillsGrid.innerHTML = `
+                <div class="no-skills-message">
+                    <i class="fas fa-cogs"></i>
+                    <h3>No skills added yet</h3>
+                    <p>Add your skills to showcase your expertise!</p>
+                    <button class="btn btn-primary" onclick="showAddSkillForm()">
+                        <i class="fas fa-plus"></i> Add Your First Skill
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        skillsGrid.innerHTML = skills.map(skill => `
+            <div class="skill-item">
+                <div class="skill-info">
+                    <h4>${skill.name || 'Unknown Skill'}</h4>
+                    <span class="skill-level ${skill.level || 'beginner'}">${skill.level || 'Beginner'}</span>
+                </div>
+                <div class="skill-description">${skill.description || 'No description available'}</div>
+                <div class="skill-actions">
+                    <button class="btn btn-sm btn-outline" onclick="editSkill(${skill.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSkill(${skill.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading skills:', error);
+    }
+}
+
+// Load experience for authenticated user
+async function loadExperience() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/experience`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch experience');
+        }
+        
+        const experience = await response.json();
+        const experienceTimeline = document.getElementById('experience-timeline');
+        
+        if (!experienceTimeline) return;
+        
+        if (experience.length === 0) {
+            experienceTimeline.innerHTML = `
+                <div class="no-experience-message">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>No experience added yet</h3>
+                    <p>Add your work experience to build your professional profile!</p>
+                    <button class="btn btn-primary" onclick="showAddExperienceForm()">
+                        <i class="fas fa-plus"></i> Add Your First Experience
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        experienceTimeline.innerHTML = experience.map(exp => `
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h4>${exp.position || 'Position'}</h4>
+                    <div class="experience-dates">${exp.start_date || 'Start'} - ${exp.end_date || 'Present'}</div>
+                </div>
+                <div class="experience-company">${exp.company || 'Company'}</div>
+                <div class="experience-description">${exp.description || 'No description available'}</div>
+                <div class="experience-actions">
+                    <button class="btn btn-sm btn-outline" onclick="editExperience(${exp.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteExperience(${exp.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading experience:', error);
+    }
+}
+
+// Load projects for authenticated user
+async function loadProjects() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/projects`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch projects');
+        }
+        
+        const projects = await response.json();
+        const projectsGrid = document.getElementById('projects-grid');
+        
+        if (!projectsGrid) return;
+        
+        if (projects.length === 0) {
+            projectsGrid.innerHTML = `
+                <div class="no-projects-message">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>No projects added yet</h3>
+                    <p>Add your projects to showcase your work!</p>
+                    <button class="btn btn-primary" onclick="showAddProjectForm()">
+                        <i class="fas fa-plus"></i> Add Your First Project
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        projectsGrid.innerHTML = projects.map(project => `
+            <div class="project-item">
+                <div class="project-header">
+                    <h4>${project.name || 'Project Name'}</h4>
+                </div>
+                ${project.image ? `<img src="${project.image}" alt="${project.name}" class="project-image">` : ''}
+                <div class="project-description">${project.description || 'No description available'}</div>
+                <div class="project-tech">${project.technologies || 'Technologies'}</div>
+                ${project.link ? `<div class="project-link"><a href="${project.link}" target="_blank">View Project</a></div>` : ''}
+                <div class="project-actions">
+                    <button class="btn btn-sm btn-outline" onclick="editProject(${project.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProject(${project.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading projects:', error);
+    }
+}
+
+// Update portfolio statistics
+function updatePortfolioStats() {
+    try {
+        // This would typically fetch from API, but for now we'll update from current data
+        const projectsGrid = document.getElementById('projects-grid');
+        const skillsGrid = document.getElementById('skills-grid');
+        
+        const totalProjects = projectsGrid ? projectsGrid.querySelectorAll('.project-item').length : 0;
+        const totalSkills = skillsGrid ? skillsGrid.querySelectorAll('.skill-item').length : 0;
+        
+        // Update UI
+        const projectsEl = document.getElementById('total-projects');
+        if (projectsEl) projectsEl.textContent = totalProjects;
+        
+        // Portfolio views would be tracked separately
+        // For now, we'll use a placeholder
+        const viewsEl = document.getElementById('portfolio-views');
+        if (viewsEl) viewsEl.textContent = '0';
+        
+        const ratingEl = document.getElementById('portfolio-rating');
+        if (ratingEl) ratingEl.textContent = '0';
+        
+    } catch (error) {
+        console.error('❌ Error updating portfolio stats:', error);
+    }
+}
+
+// Form management functions
+function showAddSkillForm() {
+    const formContainer = document.getElementById('skills-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+        // Clear form
+        document.getElementById('skill-name').value = '';
+        document.getElementById('skill-level').value = '';
+        document.getElementById('skill-category').value = '';
+        document.getElementById('skill-description').value = '';
+    }
+}
+
+function hideSkillForm() {
+    const formContainer = document.getElementById('skills-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+function showAddExperienceForm() {
+    const formContainer = document.getElementById('experience-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+        // Clear form
+        document.getElementById('exp-company').value = '';
+        document.getElementById('exp-position').value = '';
+        document.getElementById('exp-start-date').value = '';
+        document.getElementById('exp-end-date').value = '';
+        document.getElementById('exp-description').value = '';
+    }
+}
+
+function hideExperienceForm() {
+    const formContainer = document.getElementById('experience-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+function showAddProjectForm() {
+    const formContainer = document.getElementById('project-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+        // Clear form
+        document.getElementById('project-name').value = '';
+        document.getElementById('project-description').value = '';
+        document.getElementById('project-technologies').value = '';
+        document.getElementById('project-link').value = '';
+        document.getElementById('project-image').value = '';
+    }
+}
+
+function hideProjectForm() {
+    const formContainer = document.getElementById('project-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+// CRUD operations for portfolio items
+async function addSkill(event) {
+    event.preventDefault();
+    try {
+        const formData = new FormData(event.target);
+        const skillData = Object.fromEntries(formData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/skills`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(skillData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add skill');
+        }
+        
+        hideSkillForm();
+        await loadSkills();
+        updatePortfolioStats();
+        
+        if (window.notifications) {
+            window.notifications.success('Skill added successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error adding skill:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to add skill: ' + error.message);
+        }
+    }
+}
+
+async function addExperience(event) {
+    event.preventDefault();
+    try {
+        const formData = new FormData(event.target);
+        const experienceData = Object.fromEntries(formData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/experience`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(experienceData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add experience');
+        }
+        
+        hideExperienceForm();
+        await loadExperience();
+        
+        if (window.notifications) {
+            window.notifications.success('Experience added successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error adding experience:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to add experience: ' + error.message);
+        }
+    }
+}
+
+async function addProject(event) {
+    event.preventDefault();
+    try {
+        const formData = new FormData(event.target);
+        const projectData = Object.fromEntries(formData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/projects`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(projectData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add project');
+        }
+        
+        hideProjectForm();
+        await loadProjects();
+        updatePortfolioStats();
+        
+        if (window.notifications) {
+            window.notifications.success('Project added successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error adding project:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to add project: ' + error.message);
+        }
+    }
+}
+
+async function updateProfile(event) {
+    event.preventDefault();
+    try {
+        const formData = new FormData(event.target);
+        const profileData = Object.fromEntries(formData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(profileData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+        
+        // Hide form and reload profile
+        const formContainer = document.getElementById('profile-form-container');
+        if (formContainer) formContainer.style.display = 'none';
+        
+        await loadProfile();
+        
+        if (window.notifications) {
+            window.notifications.success('Profile updated successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error updating profile:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to update profile: ' + error.message);
+        }
+    }
+}
+
+// Delete functions
+async function deleteSkill(skillId) {
+    if (!confirm('Are you sure you want to delete this skill?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/skills/${skillId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete skill');
+        }
+        
+        await loadSkills();
+        updatePortfolioStats();
+        
+        if (window.notifications) {
+            window.notifications.success('Skill deleted successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error deleting skill:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to delete skill: ' + error.message);
+        }
+    }
+}
+
+async function deleteExperience(expId) {
+    if (!confirm('Are you sure you want to delete this experience?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/experience/${expId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete experience');
+        }
+        
+        await loadExperience();
+        
+        if (window.notifications) {
+            window.notifications.success('Experience deleted successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error deleting experience:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to delete experience: ' + error.message);
+        }
+    }
+}
+
+async function deleteProject(projectId) {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/projects/${projectId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete project');
+        }
+        
+        await loadProjects();
+        updatePortfolioStats();
+        
+        if (window.notifications) {
+            window.notifications.success('Project deleted successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error deleting project:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to delete project: ' + error.message);
+        }
+    }
+}
+
+// Edit functions (placeholders for now)
+function editSkill(skillId) {
+    console.log('Edit skill:', skillId);
+    // This would open an edit form with the skill data
+    if (window.notifications) {
+        window.notifications.info('Edit functionality coming soon!');
+    }
+}
+
+function editExperience(expId) {
+    console.log('Edit experience:', expId);
+    // This would open an edit form with the experience data
+    if (window.notifications) {
+        window.notifications.info('Edit functionality coming soon!');
+    }
+}
+
+function editProject(projectId) {
+    console.log('Edit project:', projectId);
+    // This would open an edit form with the project data
+    if (window.notifications) {
+        window.notifications.info('Edit functionality coming soon!');
+    }
+}
+
+// Profile form management
+function cancelProfileEdit() {
+    const formContainer = document.getElementById('profile-form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+}
+
+function uploadProfilePicture() {
+    console.log('Upload profile picture');
+    if (window.notifications) {
+        window.notifications.info('Profile picture upload coming soon!');
+    }
+}
+
+// CV Builder functions (placeholders)
+function showCVBuilder() {
+    console.log('Show CV builder');
+    if (window.notifications) {
+        window.notifications.info('CV Builder coming soon!');
+    }
+}
+
+function hideCVBuilder() {
+    console.log('Hide CV builder');
+}
+
+function generateCV() {
+    console.log('Generate CV');
+    if (window.notifications) {
+        window.notifications.info('CV generation coming soon!');
+    }
+}
+
+function downloadCV() {
+    console.log('Download CV');
+    if (window.notifications) {
+        window.notifications.info('CV download coming soon!');
+    }
+}
 const viewedBlogs = new Set();
 const likedBlogs = new Set();
 
@@ -2932,3 +3540,33 @@ window.loadPublicProfile = loadPublicProfile;
 window.loadPublicSkills = loadPublicSkills;
 window.loadPublicExperience = loadPublicExperience;
 window.loadPublicProjects = loadPublicProjects;
+
+// Portfolio management functions
+window.loadPortfolioData = loadPortfolioData;
+window.loadProfile = loadProfile;
+window.loadSkills = loadSkills;
+window.loadExperience = loadExperience;
+window.loadProjects = loadProjects;
+window.updatePortfolioStats = updatePortfolioStats;
+window.showAddSkillForm = showAddSkillForm;
+window.hideSkillForm = hideSkillForm;
+window.showAddExperienceForm = showAddExperienceForm;
+window.hideExperienceForm = hideExperienceForm;
+window.showAddProjectForm = showAddProjectForm;
+window.hideProjectForm = hideProjectForm;
+window.addSkill = addSkill;
+window.addExperience = addExperience;
+window.addProject = addProject;
+window.updateProfile = updateProfile;
+window.deleteSkill = deleteSkill;
+window.deleteExperience = deleteExperience;
+window.deleteProject = deleteProject;
+window.editSkill = editSkill;
+window.editExperience = editExperience;
+window.editProject = editProject;
+window.cancelProfileEdit = cancelProfileEdit;
+window.uploadProfilePicture = uploadProfilePicture;
+window.showCVBuilder = showCVBuilder;
+window.hideCVBuilder = hideCVBuilder;
+window.generateCV = generateCV;
+window.downloadCV = downloadCV;
