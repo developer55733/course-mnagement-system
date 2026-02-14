@@ -427,4 +427,40 @@ router.delete('/projects/:id', async (req, res) => {
     }
 });
 
+// Test endpoint to verify portfolio API is working
+router.get('/test', async (req, res) => {
+    try {
+        console.log('🧪 Portfolio API test endpoint hit');
+        
+        // Check if user is authenticated
+        if (!req.session || !req.session.portfolioUserId) {
+            console.log('❌ No portfolio session found');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+        
+        console.log('👤 Portfolio user ID from session:', req.session.portfolioUserId);
+        
+        // Test database connection
+        const [test] = await pool.execute('SELECT 1 as test');
+        console.log('✅ Database test result:', test);
+        
+        res.json({
+            success: true,
+            message: 'Portfolio API is working',
+            user_id: req.session.portfolioUserId,
+            database_test: test
+        });
+        
+    } catch (error) {
+        console.error('❌ Portfolio API test error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Portfolio API test failed: ' + error.message
+        });
+    }
+});
+
 module.exports = router;
