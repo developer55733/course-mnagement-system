@@ -1689,7 +1689,7 @@ async function addTestProject() {
     }
 }
 
-// Direct save function that bypasses form submission
+// Direct save function that bypasses form submission entirely
 async function saveProfileDirect() {
     alert('Direct save button clicked!'); // Test alert
     console.log('🔍 Direct save button clicked!');
@@ -1702,9 +1702,54 @@ async function saveProfileDirect() {
             return;
         }
         
+        console.log('🔍 Form element found:', form);
+        console.log('🔍 Form elements:', {
+            profileName: document.getElementById('profile-name'),
+            profileTitle: document.getElementById('profile-title'),
+            profileBio: document.getElementById('profile-bio'),
+            profileEmail: document.getElementById('profile-email'),
+            profilePhone: document.getElementById('profile-phone'),
+            profileLocation: document.getElementById('profile-location'),
+            profileWebsite: document.getElementById('profile-website'),
+            profileCategory: document.getElementById('profile-category')
+        });
+        
+        // Check if all required elements exist
+        const requiredElements = ['profile-name', 'profile-title', 'profile-bio', 'profile-email', 'profile-phone', 'profile-location', 'profile-website', 'profile-category'];
+        const missingElements = requiredElements.filter(id => !document.getElementById(id));
+        
+        if (missingElements.length > 0) {
+            console.error('❌ Missing form elements:', missingElements);
+            alert('Missing required form elements: ' + missingElements.join(', '));
+            return;
+        }
+        
+        // Get form values
         const formData = new FormData(form);
         const profileData = Object.fromEntries(formData);
-        console.log('📊 Profile data to save (direct):', profileData);
+        console.log('📊 Form data from manual get:', profileData);
+        console.log('📊 Form data details:', {
+            name: profileData.get('name'),
+            title: profileData.get('title'),
+            bio: profileData.get('bio'),
+            email: profileData.get('email'),
+            phone: profileData.get('phone'),
+            location: profileData.get('location'),
+            website: profileData.get('website'),
+            category: profileData.get('category')
+        });
+        
+        // Validate required fields
+        const requiredFields = ['name', 'title', 'bio', 'phone', 'location', 'website', 'category'];
+        const missingFields = requiredFields.filter(field => !profileData.get(field));
+        
+        if (missingFields.length > 0) {
+            console.error('❌ Missing required fields:', missingFields);
+            alert('Missing required fields: ' + missingFields.join(', '));
+            return;
+        }
+        
+        console.log('🔍 Sending API request to:', `${API_BASE}/portfolio/profile`);
         
         const response = await fetch(`${API_BASE}/portfolio/profile`, {
             method: 'PUT',
