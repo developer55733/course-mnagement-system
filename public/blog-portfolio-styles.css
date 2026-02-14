@@ -590,7 +590,7 @@
 }
 
 .skill-actions {
-    display: flex;
+    display: flex !important;
     gap: 8px;
     margin-top: 10px;
     padding-top: 10px;
@@ -600,6 +600,26 @@
 .skill-actions .btn {
     font-size: 0.8em;
     padding: 6px 12px;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Make buttons more visible */
+.skill-actions .btn-outline {
+    background-color: #f8f9fa !important;
+    border: 1px solid #007bff !important;
+    color: #007bff !important;
+}
+
+.skill-actions .btn-danger {
+    background-color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+    color: white !important;
+}
+
+.skill-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .project-tech {
@@ -636,7 +656,7 @@
 
 .experience-actions,
 .project-actions {
-    display: flex;
+    display: flex !important;
     gap: 8px;
     margin-top: 10px;
     padding-top: 10px;
@@ -647,6 +667,29 @@
 .project-actions .btn {
     font-size: 0.8em;
     padding: 6px 12px;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Make experience and project buttons more visible */
+.experience-actions .btn-outline,
+.project-actions .btn-outline {
+    background-color: #f8f9fa !important;
+    border: 1px solid #007bff !important;
+    color: #007bff !important;
+}
+
+.experience-actions .btn-danger,
+.project-actions .btn-danger {
+    background-color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+    color: white !important;
+}
+
+.experience-actions .btn:hover,
+.project-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .project-image {

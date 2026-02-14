@@ -1120,15 +1120,20 @@ async function loadProfile() {
 // Load skills for authenticated user
 async function loadSkills() {
     try {
+        console.log('🔍 Loading portfolio skills...');
         const response = await fetch(`${API_BASE}/portfolio/skills`);
         if (!response.ok) {
             throw new Error('Failed to fetch skills');
         }
         
         const skills = await response.json();
-        const skillsGrid = document.getElementById('skills-grid');
+        console.log('📊 Skills loaded:', skills);
         
-        if (!skillsGrid) return;
+        const skillsGrid = document.getElementById('skills-grid');
+        if (!skillsGrid) {
+            console.error('❌ Skills grid not found');
+            return;
+        }
         
         if (skills.length === 0) {
             skillsGrid.innerHTML = `
@@ -1144,7 +1149,9 @@ async function loadSkills() {
             return;
         }
         
-        skillsGrid.innerHTML = skills.map(skill => `
+        skillsGrid.innerHTML = skills.map(skill => {
+            console.log('🔍 Rendering skill:', skill);
+            return `
             <div class="skill-item">
                 <div class="skill-info">
                     <h4>${skill.name || 'Unknown Skill'}</h4>
@@ -1160,10 +1167,41 @@ async function loadSkills() {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
+        
+        console.log('✅ Skills rendered successfully');
         
     } catch (error) {
         console.error('❌ Error loading skills:', error);
+    }
+}
+
+// Test function to add a sample skill for testing
+async function addTestSkill() {
+    try {
+        console.log('🧪 Adding test skill...');
+        const response = await fetch(`${API_BASE}/portfolio/skills`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: 'JavaScript',
+                level: 'advanced',
+                category: 'technical',
+                description: 'Advanced JavaScript programming skills'
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Test skill added successfully');
+            await loadSkills(); // Reload skills to show the new one
+        } else {
+            console.error('❌ Failed to add test skill');
+        }
+    } catch (error) {
+        console.error('❌ Error adding test skill:', error);
     }
 }
 
@@ -3637,6 +3675,7 @@ window.editSkill = editSkill;
 window.editExperience = editExperience;
 window.editProject = editProject;
 window.cancelProfileEdit = cancelProfileEdit;
+window.addTestSkill = addTestSkill;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
