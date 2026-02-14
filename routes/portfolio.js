@@ -39,6 +39,7 @@ async function ensurePortfolioTables() {
                     CREATE TABLE portfolio_profile (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         user_id INT NOT NULL,
+                        name VARCHAR(100) NOT NULL,
                         title VARCHAR(100),
                         bio TEXT,
                         phone VARCHAR(20),
