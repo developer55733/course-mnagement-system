@@ -1689,6 +1689,60 @@ async function addTestProject() {
     }
 }
 
+// Direct save function that bypasses form submission
+async function saveProfileDirect() {
+    alert('Direct save button clicked!'); // Test alert
+    console.log('🔍 Direct save button clicked!');
+    
+    try {
+        // Get form data directly
+        const form = document.getElementById('edit-profile-form');
+        if (!form) {
+            console.error('❌ Profile form not found');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const profileData = Object.fromEntries(formData);
+        console.log('📊 Profile data to save (direct):', profileData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(profileData)
+        });
+        
+        console.log('📡 Profile update response (direct):', response);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Profile update failed (direct):', errorData);
+            throw new Error(errorData.error || 'Failed to update profile');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Profile update result (direct):', result);
+        
+        // Hide form and reload profile
+        const formContainer = document.getElementById('profile-form-container');
+        if (formContainer) formContainer.style.display = 'none';
+        
+        await loadProfile();
+        
+        if (window.notifications) {
+            window.notifications.success('Profile updated successfully!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error updating profile (direct):', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to update profile: ' + error.message);
+        }
+    }
+}
+
 // Delete functions
 async function deleteSkill(skillId) {
     if (!confirm('Are you sure you want to delete this skill?')) return;
@@ -3835,6 +3889,7 @@ window.addTestSkill = addTestSkill;
 window.testProfileSave = testProfileSave;
 window.addTestExperience = addTestExperience;
 window.addTestProject = addTestProject;
+window.saveProfileDirect = saveProfileDirect;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
