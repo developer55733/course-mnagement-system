@@ -1728,7 +1728,14 @@ window.deleteAccount = async function() {
 
     // Confirmation dialog
 
-    const isConfirmed = confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you sure you want to permanently delete your account?\n\nAll your data will be lost.');
+    let isConfirmed = false;
+    
+    if (window.notifications) {
+        isConfirmed = await window.notifications.confirmDelete('your account permanently');
+    } else {
+        // Fallback to browser confirm
+        isConfirmed = confirm('⚠️ WARNING: This action cannot be undone!\n\nAre you sure you want to permanently delete your account?\n\nAll your data will be lost.');
+    }
 
     
 
@@ -1743,8 +1750,22 @@ window.deleteAccount = async function() {
     
 
     // Second confirmation for safety
-
-    const finalConfirmation = confirm('🚨 FINAL CONFIRMATION:\n\nThis will permanently delete:\n• Your account\n• All your data\n• Login access\n• Profile information\n\nType "DELETE" to confirm:');
+    let finalConfirmation = false;
+    
+    if (window.notifications) {
+        finalConfirmation = await window.notifications.confirm(
+            '🚨 FINAL CONFIRMATION:\n\nThis will permanently delete:\n• Your account\n• All your data\n• Login access\n• Profile information\n\nThis action cannot be undone.',
+            'Delete Account - Final Warning',
+            {
+                type: 'delete',
+                primaryText: 'Delete Forever',
+                secondaryText: 'Cancel'
+            }
+        );
+    } else {
+        // Fallback to browser confirm
+        finalConfirmation = confirm('🚨 FINAL CONFIRMATION:\n\nThis will permanently delete:\n• Your account\n• All your data\n• Login access\n• Profile information\n\nType "DELETE" to confirm:');
+    }
 
     
 
@@ -1787,8 +1808,9 @@ window.deleteAccount = async function() {
             
 
             // Show success message
-
-            alert('✅ Account deleted successfully.\n\nYou have been logged out and your account has been removed from the system.');
+            if (window.notifications) {
+                window.notifications.success('Account deleted successfully. You have been logged out and your account has been removed from the system.', 5000);
+            }
 
             
 

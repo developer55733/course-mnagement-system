@@ -2501,7 +2501,11 @@
                 const replyContent = document.getElementById('reply-content').value;
                 
                 if (!replyContent.trim()) {
-                    alert('Please write a reply before submitting.');
+                    if (window.notifications) {
+                        window.notifications.warning('Please write a reply before submitting.');
+                    } else {
+                        alert('Please write a reply before submitting.');
+                    }
                     return;
                 }
                 
@@ -2569,16 +2573,28 @@
                         window.openDiscussionModal(discussionId);
                         
                         // Show success message
-                        alert('Reply posted successfully!');
+                        if (window.notifications) {
+                            window.notifications.success('Reply posted successfully!');
+                        } else {
+                            alert('Reply posted successfully!');
+                        }
                         
                         // Refresh discussions list
                         loadDiscussions();
                     } else {
-                        alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+                        if (window.notifications) {
+                            window.notifications.error('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+                        } else {
+                            alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+                        }
                     }
                 } catch (error) {
                     console.error('Error posting reply:', error);
-                    alert('Failed to post reply. Please try again.');
+                    if (window.notifications) {
+                        window.notifications.error('Failed to post reply. Please try again.');
+                    } else {
+                        alert('Failed to post reply. Please try again.');
+                    }
                 }
             });
         }
@@ -2591,6 +2607,7 @@
             }
         });
    </script>
+   <script src="notification-system.js"></script>
    <script src="secure-session.js"></script>
    <script src="working-script.js"></script>
    <script src="blog-portfolio-database.js"></script>
