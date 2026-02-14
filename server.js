@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 
 const config = require('./config/config');
 const database = require('./config/database'); // Use MySQL only
@@ -49,6 +50,7 @@ const blogPortfolioRoutes = require('./routes/blog-portfolio');
 const sessionRoutes = require('./routes/session');
 const blogAuthRoutes = require('./routes/blog-auth');
 const blogInteractionsRoutes = require('./routes/blog-interactions');
+const portfolioAuthRoutes = require('./routes/portfolio-auth');
 
 const app = express();
 
@@ -56,6 +58,19 @@ const app = express();
 app.use(cors);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Session middleware for portfolio authentication
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'portfolio-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set view engine
@@ -135,6 +150,7 @@ app.use('/api', blogPortfolioRoutes);
 app.use('/api/session', sessionRoutes);
 app.use('/api/blog-auth', blogAuthRoutes);
 app.use('/api/blog-interactions', blogInteractionsRoutes);
+app.use('/api/portfolio-auth', portfolioAuthRoutes);
 
 // 404 handler
 app.use((req, res) => {
