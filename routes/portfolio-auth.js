@@ -209,14 +209,8 @@ router.post('/register', async (req, res) => {
 // Login portfolio user
 router.post('/login', async (req, res) => {
     try {
-        // Ensure portfolio tables exist before proceeding
-        const tablesReady = await ensurePortfolioTables();
-        if (!tablesReady) {
-            return res.status(500).json({ 
-                success: false, 
-                error: 'Database setup failed. Please try again.' 
-            });
-        }
+        console.log('🔍 Portfolio login attempt');
+        console.log('📋 Request body:', req.body);
         
         const { username, password } = req.body;
         
@@ -227,13 +221,14 @@ router.post('/login', async (req, res) => {
             });
         }
         
+        console.log('🔍 Looking for user:', username);
+        
         // Find user by username or email
-        const query = `
-            SELECT id, name, email, username, password, user_type, created_at 
-            FROM portfolio_users 
-            WHERE username = ? OR email = ?
-        `;
-        const [users] = await pool.execute(query, [username, username]);
+        const [users] = await pool.execute(`
+            SELECT * FROM portfolio_users WHERE username = ? OR email = ?
+        `, [username, username]);
+        
+        console.log('📊 Found users:', users.length);
         
         if (users.length === 0) {
             return res.status(401).json({ 
@@ -243,23 +238,23 @@ router.post('/login', async (req, res) => {
         }
         
         const user = users[0];
+        console.log('👤 User found:', { id: user.id, name: user.name });
         
-        // Verify password
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        // Compare password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        console.log('🔐 Password match:', passwordMatch);
         
-        if (!isValidPassword) {
+        if (!passwordMatch) {
             return res.status(401).json({ 
                 success: false, 
                 error: 'Invalid username or password' 
             });
         }
         
-        // Remove password from response
-        delete user.password;
-        
         // Store user in session
         req.session.portfolioUserId = user.id;
         req.session.portfolioUser = user;
+        console.log('✅ Session stored:', { portfolioUserId: user.id, portfolioUser: user.name });
         
         res.json({
             success: true,
