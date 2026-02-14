@@ -80,12 +80,15 @@ router.post('/register', async (req, res) => {
             console.log('🔍 Creating new user...');
             const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             
+            console.log('🔍 User data prepared:', { userId, name, email, username, role: 'user' });
+            console.log('🔍 Executing INSERT query...');
+            
             const [result] = await pool.query(
                 'INSERT INTO users (id, name, email, username, password, role, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
                 [userId, name, email, username, hashedPassword, 'user']
             );
             
-            console.log('✅ User created successfully:', { userId, affectedRows: result.affectedRows });
+            console.log('✅ User created successfully:', { userId, affectedRows: result.affectedRows, insertId: result.insertId });
             
             // Return user info (without password)
             const user = {
@@ -106,28 +109,68 @@ router.post('/register', async (req, res) => {
             
         } catch (createError) {
             console.error('❌ Error creating user:', createError);
+            console.error('❌ Full error object:', createError);
+            console.error('❌ Error name:', createError.name);
+            console.error('❌ Error message:', createError.message);
+            console.error('❌ Error stack:', createError.stack);
             
-            // Check if it's a duplicate error
-            if (createError.code === 'ER_DUP_ENTRY') {
-                console.log('❌ Duplicate entry error');
-                return res.status(409).json({ 
-                    error: 'User already exists',
-                    message: 'A user with this email or username already exists'
+            // Check for different types of errors
+            if (createError.code) {
+                console.error('❌ SQL Error code:', createError.code);
+                console.error('❌ SQL Error details:', {
+                    code: createError.code,
+                    errno: createError.errno,
+                    sqlState: createError.sqlState,
+                    sqlMessage: createError.sqlMessage
+                });
+                
+                // Handle specific MySQL error codes
+                switch (createError.code) {
+                    case 'ER_DUP_ENTRY':
+                        console.log('❌ Duplicate entry error');
+                        return res.status(409).json({ 
+                            error: 'User already exists',
+                            message: 'A user with this email or username already exists'
+                        });
+                    
+                    case 'ER_NO_SUCH_TABLE':
+                        console.log('❌ Table does not exist error');
+                        return res.status(500).json({ 
+                            error: 'Database setup failed',
+                            message: 'Users table not found. Please try again later.'
+                        });
+                    
+                    case 'ER_DATA_TOO_LONG':
+                        console.log('❌ Data too long error');
+                        return res.status(400).json({ 
+                            error: 'Invalid data',
+                            message: 'One of the fields is too long. Please use shorter values.'
+                        });
+                    
+                    case 'ER_BAD_NULL_ERROR':
+                        console.log('❌ Null value error');
+                        return res.status(400).json({ 
+                            error: 'Missing data',
+                            message: 'Required field is missing. Please fill all fields.'
+                        });
+                    
+                    default:
+                        console.log('❌ Unknown SQL error');
+                        return res.status(500).json({ 
+                            error: 'Database error',
+                            message: 'Database error occurred. Please try again.',
+                            details: createError.sqlMessage || createError.message
+                        });
+                }
+            } else {
+                // Non-SQL errors
+                console.log('❌ Non-SQL error');
+                return res.status(500).json({ 
+                    error: 'User creation failed',
+                    message: 'Could not create user account. Please try again.',
+                    details: createError.message
                 });
             }
-            
-            console.error('❌ SQL Error details:', {
-                code: createError.code,
-                errno: createError.errno,
-                sqlState: createError.sqlState,
-                sqlMessage: createError.sqlMessage
-            });
-            
-            return res.status(500).json({ 
-                error: 'User creation failed',
-                message: 'Could not create user account. Please try again.',
-                details: createError.message
-            });
         }
         
     } catch (error) {
@@ -218,6 +261,61 @@ router.get('/me', async (req, res) => {
     } catch (error) {
         console.error('❌ Get user error:', error);
         res.status(500).json({ error: 'Failed to get user info' });
+    }
+});
+
+// Test database connection
+router.get('/test-db', async (req, res) => {
+    try {
+        console.log('🔍 Testing database connection...');
+        
+        // Test basic connection
+        const [testResult] = await pool.query('SELECT 1 as test, NOW() as timestamp');
+        console.log('✅ Database connection test successful:', testResult);
+        
+        // Test table creation
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id VARCHAR(255) PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role ENUM('admin', 'user') DEFAULT 'user',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Users table creation test successful');
+        
+        // Test table query
+        const [tableTest] = await pool.query('SELECT COUNT(*) as user_count FROM users');
+        console.log('✅ Table query test successful:', tableTest);
+        
+        res.json({
+            success: true,
+            message: 'Database connection and table setup working correctly',
+            details: {
+                connection: 'OK',
+                table: 'OK',
+                query: 'OK',
+                userCount: tableTest[0].user_count
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Database test failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Database test failed',
+            message: error.message,
+            details: {
+                code: error.code,
+                errno: error.errno,
+                sqlState: error.sqlState,
+                sqlMessage: error.sqlMessage
+            }
+        });
     }
 });
 
