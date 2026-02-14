@@ -171,20 +171,39 @@ initializeDatabase().then(success => {
       console.log('⚠️ Discussion replies migration failed');
     }
     
-    // Start the server after database initialization and migration
-    app.listen(PORT, () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const apiUrl = isProduction 
-    ? `https://course-management-system.up.railway.app`
-    : `http://localhost:${PORT}`;
-  
-  // Enhanced database info for Railway
-  const dbHost = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
-  const dbPort = process.env.RAILWAY_TCP_PROXY_PORT || '33264';
-  const dbUser = process.env.MYSQLUSER || 'root';
-  const dbInfo = `${dbUser}@${dbHost}:${dbPort}`;
-  
-  console.log(`
+    // Run migration for blog ownership columns
+    const { migrateBlogOwnership } = require('./migrate-blog-ownership');
+    migrateBlogOwnership().then(blogMigrationSuccess => {
+      if (blogMigrationSuccess) {
+        console.log('✅ Blog ownership migration completed');
+      } else {
+        console.log('⚠️ Blog ownership migration failed');
+      }
+    }).catch(error => {
+      console.error('❌ Blog ownership migration error:', error);
+    });
+  }).catch(error => {
+    console.error('❌ Discussion replies migration error:', error);
+  });
+}).then(() => {
+  startServer();
+});
+
+function startServer() {
+  // Start the server after database initialization and migration
+  app.listen(PORT, () => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction 
+      ? `https://course-management-system.up.railway.app`
+      : `http://localhost:${PORT}`;
+    
+    // Enhanced database info for Railway
+    const dbHost = process.env.RAILWAY_TCP_PROXY_DOMAIN || 'yamabiko.proxy.rlwy.net';
+    const dbPort = process.env.RAILWAY_TCP_PROXY_PORT || '33264';
+    const dbUser = process.env.MYSQLUSER || 'root';
+    const dbInfo = `${dbUser}@${dbHost}:${dbPort}`;
+    
+    console.log(`
 ╔══════════════════════════════════════╗
 ║  Backend Server Started Successfully   ║
 ╠════════════════════════════════════════╣
@@ -194,11 +213,10 @@ initializeDatabase().then(success => {
 ║ API: ${apiUrl}
 ║ Health: ${apiUrl}/health
 ╚════════════════════════════════════════╝
-  `);
-  
-  console.log(`🚀 Server ready for Railway deployment`);
-  console.log(`📊 Health check available at: ${apiUrl}/health`);
-  console.log(`🔗 API documentation at: ${apiUrl}/api`);
+    `);
+    
+    console.log(`🚀 Server ready for Railway deployment`);
+    console.log(`📊 Health check available at: ${apiUrl}/health`);
+    console.log(`🔗 API documentation at: ${apiUrl}/api`);
   });
-  });
-});
+}
