@@ -162,26 +162,40 @@ router.get('/profile', async (req, res) => {
 // Update portfolio profile
 router.put('/profile', async (req, res) => {
     try {
+        console.log('🔍 Profile update request received');
+        console.log('📋 Request body:', req.body);
+        console.log('👤 Portfolio user ID:', req.portfolioUserId);
+        
         const { name, title, bio, phone, location, website, category } = req.body;
+        
+        console.log('📊 Extracted fields:', { name, title, bio, phone, location, website, category });
         
         // Check if profile exists
         const [existing] = await pool.execute(`
             SELECT id FROM portfolio_profile WHERE user_id = ?
         `, [req.portfolioUserId]);
         
+        console.log('📋 Existing profile check:', existing.length > 0 ? 'Found' : 'Not found');
+        
         if (existing.length > 0) {
+            console.log('🔧 Updating existing profile...');
             // Update existing profile
-            await pool.execute(`
+            const result = await pool.execute(`
                 UPDATE portfolio_profile 
                 SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?
                 WHERE user_id = ?
             `, [name, title, bio, phone, location, website, category, req.portfolioUserId]);
+            
+            console.log('✅ Profile update result:', result);
         } else {
+            console.log('🔧 Creating new profile...');
             // Create new profile
-            await pool.execute(`
+            const result = await pool.execute(`
                 INSERT INTO portfolio_profile (user_id, name, title, bio, phone, location, website, category)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             `, [req.portfolioUserId, name, title, bio, phone, location, website, category]);
+            
+            console.log('✅ Profile insert result:', result);
         }
         
         res.json({
@@ -190,6 +204,11 @@ router.put('/profile', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error updating profile:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         res.status(500).json({ 
             success: false, 
             error: 'Failed to update profile: ' + error.message 
