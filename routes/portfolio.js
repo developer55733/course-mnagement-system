@@ -463,4 +463,92 @@ router.get('/test', async (req, res) => {
     }
 });
 
+// Comprehensive database diagnostic endpoint
+router.get('/diagnose', async (req, res) => {
+    try {
+        console.log('🔍 Database diagnostic started');
+        
+        // Check database connection
+        const [test] = await pool.execute('SELECT 1 as test');
+        console.log('✅ Database connection test:', test);
+        
+        // Check if portfolio_users table exists
+        const [tableCheck] = await pool.execute(`
+            SELECT COUNT(*) as count FROM information_schema.tables 
+            WHERE table_schema = DATABASE() AND table_name = 'portfolio_users'
+        `);
+        
+        console.log('📊 Portfolio_users table exists:', tableCheck[0].count > 0);
+        
+        // Check if portfolio_profile table exists
+        const [profileTableCheck] = await pool.execute(`
+            SELECT COUNT(*) as count FROM information_schema.tables 
+            WHERE table_schema = DATABASE() AND table_name = 'portfolio_profile'
+        `);
+        
+        console.log('📊 Portfolio_profile table exists:', profileTableCheck[0].count > 0);
+        
+        // Check if user exists in portfolio_users
+        const [userCheck] = await pool.execute(`
+            SELECT COUNT(*) as count FROM portfolio_users LIMIT 1
+        `);
+        
+        console.log('📊 Portfolio_users has data:', userCheck[0].count > 0);
+        
+        // Check session info
+        console.log('🔍 Session info:', {
+            hasSession: !!req.session,
+            portfolioUserId: req.session?.portfolioUserId || 'none',
+            portfolioUser: req.session?.portfolioUser || 'none'
+        });
+        
+        // Test a simple insert to portfolio_users
+        if (tableCheck[0].count > 0) {
+            const testUser = {
+                name: 'Diagnostic User',
+                email: 'test@diagnostic.com',
+                username: 'diag_user',
+                password: 'testpass123',
+                user_type: 'portfolio'
+            };
+            
+            const hashedPassword = await bcrypt.hash('testpass123', 10);
+            
+            const [insertTest] = await pool.execute(`
+                INSERT INTO portfolio_users (name, email, username, password, user_type, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+            `, [testUser.name, testUser.email, testUser.username, hashedPassword, testUser.user_type]);
+            
+            console.log('✅ Test insert result:', insertTest);
+            
+            // Clean up test user
+            await pool.execute('DELETE FROM portfolio_users WHERE username = ?', ['diag_user']);
+        }
+        
+        res.json({
+            success: true,
+            message: 'Database diagnostic completed',
+            diagnostics: {
+                database_connection: test && test.length > 0,
+                portfolio_users_table: tableCheck[0].count > 0,
+                portfolio_profile_table: profileTableCheck[0].count > 0,
+                portfolio_users_data: userCheck[0].count > 0,
+                session_info: {
+                    hasSession: !!req.session,
+                    portfolioUserId: req.session?.portfolioUserId || 'none',
+                    portfolioUser: req.session?.portfolioUser || 'none'
+                },
+                test_insert: insertTest && insertTest.insertId > 0
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Database diagnostic error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Database diagnostic failed: ' + error.message
+        });
+    }
+});
+
 module.exports = router;
