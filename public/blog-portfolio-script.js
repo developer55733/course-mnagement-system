@@ -1313,18 +1313,29 @@ function uploadProfilePicture() {
 }
 
 // Initialize blog and portfolio functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Load saved data
-    const savedBlogPosts = localStorage.getItem('blogPosts');
-    if (savedBlogPosts) {
-        blogPosts = JSON.parse(savedBlogPosts);
+document.addEventListener('DOMContentLoaded', async function() {
+    // Wait for session manager to initialize
+    if (window.sessionManager) {
+        await window.sessionManager.init();
+    }
+    
+    // Load saved data from secure session
+    let savedBlogPosts = null;
+    let savedPortfolioData = null;
+    
+    if (window.sessionManager) {
+        savedBlogPosts = window.sessionManager.getBlogPosts();
+        savedPortfolioData = window.sessionManager.getPortfolioData();
+    }
+    
+    if (savedBlogPosts && savedBlogPosts.length > 0) {
+        blogPosts = savedBlogPosts;
         displayBlogPosts();
         updateBlogStats();
     }
     
-    const savedPortfolioData = localStorage.getItem('portfolioData');
-    if (savedPortfolioData) {
-        portfolioData = JSON.parse(savedPortfolioData);
+    if (savedPortfolioData && Object.keys(savedPortfolioData).length > 0) {
+        portfolioData = savedPortfolioData;
         updatePortfolioDisplay();
         updateProfileDisplay();
     }

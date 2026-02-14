@@ -2506,23 +2506,20 @@
                 }
                 
                 try {
-                    // Get current user info from localStorage or session
+                    // Get current user info from secure session
                     let userId = null;
                     let userName = 'Anonymous';
                     
-                    // Try to get user from localStorage (from login)
-                    const currentUser = localStorage.getItem('currentUser');
-                    if (currentUser) {
-                        try {
-                            const user = JSON.parse(currentUser);
-                            userId = user.id;
-                            userName = user.name;
-                        } catch (e) {
-                            console.error('Error parsing user data:', e);
+                    // Try to get user from secure session manager
+                    if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+                        const currentUser = window.sessionManager.getCurrentUser();
+                        if (currentUser) {
+                            userId = currentUser.id;
+                            userName = currentUser.name;
                         }
                     }
                     
-                    // If no user in localStorage, try session
+                    // If no user in session, try session endpoint
                     if (!userId) {
                         const userResponse = await fetch('/api/discussions/current-user');
                         const userData = await userResponse.json();
@@ -2576,5 +2573,9 @@
             }
         });
    </script>
+   <script src="secure-session.js"></script>
+   <script src="working-script.js"></script>
+   <script src="blog-portfolio-database.js"></script>
+   <script src="blog-portfolio-script.js"></script>
 </body>
 </html>

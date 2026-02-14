@@ -1720,7 +1720,7 @@ window.editProfile = function() {
 
 // Delete account function
 
-window.deleteAccount = function() {
+window.deleteAccount = async function() {
 
     console.log('Delete account clicked');
 
@@ -1772,12 +1772,14 @@ window.deleteAccount = function() {
 
         // Simulate deletion process
 
-        setTimeout(() => {
+        setTimeout(async () => {
 
             // Clear all user data
+            if (window.sessionManager) {
+                await window.sessionManager.destroySession();
+            }
 
             localStorage.clear();
-
             sessionStorage.clear();
 
             currentUser = null;
@@ -2918,17 +2920,16 @@ function initialize() {
 
                 const reader = new FileReader();
 
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
 
                     profilePicture.src = e.target.result;
 
                     console.log('Profile picture updated');
 
-                    
-
-                    // Save to localStorage for persistence
-
-                    localStorage.setItem('userProfilePicture', e.target.result);
+                    // Save to secure session for persistence
+                    if (window.sessionManager) {
+                        await window.sessionManager.storeProfilePicture(e.target.result);
+                    }
 
                 };
 
@@ -2954,17 +2955,16 @@ function initialize() {
 
         removePhotoBtn.title = 'Remove Photo';
 
-        removePhotoBtn.onclick = function(e) {
+        removePhotoBtn.onclick = async function(e) {
 
             e.stopPropagation();
 
             console.log('Remove photo clicked');
 
-            
-
-            // Remove from localStorage
-
-            localStorage.removeItem('userProfilePicture');
+            // Remove from secure session
+            if (window.sessionManager) {
+                await window.sessionManager.storeProfilePicture(null);
+            }
 
             
 
@@ -3006,9 +3006,11 @@ function initialize() {
 
     
 
-    // Load saved profile picture or use default icon
-
-    const savedProfilePicture = localStorage.getItem('userProfilePicture');
+    // Load saved profile picture from secure session or use default icon
+    let savedProfilePicture = null;
+    if (window.sessionManager) {
+        savedProfilePicture = window.sessionManager.getProfilePicture();
+    }
 
     if (profilePicture) {
 
@@ -3957,11 +3959,18 @@ function loadAssignments() {
 }
 
 // Check for new assignments
-function checkForNewAssignments() {
-    const lastCheck = localStorage.getItem('lastAssignmentCheck');
+async function checkForNewAssignments() {
+    let lastCheck = null;
+    if (window.sessionManager) {
+        const currentUser = window.sessionManager.getCurrentUser();
+        if (currentUser && currentUser.lastAssignmentCheck) {
+            lastCheck = currentUser.lastAssignmentCheck;
+        }
+    }
+    
     const currentTime = new Date().toISOString();
     
-    apiCall('/assignments?since=' + lastCheck, 'GET')
+    apiCall('/assignments?since=' + (lastCheck || ''), 'GET')
         .then(response => {
             if (response.success && response.data && response.data.length > 0) {
                 // New assignments found
@@ -3973,7 +3982,12 @@ function checkForNewAssignments() {
             console.error('Error checking for new assignments:', error);
         });
     
-    localStorage.setItem('lastAssignmentCheck', currentTime);
+    // Store last check time in secure session
+    if (window.sessionManager) {
+        const currentUser = window.sessionManager.getCurrentUser() || {};
+        currentUser.lastAssignmentCheck = currentTime;
+        await window.sessionManager.updateSession(currentUser);
+    }
 }
 
 // Update assignment notifications in the assignments tab
