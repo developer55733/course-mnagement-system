@@ -162,7 +162,7 @@ router.get('/profile', async (req, res) => {
 // Update portfolio profile
 router.put('/profile', async (req, res) => {
     try {
-        const { title, bio, phone, location, website, category } = req.body;
+        const { name, title, bio, phone, location, website, category } = req.body;
         
         // Check if profile exists
         const [existing] = await pool.execute(`
@@ -173,15 +173,15 @@ router.put('/profile', async (req, res) => {
             // Update existing profile
             await pool.execute(`
                 UPDATE portfolio_profile 
-                SET title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?
+                SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?
                 WHERE user_id = ?
-            `, [title, bio, phone, location, website, category, req.portfolioUserId]);
+            `, [name, title, bio, phone, location, website, category, req.portfolioUserId]);
         } else {
             // Create new profile
             await pool.execute(`
-                INSERT INTO portfolio_profile (user_id, title, bio, phone, location, website, category)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `, [req.portfolioUserId, title, bio, phone, location, website, category]);
+                INSERT INTO portfolio_profile (user_id, name, title, bio, phone, location, website, category)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `, [req.portfolioUserId, name, title, bio, phone, location, website, category]);
         }
         
         res.json({
