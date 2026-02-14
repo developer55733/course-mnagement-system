@@ -1051,70 +1051,11 @@ async function loadPortfolioData() {
         // Load projects
         await loadProjects();
         
-        // If user has no skills, add sample skills to demonstrate edit/delete functionality
-        setTimeout(async () => {
-            const skillsGrid = document.getElementById('skills-grid');
-            if (skillsGrid && skillsGrid.innerHTML.includes('No skills added yet')) {
-                console.log('🔍 Adding sample skills to demonstrate edit/delete functionality...');
-                await addSampleSkills();
-            }
-        }, 1000);
-        
         // Update portfolio stats
         updatePortfolioStats();
         
     } catch (error) {
         console.error('❌ Error loading portfolio data:', error);
-    }
-}
-
-// Add sample skills for demonstration
-async function addSampleSkills() {
-    try {
-        const sampleSkills = [
-            {
-                name: 'JavaScript',
-                level: 'advanced',
-                category: 'technical',
-                description: 'Advanced JavaScript programming with ES6+, async/await, and modern frameworks'
-            },
-            {
-                name: 'Project Management',
-                level: 'intermediate',
-                category: 'soft',
-                description: 'Experience managing projects, teams, and delivering results on time'
-            },
-            {
-                name: 'React',
-                level: 'intermediate',
-                category: 'technical',
-                description: 'Building interactive user interfaces with React and modern hooks'
-            }
-        ];
-        
-        for (const skill of sampleSkills) {
-            const response = await fetch(`${API_BASE}/portfolio/skills`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(skill)
-            });
-            
-            if (response.ok) {
-                console.log('✅ Sample skill added:', skill.name);
-            }
-        }
-        
-        // Reload skills to show the sample skills with edit/delete buttons
-        await loadSkills();
-        
-        if (window.notifications) {
-            window.notifications.info('Sample skills added to demonstrate edit/delete functionality. You can modify or delete them!');
-        }
-        
-    } catch (error) {
-        console.error('❌ Error adding sample skills:', error);
     }
 }
 

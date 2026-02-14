@@ -589,6 +589,19 @@
     font-size: 0.9em;
 }
 
+.skill-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e9ecef;
+}
+
+.skill-actions .btn {
+    font-size: 0.8em;
+    padding: 6px 12px;
+}
+
 .project-tech {
     background: #e9ecef;
     color: #495057;
@@ -619,6 +632,21 @@
     background: #007bff;
     color: white;
     transform: translateY(-1px);
+}
+
+.experience-actions,
+.project-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e9ecef;
+}
+
+.experience-actions .btn,
+.project-actions .btn {
+    font-size: 0.8em;
+    padding: 6px 12px;
 }
 
 .project-image {
