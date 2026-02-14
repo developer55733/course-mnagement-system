@@ -8,7 +8,6 @@ const database = require('./config/database'); // Use MySQL only
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/users');
 const initializeDatabase = require('./config/init-database');
-const { createPortfolioTables } = require('./config/create-portfolio-tables');
 
 // Enhanced CORS middleware for Railway
 const cors = (req, res, next) => {
@@ -219,20 +218,8 @@ initializeDatabase().then(success => {
             console.log('⚠️ Blog interactions migration failed');
           }
           
-          // Create portfolio tables
-          createPortfolioTables().then(portfolioSuccess => {
-            if (portfolioSuccess) {
-              console.log('✅ Portfolio tables created successfully');
-            } else {
-              console.log('⚠️ Portfolio tables creation failed');
-            }
-            
-            // Start server after all migrations and table creation
-            startServer();
-          }).catch(error => {
-            console.error('❌ Portfolio tables creation error:', error);
-            startServer();
-          });
+          // Start server after all migrations
+          startServer();
         }).catch(error => {
           console.error('❌ Blog interactions migration error:', error);
           startServer();
