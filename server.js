@@ -47,6 +47,7 @@ const newsRoutes = require('./routes/news');
 const adsRoutes = require('./routes/ads');
 const blogPortfolioRoutes = require('./routes/blog-portfolio');
 const sessionRoutes = require('./routes/session');
+const blogAuthRoutes = require('./routes/blog-auth');
 
 const app = express();
 
@@ -131,6 +132,7 @@ app.use('/api/news', newsRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api', blogPortfolioRoutes);
 app.use('/api/session', sessionRoutes);
+app.use('/api/blog-auth', blogAuthRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -179,14 +181,30 @@ initializeDatabase().then(success => {
       } else {
         console.log('⚠️ Blog ownership migration failed');
       }
+      
+      // Run migration for blog authentication
+      const { migrateBlogAuth } = require('./migrate-blog-auth');
+      migrateBlogAuth().then(authMigrationSuccess => {
+        if (authMigrationSuccess) {
+          console.log('✅ Blog authentication migration completed');
+        } else {
+          console.log('⚠️ Blog authentication migration failed');
+        }
+        
+        // Start server after all migrations
+        startServer();
+      }).catch(error => {
+        console.error('❌ Blog authentication migration error:', error);
+        startServer();
+      });
     }).catch(error => {
       console.error('❌ Blog ownership migration error:', error);
+      startServer();
     });
   }).catch(error => {
     console.error('❌ Discussion replies migration error:', error);
+    startServer();
   });
-}).then(() => {
-  startServer();
 });
 
 function startServer() {
