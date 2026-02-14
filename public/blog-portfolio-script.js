@@ -1619,3 +1619,126 @@ function showMessage(elementId, message, type) {
         }, 5000);
     }
 }
+
+// Text formatting functions for blog editor
+function formatText(command) {
+    const textarea = document.getElementById('blog-content');
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    
+    let formattedText = '';
+    
+    switch(command) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'underline':
+            formattedText = `__${selectedText}__`;
+            break;
+        default:
+            formattedText = selectedText;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+}
+
+function insertLink() {
+    const url = prompt('Enter URL:');
+    if (url) {
+        const textarea = document.getElementById('blog-content');
+        if (!textarea) return;
+        
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        const linkText = selectedText || prompt('Enter link text:') || url;
+        
+        const linkMarkdown = `[${linkText}](${url})`;
+        textarea.value = textarea.value.substring(0, start) + linkMarkdown + textarea.value.substring(end);
+        textarea.focus();
+    }
+}
+
+function insertImage() {
+    const url = prompt('Enter image URL:');
+    if (url) {
+        const textarea = document.getElementById('blog-content');
+        if (!textarea) return;
+        
+        const alt = prompt('Enter alt text:') || '';
+        const imageMarkdown = `![${alt}](${url})`;
+        
+        const start = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, start) + imageMarkdown + textarea.value.substring(start);
+        textarea.focus();
+    }
+}
+
+function previewBlogPost() {
+    const title = document.getElementById('blog-title')?.value || '';
+    const content = document.getElementById('blog-content')?.value || '';
+    const excerpt = document.getElementById('blog-excerpt')?.value || '';
+    const featuredImage = document.getElementById('blog-featured-image')?.value || '';
+    
+    if (!title && !content) {
+        if (window.notifications) {
+            window.notifications.warning('Please add some content to preview');
+        } else {
+            alert('Please add some content to preview');
+        }
+        return;
+    }
+    
+    // Create preview modal
+    const previewModal = document.createElement('div');
+    previewModal.className = 'modal';
+    previewModal.style.display = 'block';
+    previewModal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3><i class="fas fa-eye"></i> Blog Post Preview</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="blog-preview">
+                    ${featuredImage ? `<img src="${featuredImage}" alt="${title}" class="blog-preview-image" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;">` : ''}
+                    <h1 class="blog-preview-title">${title || 'Untitled'}</h1>
+                    ${excerpt ? `<p class="blog-preview-excerpt" style="color: #666; font-style: italic; margin-bottom: 20px;">${excerpt}</p>` : ''}
+                    <div class="blog-preview-content" style="line-height: 1.6; white-space: pre-wrap;">${content || 'No content'}</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="this.closest('.modal').remove()">Close Preview</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(previewModal);
+    
+    // Close on outside click
+    previewModal.addEventListener('click', function(e) {
+        if (e.target === previewModal) {
+            previewModal.remove();
+        }
+    });
+}
+
+// Make functions globally accessible for HTML onclick handlers
+window.createBlogPost = createBlogPost;
+window.saveDraft = saveDraft;
+window.clearBlogForm = clearBlogForm;
+window.editBlogPost = editBlogPost;
+window.deleteBlogPost = deleteBlogPost;
+window.formatText = formatText;
+window.insertLink = insertLink;
+window.insertImage = insertImage;
+window.toggleBlogForm = toggleBlogForm;
+window.previewBlogPost = previewBlogPost;
