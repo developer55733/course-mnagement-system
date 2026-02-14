@@ -397,6 +397,8 @@ async function handleBlogRegister(event) {
     const password = document.getElementById('blog-register-password').value;
     const confirmPassword = document.getElementById('blog-register-confirm-password').value;
     
+    console.log('🔍 Registration form data:', { name, email, username, passwordLength: password?.length });
+    
     if (!name || !email || !username || !password || !confirmPassword) {
         if (window.notifications) {
             window.notifications.warning('Please fill in all fields');
@@ -419,9 +421,9 @@ async function handleBlogRegister(event) {
     }
     
     try {
-        // Try to register via API (fallback to demo mode)
-        let user = null;
+        console.log('🔍 Sending registration request...');
         
+        // Try to register via API
         const response = await fetch(`${API_BASE}/blog-auth/register`, {
             method: 'POST',
             headers: {
@@ -430,17 +432,14 @@ async function handleBlogRegister(event) {
             body: JSON.stringify({ name, email, username, password })
         });
         
-        if (response.ok) {
-            user = await response.json();
-        } else {
-            const error = await response.json();
-            if (window.notifications) {
-                window.notifications.error(error.message || 'Registration failed');
-            }
-            return;
-        }
+        console.log('🔍 Registration response status:', response.status);
+        console.log('🔍 Registration response ok:', response.ok);
         
-        if (user) {
+        const responseData = await response.json();
+        console.log('🔍 Registration response data:', responseData);
+        
+        if (response.ok) {
+            const user = responseData.user;
             blogCurrentUser = user;
             localStorage.setItem('blogCurrentUser', JSON.stringify(user));
             
@@ -450,13 +449,32 @@ async function handleBlogRegister(event) {
             
             showBlogManagement();
             loadBlogPosts(); // Load user's blogs
+        } else {
+            // Handle specific error types
+            if (responseData.error === 'User already exists') {
+                window.notifications.error('A user with this email or username already exists');
+            } else if (responseData.error === 'Password too short') {
+                window.notifications.warning('Password must be at least 6 characters long');
+            } else if (responseData.error === 'All fields are required') {
+                window.notifications.warning('Please fill in all fields');
+            } else if (responseData.error === 'Database setup failed') {
+                window.notifications.error('Database setup failed. Please try again later.');
+            } else if (responseData.error === 'User creation failed') {
+                window.notifications.error('Could not create user account. Please try again.');
+            } else {
+                window.notifications.error(responseData.message || 'Registration failed. Please try again.');
+            }
+            
+            console.error('❌ Registration failed:', responseData);
         }
         
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('❌ Registration error:', error);
         
-        // Fallback to demo mode on error
-        if (window.notifications) {
+        // Check for network errors
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            window.notifications.error('Network error. Please check your connection and try again.');
+        } else {
             window.notifications.warning('Registration server unavailable. Try demo login (username: demo, password: demo)');
         }
     }

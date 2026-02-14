@@ -13,72 +13,50 @@ router.post('/register', async (req, res) => {
     try {
         const { name, email, username, password } = req.body;
         
-        console.log('🔍 Blog registration request:', { name, email, username });
+        console.log('🔍 Blog registration request received:', { name, email, username, passwordLength: password?.length });
+        console.log('🔍 Request headers:', req.headers);
+        console.log('🔍 Request body keys:', Object.keys(req.body));
         
         // Validate input
         if (!name || !email || !username || !password) {
+            console.log('❌ Validation failed - missing fields:', { 
+                hasName: !!name, 
+                hasEmail: !!email, 
+                hasUsername: !!username, 
+                hasPassword: !!password 
+            });
             return res.status(400).json({ 
                 error: 'All fields are required',
-                message: 'Please fill in all fields'
+                message: 'Please fill in all fields',
+                details: { name: !!name, email: !!email, username: !!username, password: !!password }
             });
         }
         
         if (password.length < 6) {
+            console.log('❌ Validation failed - password too short:', password.length);
             return res.status(400).json({ 
                 error: 'Password too short',
                 message: 'Password must be at least 6 characters long'
             });
         }
         
-        // Check if user already exists
-        const [existingUsers] = await pool.query(
-            'SELECT id FROM users WHERE email = ? OR username = ?',
-            [email, username]
-        );
+        console.log('🔍 Attempting database connection...');
         
-        if (existingUsers.length > 0) {
-            return res.status(409).json({ 
-                error: 'User already exists',
-                message: 'A user with this email or username already exists'
-            });
-        }
-        
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Create user
-        const userId = generateUserId();
-        const [result] = await pool.query(
-            'INSERT INTO users (id, name, email, username, password, role, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-            [userId, name, email, username, hashedPassword, 'user']
-        );
-        
-        console.log('✅ User registered successfully:', userId);
-        
-        // Return user info (without password)
-        const user = {
-            id: userId,
-            name: name,
-            email: email,
-            username: username,
-            role: 'user'
-        };
-        
-        res.status(201).json({
-            success: true,
-            message: 'Registration successful',
-            user: user
-        });
-        
-    } catch (error) {
-        console.error('❌ Registration error:', error);
-        
-        // Check if it's a database error
-        if (error.code === 'ER_NO_SUCH_TABLE') {
-            // Create users table if it doesn't exist
-            try {
+        // Check if users table exists
+        try {
+            const [tables] = await pool.query(`
+                SELECT TABLE_NAME 
+                FROM INFORMATION_SCHEMA.TABLES 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'users'
+            `);
+            
+            console.log('🔍 Users table check result:', tables.length > 0 ? 'Table exists' : 'Table does not exist');
+            
+            if (tables.length === 0) {
+                console.log('➕ Creating users table...');
                 await pool.query(`
-                    CREATE TABLE IF NOT EXISTS users (
+                    CREATE TABLE users (
                         id VARCHAR(255) PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
                         email VARCHAR(255) UNIQUE NOT NULL,
@@ -86,22 +64,117 @@ router.post('/register', async (req, res) => {
                         password VARCHAR(255) NOT NULL,
                         role ENUM('admin', 'user') DEFAULT 'user',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                        INDEX idx_email (email),
+                        INDEX idx_username (username),
+                        INDEX idx_role (role)
                     )
                 `);
-                
-                console.log('✅ Created users table, retrying registration...');
-                
-                // Retry registration
-                return module.exports.routes.post('/register', req, res);
-            } catch (createError) {
-                console.error('❌ Failed to create users table:', createError);
+                console.log('✅ Users table created successfully');
             }
+        } catch (tableError) {
+            console.error('❌ Error checking/creating users table:', tableError);
+            return res.status(500).json({ 
+                error: 'Database setup failed',
+                message: 'Could not set up user table. Please try again.',
+                details: tableError.message
+            });
         }
+        
+        // Check if user already exists
+        try {
+            console.log('🔍 Checking for existing users with email/username:', { email, username });
+            const [existingUsers] = await pool.query(
+                'SELECT id FROM users WHERE email = ? OR username = ?',
+                [email, username]
+            );
+            
+            console.log('🔍 Existing users found:', existingUsers.length);
+            
+            if (existingUsers.length > 0) {
+                console.log('❌ User already exists');
+                return res.status(409).json({ 
+                    error: 'User already exists',
+                    message: 'A user with this email or username already exists'
+                });
+            }
+        } catch (checkError) {
+            console.error('❌ Error checking existing users:', checkError);
+            return res.status(500).json({ 
+                error: 'Database check failed',
+                message: 'Could not check for existing users. Please try again.',
+                details: checkError.message
+            });
+        }
+        
+        // Hash password
+        let hashedPassword;
+        try {
+            console.log('🔍 Hashing password...');
+            hashedPassword = await bcrypt.hash(password, 10);
+            console.log('✅ Password hashed successfully');
+        } catch (hashError) {
+            console.error('❌ Error hashing password:', hashError);
+            return res.status(500).json({ 
+                error: 'Password processing failed',
+                message: 'Could not process password. Please try again.',
+                details: hashError.message
+            });
+        }
+        
+        // Create user
+        try {
+            console.log('🔍 Creating new user...');
+            const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            const [result] = await pool.query(
+                'INSERT INTO users (id, name, email, username, password, role, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+                [userId, name, email, username, hashedPassword, 'user']
+            );
+            
+            console.log('✅ User created successfully:', { userId, affectedRows: result.affectedRows });
+            
+            // Return user info (without password)
+            const user = {
+                id: userId,
+                name: name,
+                email: email,
+                username: username,
+                role: 'user'
+            };
+            
+            console.log('✅ Registration completed successfully for:', user.username);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Registration successful',
+                user: user
+            });
+            
+        } catch (createError) {
+            console.error('❌ Error creating user:', createError);
+            console.error('❌ SQL Error details:', {
+                code: createError.code,
+                errno: createError.errno,
+                sqlState: createError.sqlState,
+                sqlMessage: createError.sqlMessage
+            });
+            
+            return res.status(500).json({ 
+                error: 'User creation failed',
+                message: 'Could not create user account. Please try again.',
+                details: createError.message
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ Unexpected registration error:', error);
+        console.error('❌ Full error stack:', error.stack);
         
         res.status(500).json({ 
             error: 'Registration failed',
-            message: 'An error occurred during registration. Please try again.'
+            message: 'An unexpected error occurred during registration. Please try again.',
+            details: error.message
         });
     }
 });
