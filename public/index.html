@@ -1326,98 +1326,198 @@
                     </div>
                 </div>
                 
-                <div class="blog-main">
-                    <!-- Create New Blog Post Section -->
-                    <div class="blog-create-section">
-                        <div class="section-header">
-                            <h3><i class="fas fa-plus-circle"></i> Create New Blog Post</h3>
-                            <button class="btn btn-toggle" id="toggle-blog-form">
-                                <i class="fas fa-chevron-down"></i> Show Form
-                            </button>
-                        </div>
-                        
-                        <div class="blog-form-container" id="blog-form-container" style="display: none;">
-                            <form id="create-blog-form" onsubmit="createBlogPost(event)">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="blog-title">Blog Title</label>
-                                        <input type="text" id="blog-title" name="blog-title" required placeholder="Enter an engaging title for your blog post">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="blog-category">Category</label>
-                                        <select id="blog-category" name="blog-category" required>
-                                            <option value="">Select Category</option>
-                                            <option value="technology">Technology</option>
-                                            <option value="programming">Programming</option>
-                                            <option value="web-development">Web Development</option>
-                                            <option value="database">Database</option>
-                                            <option value="networking">Networking</option>
-                                            <option value="career">Career</option>
-                                            <option value="education">Education</option>
-                                            <option value="business">Business</option>
-                                            <option value="services">Services</option>
-                                            <option value="student-life">Student Life</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
+                <!-- Blog Authentication Section -->
+                <div class="blog-auth-section" id="blog-auth-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-lock"></i> Blog Management Access</h3>
+                        <p class="section-description">Login to create, edit, or manage your blog posts</p>
+                    </div>
+                    
+                    <div class="auth-container">
+                        <div class="auth-form-container">
+                            <form id="blog-login-form" onsubmit="handleBlogLogin(event)">
                                 <div class="form-group">
-                                    <label for="blog-excerpt">Short Description</label>
-                                    <input type="text" id="blog-excerpt" name="blog-excerpt" placeholder="Brief description of your blog post (shown in previews)">
+                                    <label for="blog-login-email">Email or Username</label>
+                                    <input type="text" id="blog-login-email" required placeholder="Enter your email or username">
                                 </div>
-                                
                                 <div class="form-group">
-                                    <label for="blog-content">Blog Content</label>
-                                    <textarea id="blog-content" name="blog-content" required placeholder="Write your blog post content here..." rows="12"></textarea>
-                                    <div class="editor-toolbar">
-                                        <button type="button" class="toolbar-btn" onclick="formatText('bold')">
-                                            <i class="fas fa-bold"></i>
-                                        </button>
-                                        <button type="button" class="toolbar-btn" onclick="formatText('italic')">
-                                            <i class="fas fa-italic"></i>
-                                        </button>
-                                        <button type="button" class="toolbar-btn" onclick="formatText('underline')">
-                                            <i class="fas fa-underline"></i>
-                                        </button>
-                                        <button type="button" class="toolbar-btn" onclick="insertLink()">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button type="button" class="toolbar-btn" onclick="insertImage()">
-                                            <i class="fas fa-image"></i>
-                                        </button>
-                                    </div>
+                                    <label for="blog-login-password">Password</label>
+                                    <input type="password" id="blog-login-password" required placeholder="Enter your password">
                                 </div>
-                                
-                                <div class="form-group">
-                                    <label for="blog-tags">Tags (comma separated)</label>
-                                    <input type="text" id="blog-tags" name="blog-tags" placeholder="e.g., javascript, web development, tutorial">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="blog-featured-image">Featured Image URL</label>
-                                    <input type="url" id="blog-featured-image" name="blog-featured-image" placeholder="https://example.com/image.jpg">
-                                </div>
-                                
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-paper-plane"></i> Publish Post
+                                        <i class="fas fa-sign-in-alt"></i> Login to Manage Blogs
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="saveDraft()">
-                                        <i class="fas fa-save"></i> Save Draft
-                                    </button>
-                                    <button type="button" class="btn btn-info" onclick="previewBlogPost()">
-                                        <i class="fas fa-eye"></i> Preview
-                                    </button>
-                                    <button type="button" class="btn btn-outline" onclick="clearBlogForm()">
-                                        <i class="fas fa-times"></i> Clear
+                                    <button type="button" class="btn btn-outline" onclick="showBlogRegister()">
+                                        <i class="fas fa-user-plus"></i> Create Account
                                     </button>
                                 </div>
                             </form>
                         </div>
                         
+                        <div class="auth-info">
+                            <div class="info-card">
+                                <i class="fas fa-user-shield"></i>
+                                <h4>Secure Blog Management</h4>
+                                <p>Only authenticated users can create, edit, or delete blog posts. Your content is protected and only you can manage your own blogs.</p>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-globe"></i>
+                                <h4>Public Reading Access</h4>
+                                <p>Everyone can read published blog posts without logging in. Share your knowledge with the world while keeping control over your content.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Registration Section (Hidden by default) -->
+                <div class="blog-register-section" id="blog-register-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-user-plus"></i> Create Blog Account</h3>
+                        <p class="section-description">Register to start creating and managing your blog posts</p>
+                    </div>
+                    
+                    <div class="auth-container">
+                        <div class="auth-form-container">
+                            <form id="blog-register-form" onsubmit="handleBlogRegister(event)">
+                                <div class="form-group">
+                                    <label for="blog-register-name">Full Name</label>
+                                    <input type="text" id="blog-register-name" required placeholder="Enter your full name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog-register-email">Email</label>
+                                    <input type="email" id="blog-register-email" required placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog-register-username">Username</label>
+                                    <input type="text" id="blog-register-username" required placeholder="Choose a username">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog-register-password">Password</label>
+                                    <input type="password" id="blog-register-password" required placeholder="Create a password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blog-register-confirm-password">Confirm Password</label>
+                                    <input type="password" id="blog-register-confirm-password" required placeholder="Confirm your password">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-user-plus"></i> Create Account
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="showBlogLogin()">
+                                        <i class="fas fa-sign-in-alt"></i> Back to Login
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blog Management Section (Hidden until authenticated) -->
+                <div class="blog-management-section" id="blog-management-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-user-cog"></i> Your Blog Management</h3>
+                        <div class="user-info">
+                            <span class="user-welcome">Welcome, <strong id="blog-user-name">User</strong>!</span>
+                            <button class="btn btn-outline btn-sm" onclick="handleBlogLogout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="blog-main">
+                        <!-- Create New Blog Post Section -->
+                        <div class="blog-create-section">
+                            <div class="section-header">
+                                <h3><i class="fas fa-plus-circle"></i> Create New Blog Post</h3>
+                                <button class="btn btn-toggle" id="toggle-blog-form">
+                                    <i class="fas fa-chevron-down"></i> Show Form
+                                </button>
+                            </div>
+                            
+                            <div class="blog-form-container" id="blog-form-container" style="display: none;">
+                                <form id="create-blog-form" onsubmit="createBlogPost(event)">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="blog-title">Blog Title</label>
+                                            <input type="text" id="blog-title" name="blog-title" required placeholder="Enter an engaging title for your blog post">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="blog-category">Category</label>
+                                            <select id="blog-category" name="blog-category" required>
+                                                <option value="">Select Category</option>
+                                                <option value="technology">Technology</option>
+                                                <option value="programming">Programming</option>
+                                                <option value="web-development">Web Development</option>
+                                                <option value="database">Database</option>
+                                                <option value="networking">Networking</option>
+                                                <option value="career">Career</option>
+                                                <option value="education">Education</option>
+                                                <option value="business">Business</option>
+                                                <option value="services">Services</option>
+                                                <option value="student-life">Student Life</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="blog-excerpt">Short Description</label>
+                                        <input type="text" id="blog-excerpt" name="blog-excerpt" placeholder="Brief description of your blog post (shown in previews)">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="blog-content">Blog Content</label>
+                                        <textarea id="blog-content" name="blog-content" required placeholder="Write your blog post content here..." rows="12"></textarea>
+                                        <div class="editor-toolbar">
+                                            <button type="button" class="toolbar-btn" onclick="formatText('bold')">
+                                                <i class="fas fa-bold"></i>
+                                            </button>
+                                            <button type="button" class="toolbar-btn" onclick="formatText('italic')">
+                                                <i class="fas fa-italic"></i>
+                                            </button>
+                                            <button type="button" class="toolbar-btn" onclick="formatText('underline')">
+                                                <i class="fas fa-underline"></i>
+                                            </button>
+                                            <button type="button" class="toolbar-btn" onclick="insertLink()">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                            <button type="button" class="toolbar-btn" onclick="insertImage()">
+                                                <i class="fas fa-image"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="blog-tags">Tags (comma separated)</label>
+                                        <input type="text" id="blog-tags" name="blog-tags" placeholder="e.g., javascript, web development, tutorial">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="blog-featured-image">Featured Image URL</label>
+                                        <input type="url" id="blog-featured-image" name="blog-featured-image" placeholder="https://example.com/image.jpg">
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i> Publish Post
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                                            <i class="fas fa-save"></i> Save Draft
+                                        </button>
+                                        <button type="button" class="btn btn-info" onclick="previewBlogPost()">
+                                            <i class="fas fa-eye"></i> Preview
+                                        </button>
+                                        <button type="button" class="btn btn-outline" onclick="clearBlogForm()">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
                         <!-- Blog Posts Management -->
-                        <div class="blog-management-section">
+                        <div class="blog-posts-management">
                             <div class="section-header">
                                 <h3><i class="fas fa-list"></i> Your Blog Posts</h3>
                                 <div class="blog-controls">
@@ -1454,24 +1554,6 @@
                                         <i class="fas fa-plus"></i> Create Your First Post
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="cv-education">Education</label>
-                                        <textarea id="cv-education" placeholder="List your educational qualifications..." rows="4"></textarea>
-                                    </div>
-                                    
-                                    <div class="form-actions">
-                                        <button type="button" class="btn btn-primary" onclick="updateCVPreview()">
-                                            <i class="fas fa-sync"></i> Update Preview
-                                        </button>
-                                        <button type="button" class="btn btn-outline" onclick="hideCVBuilder()">
-                                            <i class="fas fa-times"></i> Close
-                                        </button>
-                                    </div>
-                                </form>
                             </div>
                         </div>
                     </div>

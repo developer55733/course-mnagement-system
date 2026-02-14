@@ -11,12 +11,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Test API connection
         await testAPIConnection();
         
-        // Load data
-        await loadBlogPosts();
-        await loadPublicBlogs(); // Load public blogs
-        await loadPortfolioData();
-        updateBlogStats();
-        updatePortfolioStats();
+        // Check blog authentication status
+        checkBlogAuthStatus();
+        
+        // Load public blogs (always available)
+        await loadPublicBlogs();
+        
+        // Load data (only if authenticated)
+        if (blogCurrentUser) {
+            await loadBlogPosts();
+            await loadPortfolioData();
+            updateBlogStats();
+            updatePortfolioStats();
+        }
         
         // Setup event listeners
         setupEventListeners();
@@ -26,6 +33,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error initializing blog and portfolio system:', error);
     }
 });
+
+// Test API connection
+async function testAPIConnection() {
+    try {
+        const response = await fetch(`${API_BASE}/health`);
+        if (!response.ok) {
+            throw new Error('API not responding');
+        }
+        console.log('API connection successful');
+        return true;
+    } catch (error) {
+        console.error('API connection failed:', error);
+        throw error;
+    }
+}
 
 // Load public blogs for all users to see
 async function loadPublicBlogs() {
@@ -283,18 +305,214 @@ async function filterPublicBlogs() {
     }
 }
 
-// Test API connection
-async function testAPIConnection() {
-    try {
-        const response = await fetch(`${API_BASE}/health`);
-        if (!response.ok) {
-            throw new Error('API not responding');
-        }
-        console.log('API connection successful');
+// Blog Authentication System
+let blogCurrentUser = null;
+
+// Check if user is logged in
+function checkBlogAuthStatus() {
+    const savedUser = localStorage.getItem('blogCurrentUser');
+    if (savedUser) {
+        blogCurrentUser = JSON.parse(savedUser);
+        showBlogManagement();
         return true;
+    }
+    showBlogAuth();
+    return false;
+}
+
+// Handle blog login
+async function handleBlogLogin(event) {
+    event.preventDefault();
+    
+    const emailOrUsername = document.getElementById('blog-login-email').value.trim();
+    const password = document.getElementById('blog-login-password').value;
+    
+    if (!emailOrUsername || !password) {
+        if (window.notifications) {
+            window.notifications.warning('Please enter email/username and password');
+        }
+        return;
+    }
+    
+    try {
+        // Try to authenticate via API (fallback to demo mode)
+        let user = null;
+        
+        // Check if it's a demo account
+        if (emailOrUsername.toLowerCase() === 'demo' && password === 'demo') {
+            user = {
+                id: 'demo-user',
+                name: 'Demo User',
+                email: 'demo@example.com',
+                username: 'demo'
+            };
+        } else {
+            // Try API authentication
+            const response = await fetch(`${API_BASE}/blog-auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ emailOrUsername, password })
+            });
+            
+            if (response.ok) {
+                user = await response.json();
+            }
+        }
+        
+        if (user) {
+            blogCurrentUser = user;
+            localStorage.setItem('blogCurrentUser', JSON.stringify(user));
+            
+            if (window.notifications) {
+                window.notifications.success(`Welcome back, ${user.name}!`);
+            }
+            
+            showBlogManagement();
+            loadBlogPosts(); // Load user's blogs
+        } else {
+            if (window.notifications) {
+                window.notifications.error('Invalid email/username or password');
+            }
+        }
+        
     } catch (error) {
-        console.error('API connection failed:', error);
-        throw error;
+        console.error('Login error:', error);
+        
+        // Fallback to demo mode on error
+        if (window.notifications) {
+            window.notifications.warning('Using demo mode. Try username: demo, password: demo');
+        }
+    }
+}
+
+// Handle blog registration
+async function handleBlogRegister(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('blog-register-name').value.trim();
+    const email = document.getElementById('blog-register-email').value.trim();
+    const username = document.getElementById('blog-register-username').value.trim();
+    const password = document.getElementById('blog-register-password').value;
+    const confirmPassword = document.getElementById('blog-register-confirm-password').value;
+    
+    if (!name || !email || !username || !password || !confirmPassword) {
+        if (window.notifications) {
+            window.notifications.warning('Please fill in all fields');
+        }
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        if (window.notifications) {
+            window.notifications.error('Passwords do not match');
+        }
+        return;
+    }
+    
+    if (password.length < 6) {
+        if (window.notifications) {
+            window.notifications.warning('Password must be at least 6 characters long');
+        }
+        return;
+    }
+    
+    try {
+        // Try to register via API (fallback to demo mode)
+        let user = null;
+        
+        const response = await fetch(`${API_BASE}/blog-auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, username, password })
+        });
+        
+        if (response.ok) {
+            user = await response.json();
+        } else {
+            const error = await response.json();
+            if (window.notifications) {
+                window.notifications.error(error.message || 'Registration failed');
+            }
+            return;
+        }
+        
+        if (user) {
+            blogCurrentUser = user;
+            localStorage.setItem('blogCurrentUser', JSON.stringify(user));
+            
+            if (window.notifications) {
+                window.notifications.success(`Welcome to the blog system, ${user.name}!`);
+            }
+            
+            showBlogManagement();
+            loadBlogPosts(); // Load user's blogs
+        }
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        
+        // Fallback to demo mode on error
+        if (window.notifications) {
+            window.notifications.warning('Registration server unavailable. Try demo login (username: demo, password: demo)');
+        }
+    }
+}
+
+// Handle blog logout
+function handleBlogLogout() {
+    blogCurrentUser = null;
+    localStorage.removeItem('blogCurrentUser');
+    
+    if (window.notifications) {
+        window.notifications.info('You have been logged out');
+    }
+    
+    showBlogAuth();
+}
+
+// Show blog authentication section
+function showBlogAuth() {
+    document.getElementById('blog-auth-section').style.display = 'block';
+    document.getElementById('blog-register-section').style.display = 'none';
+    document.getElementById('blog-management-section').style.display = 'none';
+    
+    // Clear form
+    document.getElementById('blog-login-form').reset();
+}
+
+// Show blog registration section
+function showBlogRegister() {
+    document.getElementById('blog-auth-section').style.display = 'none';
+    document.getElementById('blog-register-section').style.display = 'block';
+    document.getElementById('blog-management-section').style.display = 'none';
+    
+    // Clear form
+    document.getElementById('blog-register-form').reset();
+}
+
+// Show blog login section
+function showBlogLogin() {
+    document.getElementById('blog-auth-section').style.display = 'block';
+    document.getElementById('blog-register-section').style.display = 'none';
+    document.getElementById('blog-management-section').style.display = 'none';
+    
+    // Clear form
+    document.getElementById('blog-login-form').reset();
+}
+
+// Show blog management section
+function showBlogManagement() {
+    document.getElementById('blog-auth-section').style.display = 'none';
+    document.getElementById('blog-register-section').style.display = 'none';
+    document.getElementById('blog-management-section').style.display = 'block';
+    
+    // Update user info
+    if (blogCurrentUser) {
+        document.getElementById('blog-user-name').textContent = blogCurrentUser.name;
     }
 }
 
@@ -429,17 +647,19 @@ async function saveDraft() {
 async function createBlogPost(e) {
     e.preventDefault();
     
+    // Check if user is authenticated
+    if (!blogCurrentUser) {
+        if (window.notifications) {
+            window.notifications.warning('Please login to create blog posts');
+        }
+        showBlogAuth();
+        return;
+    }
+    
     console.log('🔍 createBlogPost function called');
+    console.log('🔍 Current authenticated user:', blogCurrentUser);
     
     try {
-        // Get current user info
-        let currentUser = null;
-        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
-            currentUser = window.sessionManager.getCurrentUser();
-        }
-        
-        console.log('🔍 Current user:', currentUser);
-        
         const formData = new FormData(e.target);
         const blogPost = {
             title: formData.get('blog-title') || '',
@@ -449,8 +669,8 @@ async function createBlogPost(e) {
             tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
             featured_image: formData.get('blog-featured-image') || '',
             status: 'published',
-            created_by: currentUser ? currentUser.id : 'anonymous',
-            created_by_name: currentUser ? currentUser.name : 'Anonymous'
+            created_by: blogCurrentUser.id,
+            created_by_name: blogCurrentUser.name
         };
         
         console.log('🔍 Blog post data:', blogPost);
@@ -459,8 +679,6 @@ async function createBlogPost(e) {
             console.log('❌ Validation failed: missing title or content');
             if (window.notifications) {
                 window.notifications.warning('Please fill in at least title and content');
-            } else {
-                showMessage('blog-message', 'Please fill in at least title and content', 'error');
             }
             return;
         }
@@ -491,23 +709,23 @@ async function createBlogPost(e) {
         // Update stats
         updateBlogStats();
         
-        // Display posts
-        await displayBlogPosts();
-        
         // Clear form
-        e.target.reset();
+        clearBlogForm();
+        
+        // Reload blogs
+        await loadBlogPosts();
+        await loadPublicBlogs();
         
         if (window.notifications) {
             window.notifications.success('Blog post published successfully!');
-        } else {
-            showMessage('blog-message', 'Blog post published successfully!', 'success');
         }
+        
+        console.log('✅ Blog post created successfully');
+        
     } catch (error) {
         console.error('❌ Error creating blog post:', error);
         if (window.notifications) {
             window.notifications.error('Failed to publish blog post: ' + error.message);
-        } else {
-            showMessage('blog-message', 'Failed to publish blog post: ' + error.message, 'error');
         }
     }
 }
@@ -2027,3 +2245,8 @@ window.toggleBlogForm = toggleBlogForm;
 window.previewBlogPost = previewBlogPost;
 window.viewFullBlogPost = viewFullBlogPost;
 window.refreshPublicBlogs = refreshPublicBlogs;
+window.handleBlogLogin = handleBlogLogin;
+window.handleBlogRegister = handleBlogRegister;
+window.handleBlogLogout = handleBlogLogout;
+window.showBlogRegister = showBlogRegister;
+window.showBlogLogin = showBlogLogin;
