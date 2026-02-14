@@ -1220,7 +1220,11 @@ window.downloadNote = function(noteId) {
                 generatePDF(note);
                 
             } else {
-                alert('Error loading note details');
+                if (window.notifications) {
+                    window.notifications.error('Error loading note details');
+                } else {
+                    alert('Error loading note details');
+                }
             }
         }).catch(error => {
             console.error('❌ Error downloading note:', error);
@@ -1231,12 +1235,20 @@ window.downloadNote = function(noteId) {
             });
             
             // Show better error message
-            alert(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            if (window.notifications) {
+                window.notifications.error(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            } else {
+                alert(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            }
         });
         
     } catch (error) {
         console.error('Error in downloadNote:', error);
-        alert('Error downloading note');
+        if (window.notifications) {
+            window.notifications.error('Error downloading note');
+        } else {
+            alert('Error downloading note');
+        }
     }
 };
 
@@ -1357,16 +1369,28 @@ window.downloadEnhancedPDF = function(noteId) {
                 createProfessionalPDF(note);
                 
             } else {
-                alert('Error loading note details');
+                if (window.notifications) {
+                    window.notifications.error('Error loading note details');
+                } else {
+                    alert('Error loading note details');
+                }
             }
         }).catch(error => {
             console.error('❌ Error downloading enhanced PDF:', error);
-            alert(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            if (window.notifications) {
+                window.notifications.error(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            } else {
+                alert(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            }
         });
         
     } catch (error) {
         console.error('Error in downloadEnhancedPDF:', error);
-        alert('Error downloading enhanced PDF');
+        if (window.notifications) {
+            window.notifications.error('Error downloading enhanced PDF');
+        } else {
+            alert('Error downloading enhanced PDF');
+        }
     }
 };
 
@@ -1596,7 +1620,11 @@ function createProfessionalPDF(note) {
         
     } catch (error) {
         console.error('❌ Error creating professional PDF:', error);
-        alert('Error creating professional PDF: ' + error.message);
+        if (window.notifications) {
+            window.notifications.error('Error creating professional PDF: ' + error.message);
+        } else {
+            alert('Error creating professional PDF: ' + error.message);
+        }
     }
 }
 
@@ -1700,7 +1728,11 @@ window.editProfile = function() {
 
     // Show edit profile modal or navigate to edit page
 
-    alert('Edit Profile feature coming soon! This will open a profile editing interface.');
+    if (window.notifications) {
+        window.notifications.info('Edit Profile feature coming soon! This will open a profile editing interface.');
+    } else {
+        alert('Edit Profile feature coming soon! This will open a profile editing interface.');
+    }
 
     
 
@@ -1824,7 +1856,11 @@ window.deleteAccount = async function() {
 
         console.log('Account deletion cancelled - wrong confirmation');
 
-        alert('Account deletion cancelled.');
+        if (window.notifications) {
+            window.notifications.info('Account deletion cancelled.');
+        } else {
+            alert('Account deletion cancelled.');
+        }
 
     }
 
@@ -1968,9 +2004,11 @@ window.deleteModule = function(index) {
 
             }
 
-            
-
-            alert('✅ Module deleted successfully!');
+            if (window.notifications) {
+                window.notifications.success('Module deleted successfully!');
+            } else {
+                alert('✅ Module deleted successfully!');
+            }
 
         }, 1000);
 
@@ -2010,7 +2048,11 @@ window.saveModule = function(index) {
 
     if (!code || !name || !credits) {
 
-        alert('Please fill in all fields');
+        if (window.notifications) {
+            window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
+        }
 
         return;
 
@@ -2038,7 +2080,11 @@ window.saveModule = function(index) {
 
         closeEditModal();
 
-        alert('✅ Module updated successfully!');
+        if (window.notifications) {
+            window.notifications.success('Module updated successfully!');
+        } else {
+            alert('✅ Module updated successfully!');
+        }
 
         
 
@@ -2202,9 +2248,11 @@ window.deleteLecturer = function(index) {
 
             }
 
-            
-
-            alert('✅ Lecturer deleted successfully!');
+            if (window.notifications) {
+                window.notifications.success('Lecturer deleted successfully!');
+            } else {
+                alert('✅ Lecturer deleted successfully!');
+            }
 
         }, 1000);
 
@@ -2228,7 +2276,11 @@ window.saveLecturer = function(index) {
 
     if (!name || !module || !phone) {
 
-        alert('Please fill in all fields');
+        if (window.notifications) {
+            window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
+        }
 
         return;
 
@@ -2256,7 +2308,11 @@ window.saveLecturer = function(index) {
 
         closeEditModal();
 
-        alert('✅ Lecturer updated successfully!');
+        if (window.notifications) {
+            window.notifications.success('Lecturer updated successfully!');
+        } else {
+            alert('✅ Lecturer updated successfully!');
+        }
 
         
 
@@ -2444,9 +2500,11 @@ window.deleteTimetable = function(index) {
 
             }
 
-            
-
-            alert('✅ Timetable entry deleted successfully!');
+            if (window.notifications) {
+                window.notifications.success('Timetable entry deleted successfully!');
+            } else {
+                alert('✅ Timetable entry deleted successfully!');
+            }
 
         }, 1000);
 
@@ -2474,7 +2532,11 @@ window.saveTimetable = function(index) {
 
     if (!test || !module || !date || !time || !venue) {
 
-        alert('Please fill in all fields');
+        if (window.notifications) {
+            window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
+        }
 
         return;
 
@@ -2502,7 +2564,11 @@ window.saveTimetable = function(index) {
 
         closeEditModal();
 
-        alert('✅ Timetable entry updated successfully!');
+        if (window.notifications) {
+            window.notifications.success('Timetable entry updated successfully!');
+        } else {
+            alert('✅ Timetable entry updated successfully!');
+        }
 
         
 
@@ -3383,7 +3449,11 @@ async function postReply(e) {
     e.preventDefault();
     
     if (!currentUser) {
-        alert('Please login to reply to discussions');
+        if (window.notifications) {
+            window.notifications.warning('Please login to reply to discussions');
+        } else {
+            alert('Please login to reply to discussions');
+        }
         return;
     }
     
@@ -3392,7 +3462,11 @@ async function postReply(e) {
     const replyContent = document.getElementById('reply-content').value;
     
     if (!replyContent.trim()) {
-        alert('Please enter reply content');
+        if (window.notifications) {
+            window.notifications.warning('Please enter reply content');
+        } else {
+            alert('Please enter reply content');
+        }
         return;
     }
     
@@ -3416,11 +3490,19 @@ async function postReply(e) {
                 showDiscussionModal(discussionResult.data);
             }
         } else {
-            alert('Failed to post reply: ' + (result.error || 'Unknown error'));
+            if (window.notifications) {
+                window.notifications.error('Failed to post reply: ' + (result.error || 'Unknown error'));
+            } else {
+                alert('Failed to post reply: ' + (result.error || 'Unknown error'));
+            }
         }
     } catch (error) {
         console.error('❌ Error posting reply:', error);
-        alert('Failed to post reply: ' + error.message);
+        if (window.notifications) {
+            window.notifications.error('Failed to post reply: ' + error.message);
+        } else {
+            alert('Failed to post reply: ' + error.message);
+        }
     }
 }
 
@@ -4177,7 +4259,11 @@ let studioData = {
 };
 
 function showVideoUpload() {
-    alert('Video upload feature coming soon! This will allow you to upload and manage video content.');
+    if (window.notifications) {
+        window.notifications.info('Video upload feature coming soon! This will allow you to upload and manage video content.');
+    } else {
+        alert('Video upload feature coming soon! This will allow you to upload and manage video content.');
+    }
 }
 
 function showBlogPostForm() {
@@ -4186,7 +4272,11 @@ function showBlogPostForm() {
 }
 
 function startLiveStream() {
-    alert('Live streaming feature coming soon! This will allow you to broadcast live to your audience.');
+    if (window.notifications) {
+        window.notifications.info('Live streaming feature coming soon! This will allow you to broadcast live to your audience.');
+    } else {
+        alert('Live streaming feature coming soon! This will allow you to broadcast live to your audience.');
+    }
 }
 
 function updateStudioStats() {
