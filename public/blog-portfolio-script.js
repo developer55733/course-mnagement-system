@@ -535,6 +535,12 @@ function showBlogManagement() {
     if (blogCurrentUser) {
         document.getElementById('blog-user-name').textContent = blogCurrentUser.name;
     }
+    
+    // Start real-time stats updates
+    startRealTimeStatsUpdates();
+    
+    // Initial stats update
+    updateBlogStats();
 }
 
 // Blog Interactions Functions
@@ -595,6 +601,9 @@ async function toggleLike(blogId) {
         } else {
             likedBlogs.delete(blogId);
         }
+        
+        // Update creator's stats in real-time
+        await updateBlogStats();
         
         // Show notification
         if (window.notifications) {
@@ -683,6 +692,9 @@ async function incrementBlogViews(blogId) {
         // Mark as viewed
         viewedBlogs.add(blogId);
         
+        // Update creator's stats in real-time
+        await updateBlogStats();
+        
     } catch (error) {
         console.error('❌ Error incrementing views:', error);
         // Don't show error for views as it's not critical
@@ -694,6 +706,24 @@ function initializeLikeButtons() {
     // This would be called after loading blogs to set initial button states
     // For now, we'll rely on the server to tell us if a user has liked a blog
     console.log('🔍 Initializing like buttons...');
+}
+
+// Start real-time stats updates for authenticated users
+function startRealTimeStatsUpdates() {
+    if (!blogCurrentUser) {
+        console.log('🔍 No authenticated user, skipping real-time stats');
+        return;
+    }
+    
+    console.log('🔍 Starting real-time stats updates for:', blogCurrentUser.username);
+    
+    // Update stats every 30 seconds
+    setInterval(async () => {
+        if (blogCurrentUser) {
+            console.log('🔍 Updating real-time stats...');
+            await updateBlogStats();
+        }
+    }, 30000); // 30 seconds
 }
 
 // Check if user has liked a blog (for UI initialization)
@@ -2470,3 +2500,5 @@ window.showBlogRegister = showBlogRegister;
 window.showBlogLogin = showBlogLogin;
 window.toggleLike = toggleLike;
 window.incrementBlogViews = incrementBlogViews;
+window.updateBlogStats = updateBlogStats;
+window.startRealTimeStatsUpdates = startRealTimeStatsUpdates;
