@@ -2564,6 +2564,58 @@
                             user_name: userName // Send user name directly to avoid database dependency
                         })
                     });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Clear form
+                        document.getElementById('reply-content').value = '';
+                        
+                        // Add new reply immediately to display
+                        const repliesContainer = document.getElementById('replies-container');
+                        const newReply = {
+                            id: data.data.id,
+                            content: replyContent,
+                            author_name: userName,
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        // Create reply element
+                        const replyElement = document.createElement('div');
+                        replyElement.className = 'reply-item';
+                        replyElement.innerHTML = `
+                            <div class="reply-header">
+                                <strong>${newReply.author_name || 'Anonymous'}</strong>
+                                <small class="reply-date">${new Date(newReply.created_at).toLocaleDateString()}</small>
+                            </div>
+                            <div class="reply-content">
+                                <p>${newReply.content}</p>
+                            </div>
+                        `;
+                        
+                        // Add to container
+                        if (repliesContainer.children.length === 1 && repliesContainer.children[0].classList.contains('text-muted')) {
+                            // Remove "No replies yet" message
+                            repliesContainer.innerHTML = '';
+                        }
+                        repliesContainer.appendChild(replyElement);
+                        
+                        // Show success message
+                        if (window.notifications) {
+                            window.notifications.success('Reply posted successfully!');
+                        } else {
+                            alert('Reply posted successfully!');
+                        }
+                        
+                        // Refresh discussions list in background
+                        loadDiscussions();
+                    } else {
+                        if (window.notifications) {
+                            window.notifications.error('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+                        } else {
+                            alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+                        }
+                    }
                 } catch (error) {
                     console.error('Error posting reply:', error);
                     if (window.notifications) {
