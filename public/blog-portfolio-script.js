@@ -1499,6 +1499,7 @@ async function addProject(event) {
 
 async function updateProfile(event) {
     event.preventDefault();
+    alert('Profile save button clicked!'); // Simple test alert
     console.log('🔍 Profile save button clicked!');
     console.log('📋 Form data:', event.target);
     
