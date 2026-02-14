@@ -2,9 +2,68 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
 
+// Helper function to ensure tables exist
+async function ensureTablesExist() {
+    try {
+        // Create blog_likes table if it doesn't exist
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS blog_likes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                blog_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                user_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_blog_id (blog_id),
+                INDEX idx_user_id (user_id),
+                UNIQUE KEY unique_blog_user (blog_id, user_id)
+            )
+        `);
+        
+        // Create blog_views table if it doesn't exist
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS blog_views (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                blog_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                user_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_blog_id (blog_id),
+                INDEX idx_user_id (user_id),
+                UNIQUE KEY unique_blog_user_view (blog_id, user_id)
+            )
+        `);
+        
+        // Ensure blogs table has likes and views columns
+        await pool.query(`
+            ALTER TABLE blogs 
+            ADD COLUMN IF NOT EXISTS likes INT DEFAULT 0
+        `);
+        
+        await pool.query(`
+            ALTER TABLE blogs 
+            ADD COLUMN IF NOT EXISTS views INT DEFAULT 0
+        `);
+        
+        console.log('✅ Blog interaction tables ensured to exist');
+        return true;
+    } catch (error) {
+        console.error('❌ Error ensuring tables exist:', error);
+        return false;
+    }
+}
+
 // Like a blog post
 router.post('/blogs/:id/like', async (req, res) => {
     try {
+        // Ensure tables exist before proceeding
+        const tablesReady = await ensureTablesExist();
+        if (!tablesReady) {
+            return res.status(500).json({ 
+                error: 'Database setup failed',
+                message: 'Could not set up blog interaction tables'
+            });
+        }
+        
         const { id } = req.params;
         const { user_id, user_name } = req.body;
         
@@ -113,6 +172,15 @@ router.get('/blogs/:id/likes', async (req, res) => {
 // Increment blog views (once per user per session)
 router.post('/blogs/:id/views', async (req, res) => {
     try {
+        // Ensure tables exist before proceeding
+        const tablesReady = await ensureTablesExist();
+        if (!tablesReady) {
+            return res.status(500).json({ 
+                error: 'Database setup failed',
+                message: 'Could not set up blog interaction tables'
+            });
+        }
+        
         const { id } = req.params;
         const { user_id, user_name } = req.body;
         
@@ -123,21 +191,6 @@ router.post('/blogs/:id/views', async (req, res) => {
         if (blogRows.length === 0) {
             return res.status(404).json({ error: 'Blog not found' });
         }
-        
-        // Create blog_views table if it doesn't exist
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS blog_views (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                blog_id VARCHAR(255) NOT NULL,
-                user_id VARCHAR(255) NOT NULL,
-                user_name VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_blog_id (blog_id),
-                INDEX idx_user_id (user_id),
-                UNIQUE KEY unique_blog_user_view (blog_id, user_id),
-                FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE
-            )
-        `);
         
         // Check if user has already viewed this blog
         const [existingViews] = await pool.query(
