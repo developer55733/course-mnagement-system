@@ -218,8 +218,21 @@ initializeDatabase().then(success => {
             console.log('⚠️ Blog interactions migration failed');
           }
           
-          // Start server after all migrations
-          startServer();
+          // Initialize portfolio tables
+          const { initializePortfolioTables } = require('./config/init-portfolio');
+          initializePortfolioTables().then(portfolioSuccess => {
+            if (portfolioSuccess) {
+              console.log('✅ Portfolio tables initialization completed');
+            } else {
+              console.log('⚠️ Portfolio tables initialization failed');
+            }
+            
+            // Start server after all migrations
+            startServer();
+          }).catch(error => {
+            console.error('❌ Portfolio tables initialization error:', error);
+            startServer();
+          });
         }).catch(error => {
           console.error('❌ Blog interactions migration error:', error);
           startServer();
