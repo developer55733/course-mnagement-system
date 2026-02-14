@@ -14,8 +14,6 @@ router.post('/register', async (req, res) => {
         const { name, email, username, password } = req.body;
         
         console.log('🔍 Blog registration request received:', { name, email, username, passwordLength: password?.length });
-        console.log('🔍 Request headers:', req.headers);
-        console.log('🔍 Request body keys:', Object.keys(req.body));
         
         // Validate input
         if (!name || !email || !username || !password) {
@@ -27,8 +25,7 @@ router.post('/register', async (req, res) => {
             });
             return res.status(400).json({ 
                 error: 'All fields are required',
-                message: 'Please fill in all fields',
-                details: { name: !!name, email: !!email, username: !!username, password: !!password }
+                message: 'Please fill in all fields'
             });
         }
         
@@ -40,98 +37,28 @@ router.post('/register', async (req, res) => {
             });
         }
         
-        console.log('🔍 Attempting database connection...');
-        
-        // Simple database connection test
+        // Ensure users table exists
         try {
-            const [testResult] = await pool.query('SELECT 1 as test');
-            console.log('✅ Database connection successful:', testResult);
-        } catch (dbError) {
-            console.error('❌ Database connection failed:', dbError);
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id VARCHAR(255) PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    role ENUM('admin', 'user') DEFAULT 'user',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )
+            `);
+            console.log('✅ Users table ensured to exist');
+        } catch (tableError) {
+            console.error('❌ Error ensuring users table exists:', tableError);
             return res.status(500).json({ 
-                error: 'Database connection failed',
-                message: 'Could not connect to database. Please try again later.',
-                details: dbError.message
+                error: 'Database setup failed',
+                message: 'Could not set up user table. Please try again later.',
+                details: tableError.message
             });
-        }
-        
-        // Check if user already exists
-        try {
-            console.log('🔍 Checking for existing users with email/username:', { email, username });
-            
-            // Now check for existing users
-            const [existingUsers] = await pool.query(
-                'SELECT id FROM users WHERE email = ? OR username = ?',
-                [email, username]
-            );
-            
-            console.log('🔍 Existing users found:', existingUsers.length);
-            console.log('🔍 Existing users data:', existingUsers);
-            
-            if (existingUsers.length > 0) {
-                console.log('❌ User already exists');
-                return res.status(409).json({ 
-                    error: 'User already exists',
-                    message: 'A user with this email or username already exists'
-                });
-            }
-        } catch (checkError) {
-            console.error('❌ Error checking existing users:', checkError);
-            console.error('❌ SQL Error details:', {
-                code: checkError.code,
-                errno: checkError.errno,
-                sqlState: checkError.sqlState,
-                sqlMessage: checkError.sqlMessage
-            });
-            
-            // If the table doesn't exist, create it first
-            if (checkError.code === 'ER_NO_SUCH_TABLE') {
-                console.log('➕ Users table does not exist, creating it...');
-                try {
-                    await pool.query(`
-                        CREATE TABLE users (
-                            id VARCHAR(255) PRIMARY KEY,
-                            name VARCHAR(255) NOT NULL,
-                            email VARCHAR(255) UNIQUE NOT NULL,
-                            username VARCHAR(255) UNIQUE NOT NULL,
-                            password VARCHAR(255) NOT NULL,
-                            role ENUM('admin', 'user') DEFAULT 'user',
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                            INDEX idx_email (email),
-                            INDEX idx_username (username),
-                            INDEX idx_role (role)
-                        )
-                    `);
-                    console.log('✅ Users table created successfully, retrying user check...');
-                    
-                    // Retry the user check
-                    const [retryUsers] = await pool.query(
-                        'SELECT id FROM users WHERE email = ? OR username = ?',
-                        [email, username]
-                    );
-                    
-                    if (retryUsers.length > 0) {
-                        return res.status(409).json({ 
-                            error: 'User already exists',
-                            message: 'A user with this email or username already exists'
-                        });
-                    }
-                } catch (createError) {
-                    console.error('❌ Failed to create users table:', createError);
-                    return res.status(500).json({ 
-                        error: 'Database setup failed',
-                        message: 'Could not create user table. Please try again later.',
-                        details: createError.message
-                    });
-                }
-            } else {
-                return res.status(500).json({ 
-                    error: 'Database check failed',
-                    message: 'Could not check for existing users. Please try again.',
-                    details: checkError.message
-                });
-            }
         }
         
         // Hash password
@@ -144,12 +71,11 @@ router.post('/register', async (req, res) => {
             console.error('❌ Error hashing password:', hashError);
             return res.status(500).json({ 
                 error: 'Password processing failed',
-                message: 'Could not process password. Please try again.',
-                details: hashError.message
+                message: 'Could not process password. Please try again.'
             });
         }
         
-        // Create user
+        // Try to create user (will fail if email/username already exists)
         try {
             console.log('🔍 Creating new user...');
             const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -180,6 +106,16 @@ router.post('/register', async (req, res) => {
             
         } catch (createError) {
             console.error('❌ Error creating user:', createError);
+            
+            // Check if it's a duplicate error
+            if (createError.code === 'ER_DUP_ENTRY') {
+                console.log('❌ Duplicate entry error');
+                return res.status(409).json({ 
+                    error: 'User already exists',
+                    message: 'A user with this email or username already exists'
+                });
+            }
+            
             console.error('❌ SQL Error details:', {
                 code: createError.code,
                 errno: createError.errno,
