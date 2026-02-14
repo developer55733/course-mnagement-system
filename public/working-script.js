@@ -1220,28 +1220,42 @@ window.downloadNote = function(noteId) {
                 generatePDF(note);
                 
             } else {
-                window.notifications.error('Error loading note details');
+                if (window.notifications) {
+                    window.notifications.error('Error loading note details');
+                } else {
+                    alert('Error loading note details');
+                }
             }
         }).catch(error => {
-            console.error(' Error downloading note:', error);
-            console.error(' Error details:', {
+            console.error('❌ Error downloading note:', error);
+            console.error('❌ Error details:', {
                 message: error.message,
                 stack: error.stack,
                 noteId: noteId
             });
-            window.notifications.error(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            
+            // Show better error message
+            if (window.notifications) {
+                window.notifications.error(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            } else {
+                alert(`Error downloading note: ${error.message || 'Unknown error occurred'}`);
+            }
         });
         
     } catch (error) {
         console.error('Error in downloadNote:', error);
-        window.notifications.error('Error downloading note');
+        if (window.notifications) {
+            window.notifications.error('Error downloading note');
+        } else {
+            alert('Error downloading note');
+        }
     }
 };
 
 // Generate PDF from note content
 function generatePDF(note) {
     try {
-        console.log(' Generating PDF for note:', note.title);
+        console.log('🔍 Generating PDF for note:', note.title);
         
         // Create a new window for PDF generation
         const pdfWindow = window.open('', '_blank', 'width=800,height=600');
@@ -1275,16 +1289,6 @@ function generatePDF(note) {
                         .meta-item {
                             margin: 5px 0;
                             font-weight: bold;
-                        }
-                        .meta-label {
-                            font-weight: 600;
-                            color: #495057;
-                            font-size: 12px;
-                            margin-bottom: 5px;
-                        }
-                        .meta-value {
-                            color: #2c3e50;
-                            font-size: 14px;
                         }
                         .content { 
                             margin-top: 20px; 
@@ -1324,11 +1328,11 @@ function generatePDF(note) {
                     <div class="no-print">
                         <p style="text-align: center; margin-top: 30px;">
                             <button onclick="window.print()" style="padding: 10px 20px; background: #283593; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                Print to PDF
+                                🖨️ Print to PDF
                             </button>
                         </p>
                         <p style="text-align: center; color: #666; font-size: 12px;">
-                            Use your browser's Print function and select "Save as PDF" to download the note as PDF
+                            💡 Use your browser's Print function and select "Save as PDF" to download the note as PDF
                         </p>
                     </div>
                 </body>
@@ -1343,18 +1347,18 @@ function generatePDF(note) {
             pdfWindow.print();
         }, 1000);
         
-        console.log(' PDF generation window opened');
+        console.log('✅ PDF generation window opened');
         
     } catch (error) {
-        console.error(' Error generating PDF:', error);
-        window.notifications.error('Error generating PDF: ' + error.message);
+        console.error('❌ Error generating PDF:', error);
+        alert('Error generating PDF: ' + error.message);
     }
 }
 
 // Enhanced PDF download function
 window.downloadEnhancedPDF = function(noteId) {
     try {
-        console.log(' Downloading enhanced PDF:', noteId);
+        console.log('🔍 Downloading enhanced PDF:', noteId);
         
         // Fetch the note details
         apiCall(`/notes/${noteId}`).then(response => {
@@ -1365,16 +1369,28 @@ window.downloadEnhancedPDF = function(noteId) {
                 createProfessionalPDF(note);
                 
             } else {
-                window.notifications.error('Error loading note details');
+                if (window.notifications) {
+                    window.notifications.error('Error loading note details');
+                } else {
+                    alert('Error loading note details');
+                }
             }
         }).catch(error => {
-            console.error(' Error downloading enhanced PDF:', error);
-            window.notifications.error(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            console.error('❌ Error downloading enhanced PDF:', error);
+            if (window.notifications) {
+                window.notifications.error(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            } else {
+                alert(`Error downloading enhanced PDF: ${error.message || 'Unknown error occurred'}`);
+            }
         });
         
     } catch (error) {
         console.error('Error in downloadEnhancedPDF:', error);
-        window.notifications.error('Error downloading enhanced PDF');
+        if (window.notifications) {
+            window.notifications.error('Error downloading enhanced PDF');
+        } else {
+            alert('Error downloading enhanced PDF');
+        }
     }
 };
 
@@ -1990,6 +2006,8 @@ window.deleteModule = function(index) {
 
             if (window.notifications) {
                 window.notifications.success('Module deleted successfully!');
+            } else {
+                alert('✅ Module deleted successfully!');
             }
 
         }, 1000);
@@ -2032,6 +2050,8 @@ window.saveModule = function(index) {
 
         if (window.notifications) {
             window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
         }
 
         return;
@@ -2062,6 +2082,8 @@ window.saveModule = function(index) {
 
         if (window.notifications) {
             window.notifications.success('Module updated successfully!');
+        } else {
+            alert('✅ Module updated successfully!');
         }
 
         
@@ -2228,6 +2250,8 @@ window.deleteLecturer = function(index) {
 
             if (window.notifications) {
                 window.notifications.success('Lecturer deleted successfully!');
+            } else {
+                alert('✅ Lecturer deleted successfully!');
             }
 
         }, 1000);
@@ -2254,6 +2278,8 @@ window.saveLecturer = function(index) {
 
         if (window.notifications) {
             window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
         }
 
         return;
@@ -2284,6 +2310,8 @@ window.saveLecturer = function(index) {
 
         if (window.notifications) {
             window.notifications.success('Lecturer updated successfully!');
+        } else {
+            alert('✅ Lecturer updated successfully!');
         }
 
         
@@ -2474,6 +2502,8 @@ window.deleteTimetable = function(index) {
 
             if (window.notifications) {
                 window.notifications.success('Timetable entry deleted successfully!');
+            } else {
+                alert('✅ Timetable entry deleted successfully!');
             }
 
         }, 1000);
@@ -2504,6 +2534,8 @@ window.saveTimetable = function(index) {
 
         if (window.notifications) {
             window.notifications.warning('Please fill in all fields');
+        } else {
+            alert('Please fill in all fields');
         }
 
         return;
@@ -3419,6 +3451,8 @@ async function postReply(e) {
     if (!currentUser) {
         if (window.notifications) {
             window.notifications.warning('Please login to reply to discussions');
+        } else {
+            alert('Please login to reply to discussions');
         }
         return;
     }
@@ -3429,7 +3463,9 @@ async function postReply(e) {
     
     if (!replyContent.trim()) {
         if (window.notifications) {
-            window.notifications.warning('Please fill in all fields');
+            window.notifications.warning('Please enter reply content');
+        } else {
+            alert('Please enter reply content');
         }
         return;
     }
@@ -3456,12 +3492,16 @@ async function postReply(e) {
         } else {
             if (window.notifications) {
                 window.notifications.error('Failed to post reply: ' + (result.error || 'Unknown error'));
+            } else {
+                alert('Failed to post reply: ' + (result.error || 'Unknown error'));
             }
         }
     } catch (error) {
         console.error('❌ Error posting reply:', error);
         if (window.notifications) {
             window.notifications.error('Failed to post reply: ' + error.message);
+        } else {
+            alert('Failed to post reply: ' + error.message);
         }
     }
 }

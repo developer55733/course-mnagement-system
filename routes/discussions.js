@@ -15,22 +15,10 @@ const authenticateUser = (req, res, next) => {
   });
   
   if (userId && userId !== '0' && userId !== 'undefined') {
-    // Get user name from database
-    const userQuery = 'SELECT name, email FROM users WHERE id = ?';
-    try {
-      const [userData] = await query(userQuery, [userId]);
-      req.user = { 
-        id: parseInt(userId), 
-        name: userData[0]?.name || 'User',
-        email: userData[0]?.email || ''
-      };
-      console.log('✅ User authenticated via x-user-id:', req.user.id, 'Name:', req.user.name);
-      return next();
-    } catch (error) {
-      console.error('❌ Error fetching user data:', error);
-      req.user = { id: parseInt(userId), name: 'User' };
-      return next();
-    }
+    req.user = { id: parseInt(userId) };
+    console.log('✅ User authenticated via x-user-id:', req.user.id);
+    return next();
+  }
   
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
@@ -61,32 +49,6 @@ const authenticateUser = (req, res, next) => {
   console.log('❌ Authentication required for:', req.method, req.path);
   res.status(401).json({ success: false, error: 'Authentication required' });
 };
-
-// Get current user for discussion forum
-router.get('/current-user', authenticateUser, async (req, res) => {
-  try {
-    if (req.user) {
-      res.json({ 
-        success: true, 
-        data: {
-          id: req.user.id,
-          name: req.user.name || 'User'
-        }
-      });
-    } else {
-      res.status(401).json({ 
-        success: false, 
-        error: 'No authenticated user found' 
-      });
-    }
-  } catch (error) {
-    console.error('Error getting current user:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to get current user' 
-    });
-  }
-});
 
 // Get all discussion posts
 router.get('/', async (req, res) => {
