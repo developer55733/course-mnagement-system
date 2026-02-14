@@ -162,8 +162,17 @@ initializeDatabase().then(success => {
     console.log('⚠️ Database initialization failed, but server will continue');
   }
   
-  // Start the server after database initialization
-  app.listen(PORT, () => {
+  // Run migration for discussion replies and user sessions
+  const migrateDiscussionReplies = require('./migrate-discussion-replies');
+  migrateDiscussionReplies().then(migrationSuccess => {
+    if (migrationSuccess) {
+      console.log('✅ Discussion replies migration completed');
+    } else {
+      console.log('⚠️ Discussion replies migration failed');
+    }
+    
+    // Start the server after database initialization and migration
+    app.listen(PORT, () => {
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction 
     ? `https://course-management-system.up.railway.app`
@@ -190,5 +199,6 @@ initializeDatabase().then(success => {
   console.log(`🚀 Server ready for Railway deployment`);
   console.log(`📊 Health check available at: ${apiUrl}/health`);
   console.log(`🔗 API documentation at: ${apiUrl}/api`);
+  });
   });
 });

@@ -184,6 +184,42 @@ async function initializeDatabase() {
         `);
         console.log('✅ portfolio_cv table created/verified');
 
+        // Create discussion_replies table for discussion forum replies
+        await query(`
+            CREATE TABLE IF NOT EXISTS discussion_replies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                discussion_id INT NOT NULL,
+                content TEXT NOT NULL,
+                created_by INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_discussion_id (discussion_id),
+                INDEX idx_created_by (created_by),
+                INDEX idx_created_at (created_at),
+                FOREIGN KEY (discussion_id) REFERENCES discussion_forum(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log('✅ discussion_replies table created/verified');
+
+        // Create user_sessions table for secure session management
+        await query(`
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                session_id VARCHAR(255) UNIQUE NOT NULL,
+                user_id INT NOT NULL,
+                user_data JSON NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP NOT NULL,
+                INDEX idx_session_id (session_id),
+                INDEX idx_user_id (user_id),
+                INDEX idx_expires_at (expires_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log('✅ user_sessions table created/verified');
+
         console.log('🎉 All new database tables initialized successfully!');
         return true;
         
