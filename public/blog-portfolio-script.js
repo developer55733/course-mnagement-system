@@ -828,24 +828,54 @@ function canCurrentUserManageBlog(blog) {
 
 async function updateBlogStats() {
     try {
-        const response = await fetch(`${API_BASE}/stats`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch stats');
+        // Only update stats if user is authenticated
+        if (!blogCurrentUser) {
+            console.log('🔍 No authenticated user, skipping blog stats update');
+            return;
         }
         
-        const stats = await response.json();
+        console.log('🔍 Updating blog stats for user:', blogCurrentUser.username);
         
+        // Fetch user's blogs only
+        const response = await fetch(`${API_BASE}/blogs?created_by=${blogCurrentUser.id}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user blogs');
+        }
+        
+        const userBlogs = await response.json();
+        console.log('🔍 User blogs fetched:', userBlogs.length);
+        
+        // Calculate user-specific stats
+        const totalPosts = userBlogs.length;
+        const totalViews = userBlogs.reduce((sum, blog) => sum + (blog.views || 0), 0);
+        const totalLikes = userBlogs.reduce((sum, blog) => sum + (blog.likes || 0), 0);
+        
+        console.log('🔍 User stats calculated:', { totalPosts, totalViews, totalLikes });
+        
+        // Update UI elements
         const totalPostsEl = document.getElementById('total-posts');
         const totalViewsEl = document.getElementById('total-views');
         const totalLikesEl = document.getElementById('total-likes');
         
-        if (totalPostsEl) totalPostsEl.textContent = stats.totalBlogs || 0;
-        if (totalViewsEl) totalViewsEl.textContent = '0'; // Would need to track views in DB
-        if (totalLikesEl) totalLikesEl.textContent = '0'; // Would need to track likes in DB
-    } catch (error) {
-        console.error('Error updating blog stats:', error);
+        if (totalPostsEl) {
+            totalPostsEl.textContent = totalPosts;
+            console.log('✅ Updated total posts:', totalPosts);
+        }
         
-        // Set default values
+        if (totalViewsEl) {
+            totalViewsEl.textContent = totalViews;
+            console.log('✅ Updated total views:', totalViews);
+        }
+        
+        if (totalLikesEl) {
+            totalLikesEl.textContent = totalLikes;
+            console.log('✅ Updated total likes:', totalLikes);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error updating blog stats:', error);
+        
+        // Set default values on error
         const totalPostsEl = document.getElementById('total-posts');
         const totalViewsEl = document.getElementById('total-views');
         const totalLikesEl = document.getElementById('total-likes');

@@ -7,7 +7,7 @@ const { pool } = require('../config/database');
 // Get all blogs
 router.get('/blogs', async (req, res) => {
     try {
-        const { status, category } = req.query;
+        const { status, category, created_by } = req.query;
         let query = 'SELECT * FROM blogs';
         const params = [];
         
@@ -22,6 +22,11 @@ router.get('/blogs', async (req, res) => {
         if (category) {
             whereConditions.push('category = ?');
             params.push(category);
+        }
+        
+        if (created_by) {
+            whereConditions.push('created_by = ?');
+            params.push(created_by);
         }
         
         if (whereConditions.length > 0) {
