@@ -19,6 +19,85 @@ CREATE TABLE IF NOT EXISTS `users` (
   INDEX idx_role (role)
 );
 
+-- Create portfolio_users table for portfolio authentication
+CREATE TABLE IF NOT EXISTS `portfolio_users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) UNIQUE NOT NULL,
+  `username` VARCHAR(50) UNIQUE NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `user_type` ENUM('portfolio') DEFAULT 'portfolio',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_username (username),
+  INDEX idx_user_type (user_type)
+);
+
+-- Create portfolio_profile table for portfolio data
+CREATE TABLE IF NOT EXISTS `portfolio_profile` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `title` VARCHAR(100),
+  `bio` TEXT,
+  `phone` VARCHAR(20),
+  `location` VARCHAR(100),
+  `website` VARCHAR(200),
+  `avatar` VARCHAR(500),
+  `category` ENUM('business', 'services', 'student', 'freelancer', 'professional', 'academic'),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES portfolio_users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id)
+);
+
+-- Create portfolio_skills table
+CREATE TABLE IF NOT EXISTS `portfolio_skills` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `level` ENUM('beginner', 'intermediate', 'advanced', 'expert') DEFAULT 'beginner',
+  `category` ENUM('technical', 'soft', 'language', 'tool') DEFAULT 'technical',
+  `description` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES portfolio_users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_level (level),
+  INDEX idx_category (category)
+);
+
+-- Create portfolio_experience table
+CREATE TABLE IF NOT EXISTS `portfolio_experience` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `company` VARCHAR(100) NOT NULL,
+  `position` VARCHAR(100) NOT NULL,
+  `start_date` DATE NOT NULL,
+  `end_date` DATE,
+  `description` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES portfolio_users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_start_date (start_date)
+);
+
+-- Create portfolio_projects table
+CREATE TABLE IF NOT EXISTS `portfolio_projects` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT,
+  `technologies` VARCHAR(200),
+  `link` VARCHAR(500),
+  `image` VARCHAR(500),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES portfolio_users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id)
+);
+
 -- Create lecturers table
 CREATE TABLE IF NOT EXISTS `lecturers` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

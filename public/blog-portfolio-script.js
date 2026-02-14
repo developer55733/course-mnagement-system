@@ -598,42 +598,73 @@ async function handlePortfolioLogin() {
         
         console.log('🔍 Portfolio login attempt:', username);
         
-        // For now, create a mock portfolio user since backend endpoint might not exist
-        // In production, this would be: `${API_BASE}/portfolio-auth/login`
-        const portfolioUser = {
-            id: 'portfolio_' + Date.now(),
-            name: username, // Use username as name for demo
-            email: username + '@portfolio.com', // Mock email
-            username: username,
-            created_at: new Date().toISOString(),
-            user_type: 'portfolio'
-        };
+        // Use database API for login
+        const response = await fetch(`${API_BASE}/portfolio-auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
         
-        // Mock successful login
-        console.log('✅ Portfolio login successful:', portfolioUser);
+        console.log('🔍 Login response status:', response.status);
+        console.log('🔍 Login response ok:', response.ok);
         
-        // Store portfolio user session
-        portfolioCurrentUser = portfolioUser;
-        localStorage.setItem('portfolioCurrentUser', JSON.stringify(portfolioUser));
+        const responseData = await response.json();
+        console.log('🔍 Login response data:', responseData);
         
-        // Show management section
-        showPortfolioManagement();
-        
-        // Load portfolio data
-        await loadPortfolioData();
-        
-        if (window.notifications) {
-            window.notifications.success('Portfolio login successful! Welcome back!');
+        if (response.ok && responseData.success) {
+            const user = responseData.user;
+            console.log('✅ Portfolio login successful:', user);
+            
+            // Store portfolio user session (minimal data for security)
+            portfolioCurrentUser = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                username: user.username,
+                user_type: user.user_type,
+                created_at: user.created_at
+            };
+            
+            // Use sessionStorage instead of localStorage for better security
+            sessionStorage.setItem('portfolioCurrentUser', JSON.stringify(portfolioCurrentUser));
+            
+            // Show management section
+            showPortfolioManagement();
+            
+            // Load portfolio data
+            await loadPortfolioData();
+            
+            if (window.notifications) {
+                window.notifications.success('Portfolio login successful! Welcome back!');
+            } else {
+                alert('Portfolio login successful! Welcome back!');
+            }
         } else {
-            alert('Portfolio login successful! Welcome back!');
+            // Handle specific error types
+            if (responseData.error === 'Invalid username or password') {
+                window.notifications.error('Invalid username or password');
+            } else if (responseData.error === 'Username and password are required') {
+                window.notifications.warning('Please enter username and password');
+            } else {
+                window.notifications.error(responseData.error || 'Login failed. Please try again.');
+            }
+            
+            console.error('❌ Login failed:', responseData);
         }
         
     } catch (error) {
         console.error('❌ Portfolio login error:', error);
-        if (window.notifications) {
-            window.notifications.error('Portfolio login failed: ' + error.message);
+        
+        // Check for network errors
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            window.notifications.error('Network error. Please check your connection and try again.');
         } else {
-            alert('Portfolio login failed: ' + error.message);
+            window.notifications.error('Login failed: ' + error.message);
         }
     }
 }
@@ -670,42 +701,78 @@ async function handlePortfolioRegister(event) {
         
         console.log('🔍 Portfolio registration attempt:', { name, email, username });
         
-        // For now, create a mock portfolio user since backend endpoint might not exist
-        // In production, this would be: `${API_BASE}/portfolio-auth/register`
-        const portfolioUser = {
-            id: 'portfolio_' + Date.now(),
-            name: name,
-            email: email,
-            username: username,
-            created_at: new Date().toISOString(),
-            user_type: 'portfolio'
-        };
+        // Use database API for registration
+        const response = await fetch(`${API_BASE}/portfolio-auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                username: username,
+                password: password,
+                confirm_password: confirmPassword
+            })
+        });
         
-        // Mock successful registration
-        console.log('✅ Portfolio registration successful:', portfolioUser);
+        console.log('🔍 Registration response status:', response.status);
+        console.log('🔍 Registration response ok:', response.ok);
         
-        // Store portfolio user session
-        portfolioCurrentUser = portfolioUser;
-        localStorage.setItem('portfolioCurrentUser', JSON.stringify(portfolioUser));
+        const responseData = await response.json();
+        console.log('🔍 Registration response data:', responseData);
         
-        // Show management section
-        showPortfolioManagement();
-        
-        // Load portfolio data
-        await loadPortfolioData();
-        
-        if (window.notifications) {
-            window.notifications.success('Portfolio account created successfully! Welcome to your portfolio management!');
+        if (response.ok && responseData.success) {
+            const user = responseData.user;
+            console.log('✅ Portfolio registration successful:', user);
+            
+            // Store portfolio user session (minimal data for security)
+            portfolioCurrentUser = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                username: user.username,
+                user_type: user.user_type,
+                created_at: user.created_at
+            };
+            
+            // Use sessionStorage instead of localStorage for better security
+            sessionStorage.setItem('portfolioCurrentUser', JSON.stringify(portfolioCurrentUser));
+            
+            // Show management section
+            showPortfolioManagement();
+            
+            // Load portfolio data
+            await loadPortfolioData();
+            
+            if (window.notifications) {
+                window.notifications.success('Portfolio account created successfully! Welcome to your portfolio management!');
+            } else {
+                alert('Portfolio account created successfully! Welcome to your portfolio management!');
+            }
         } else {
-            alert('Portfolio account created successfully! Welcome to your portfolio management!');
+            // Handle specific error types
+            if (responseData.error === 'Email or username already exists') {
+                window.notifications.error('A user with this email or username already exists');
+            } else if (responseData.error === 'Passwords do not match') {
+                window.notifications.error('Passwords do not match');
+            } else if (responseData.error === 'All fields are required') {
+                window.notifications.warning('Please fill in all fields');
+            } else {
+                window.notifications.error(responseData.error || 'Registration failed. Please try again.');
+            }
+            
+            console.error('❌ Registration failed:', responseData);
         }
         
     } catch (error) {
         console.error('❌ Portfolio registration error:', error);
-        if (window.notifications) {
-            window.notifications.error('Registration failed: ' + error.message);
+        
+        // Check for network errors
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            window.notifications.error('Network error. Please check your connection and try again.');
         } else {
-            alert('Registration failed: ' + error.message);
+            window.notifications.error('Registration failed: ' + error.message);
         }
     }
 }
@@ -714,9 +781,19 @@ async function handlePortfolioRegister(event) {
 function handlePortfolioLogout() {
     console.log('🔍 Portfolio logout');
     
-    // Clear portfolio user session
+    // Clear portfolio user session from sessionStorage
     portfolioCurrentUser = null;
-    localStorage.removeItem('portfolioCurrentUser');
+    sessionStorage.removeItem('portfolioCurrentUser');
+    
+    // Call logout API to clear server session
+    fetch(`${API_BASE}/portfolio-auth/logout`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).catch(error => {
+        console.log('Logout API call failed:', error);
+    });
     
     // Show public portfolio view
     showPublicPortfolio();
@@ -763,15 +840,15 @@ function showPublicPortfolio() {
 
 // Check portfolio authentication status
 function checkPortfolioAuthStatus() {
-    const storedUser = localStorage.getItem('portfolioCurrentUser');
+    const storedUser = sessionStorage.getItem('portfolioCurrentUser');
     if (storedUser) {
         try {
             portfolioCurrentUser = JSON.parse(storedUser);
-            console.log('🔍 Portfolio user found in storage:', portfolioCurrentUser);
+            console.log('🔍 Portfolio user found in sessionStorage:', portfolioCurrentUser);
             showPortfolioManagement();
         } catch (error) {
             console.error('❌ Error parsing portfolio user:', error);
-            localStorage.removeItem('portfolioCurrentUser');
+            sessionStorage.removeItem('portfolioCurrentUser');
             showPortfolioLogin(); // Show login/register form
         }
     } else {
