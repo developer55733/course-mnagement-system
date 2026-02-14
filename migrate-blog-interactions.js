@@ -10,13 +10,16 @@ async function migrateBlogInteractions() {
             SELECT TABLE_NAME 
             FROM INFORMATION_SCHEMA.TABLES 
             WHERE TABLE_SCHEMA = DATABASE() 
-            AND TABLE_NAME = 'blog_likes'
+            AND TABLE_NAME IN ('blog_likes', 'blog_views')
         `);
         
-        if (tables.length === 0) {
+        const existingTables = tables.map(t => t.TABLE_NAME);
+        console.log('🔍 Existing tables:', existingTables);
+        
+        // Create blog_likes table if it doesn't exist
+        if (!existingTables.includes('blog_likes')) {
             console.log('➕ Creating blog_likes table...');
             
-            // Create blog_likes table
             await pool.query(`
                 CREATE TABLE blog_likes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -36,16 +39,42 @@ async function migrateBlogInteractions() {
             console.log('ℹ️ blog_likes table already exists');
         }
         
+        // Create blog_views table if it doesn't exist
+        if (!existingTables.includes('blog_views')) {
+            console.log('➕ Creating blog_views table...');
+            
+            await pool.query(`
+                CREATE TABLE blog_views (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    blog_id VARCHAR(255) NOT NULL,
+                    user_id VARCHAR(255) NOT NULL,
+                    user_name VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_blog_id (blog_id),
+                    INDEX idx_user_id (user_id),
+                    UNIQUE KEY unique_blog_user_view (blog_id, user_id),
+                    FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE
+                )
+            `);
+            
+            console.log('✅ blog_views table created successfully');
+        } else {
+            console.log('ℹ️ blog_views table already exists');
+        }
+        
         // Check if blogs table has likes column
         const [columns] = await pool.query(`
             SELECT COLUMN_NAME 
             FROM INFORMATION_SCHEMA.COLUMNS 
             WHERE TABLE_SCHEMA = DATABASE() 
             AND TABLE_NAME = 'blogs' 
-            AND COLUMN_NAME = 'likes'
+            AND COLUMN_NAME IN ('likes', 'views')
         `);
         
-        if (columns.length === 0) {
+        const existingColumns = columns.map(c => c.COLUMN_NAME);
+        console.log('🔍 Existing columns:', existingColumns);
+        
+        if (!existingColumns.includes('likes')) {
             console.log('➕ Adding likes column to blogs table...');
             await pool.query(`
                 ALTER TABLE blogs 
@@ -56,16 +85,7 @@ async function migrateBlogInteractions() {
             console.log('ℹ️ likes column already exists in blogs table');
         }
         
-        // Check if blogs table has views column
-        const [viewsColumns] = await pool.query(`
-            SELECT COLUMN_NAME 
-            FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = DATABASE() 
-            AND TABLE_NAME = 'blogs' 
-            AND COLUMN_NAME = 'views'
-        `);
-        
-        if (viewsColumns.length === 0) {
+        if (!existingColumns.includes('views')) {
             console.log('➕ Adding views column to blogs table...');
             await pool.query(`
                 ALTER TABLE blogs 
@@ -78,12 +98,14 @@ async function migrateBlogInteractions() {
         
         // Verify the migration
         const [likeCount] = await pool.query('SELECT COUNT(*) as count FROM blog_likes');
+        const [viewCount] = await pool.query('SELECT COUNT(*) as count FROM blog_views');
         const [blogCount] = await pool.query('SELECT COUNT(*) as count FROM blogs');
         
         console.log('✅ Migration completed successfully!');
         console.log('🔍 Migration summary:');
         console.log(`  - Total blogs: ${blogCount[0].count}`);
         console.log(`  - Total likes: ${likeCount[0].count}`);
+        console.log(`  - Total views: ${viewCount[0].count}`);
         console.log('  - Blog interactions system ready');
         
         return true;

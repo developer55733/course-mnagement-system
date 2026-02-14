@@ -74,9 +74,18 @@ router.post('/blogs/:id/like', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error liking blog:', error);
+        
+        // Handle duplicate entry error
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                error: 'Already liked',
+                message: 'You have already liked this blog'
+            });
+        }
+        
         res.status(500).json({ 
             error: 'Failed to like blog',
-            message: 'Could not process like request'
+            message: 'Could not process like request: ' + error.message
         });
     }
 });
@@ -101,10 +110,13 @@ router.get('/blogs/:id/likes', async (req, res) => {
     }
 });
 
-// Increment blog views
+// Increment blog views (once per user per session)
 router.post('/blogs/:id/views', async (req, res) => {
     try {
         const { id } = req.params;
+        const { user_id, user_name } = req.body;
+        
+        console.log('🔍 View increment request:', { id, user_id, user_name });
         
         // Check if blog exists
         const [blogRows] = await pool.query('SELECT id FROM blogs WHERE id = ?', [id]);
@@ -112,20 +124,76 @@ router.post('/blogs/:id/views', async (req, res) => {
             return res.status(404).json({ error: 'Blog not found' });
         }
         
+        // Create blog_views table if it doesn't exist
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS blog_views (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                blog_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                user_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_blog_id (blog_id),
+                INDEX idx_user_id (user_id),
+                UNIQUE KEY unique_blog_user_view (blog_id, user_id),
+                FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE
+            )
+        `);
+        
+        // Check if user has already viewed this blog
+        const [existingViews] = await pool.query(
+            'SELECT id FROM blog_views WHERE blog_id = ? AND user_id = ?',
+            [id, user_id]
+        );
+        
+        if (existingViews.length > 0) {
+            console.log('🔍 User already viewed this blog:', id);
+            // Return current view count without incrementing
+            const [viewCount] = await pool.query('SELECT views FROM blogs WHERE id = ?', [id]);
+            return res.json({ 
+                success: true, 
+                views: viewCount[0].views,
+                alreadyViewed: true
+            });
+        }
+        
+        // Add new view record
+        await pool.query(
+            'INSERT INTO blog_views (blog_id, user_id, user_name, created_at) VALUES (?, ?, ?, NOW())',
+            [id, user_id, user_name]
+        );
+        
         // Increment views
         await pool.query('UPDATE blogs SET views = views + 1 WHERE id = ?', [id]);
         
         // Get updated view count
         const [viewCount] = await pool.query('SELECT views FROM blogs WHERE id = ?', [id]);
         
+        console.log('✅ Views incremented:', { id, views: viewCount[0].views });
+        
         res.json({ 
             success: true, 
-            views: viewCount[0].views 
+            views: viewCount[0].views,
+            alreadyViewed: false
         });
         
     } catch (error) {
         console.error('❌ Error incrementing views:', error);
-        res.status(500).json({ error: 'Failed to increment views' });
+        
+        // Handle duplicate entry error
+        if (error.code === 'ER_DUP_ENTRY') {
+            // User already viewed, return current count
+            const [viewCount] = await pool.query('SELECT views FROM blogs WHERE id = ?', [req.params.id]);
+            return res.json({ 
+                success: true, 
+                views: viewCount[0].views,
+                alreadyViewed: true
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Failed to increment views',
+            message: 'Could not process view request: ' + error.message
+        });
     }
 });
 
