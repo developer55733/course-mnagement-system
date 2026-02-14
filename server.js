@@ -51,6 +51,7 @@ const sessionRoutes = require('./routes/session');
 const blogAuthRoutes = require('./routes/blog-auth');
 const blogInteractionsRoutes = require('./routes/blog-interactions');
 const portfolioAuthRoutes = require('./routes/portfolio-auth');
+const portfolioRoutes = require('./routes/portfolio');
 
 const app = express();
 
@@ -151,6 +152,7 @@ app.use('/api/session', sessionRoutes);
 app.use('/api/blog-auth', blogAuthRoutes);
 app.use('/api/blog-interactions', blogInteractionsRoutes);
 app.use('/api/portfolio-auth', portfolioAuthRoutes);
+app.use('/api/portfolio', portfolioRoutes);
 
 // 404 handler
 app.use((req, res) => {
