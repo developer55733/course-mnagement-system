@@ -42,54 +42,31 @@ router.post('/register', async (req, res) => {
         
         console.log('🔍 Attempting database connection...');
         
-        // Check if users table exists
+        // Simple database connection test
         try {
-            const [tables] = await pool.query(`
-                SELECT TABLE_NAME 
-                FROM INFORMATION_SCHEMA.TABLES 
-                WHERE TABLE_SCHEMA = DATABASE() 
-                AND TABLE_NAME = 'users'
-            `);
-            
-            console.log('🔍 Users table check result:', tables.length > 0 ? 'Table exists' : 'Table does not exist');
-            
-            if (tables.length === 0) {
-                console.log('➕ Creating users table...');
-                await pool.query(`
-                    CREATE TABLE users (
-                        id VARCHAR(255) PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) UNIQUE NOT NULL,
-                        username VARCHAR(255) UNIQUE NOT NULL,
-                        password VARCHAR(255) NOT NULL,
-                        role ENUM('admin', 'user') DEFAULT 'user',
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_email (email),
-                        INDEX idx_username (username),
-                        INDEX idx_role (role)
-                    )
-                `);
-                console.log('✅ Users table created successfully');
-            }
-        } catch (tableError) {
-            console.error('❌ Error checking/creating users table:', tableError);
+            const [testResult] = await pool.query('SELECT 1 as test');
+            console.log('✅ Database connection successful:', testResult);
+        } catch (dbError) {
+            console.error('❌ Database connection failed:', dbError);
             return res.status(500).json({ 
-                error: 'Database setup failed',
-                message: 'Could not set up user table. Please try again.',
-                details: tableError.message
+                error: 'Database connection failed',
+                message: 'Could not connect to database. Please try again later.',
+                details: dbError.message
             });
         }
         
         // Check if user already exists
         try {
             console.log('🔍 Checking for existing users with email/username:', { email, username });
+            
+            // Now check for existing users
             const [existingUsers] = await pool.query(
                 'SELECT id FROM users WHERE email = ? OR username = ?',
                 [email, username]
             );
             
             console.log('🔍 Existing users found:', existingUsers.length);
+            console.log('🔍 Existing users data:', existingUsers);
             
             if (existingUsers.length > 0) {
                 console.log('❌ User already exists');
@@ -100,11 +77,61 @@ router.post('/register', async (req, res) => {
             }
         } catch (checkError) {
             console.error('❌ Error checking existing users:', checkError);
-            return res.status(500).json({ 
-                error: 'Database check failed',
-                message: 'Could not check for existing users. Please try again.',
-                details: checkError.message
+            console.error('❌ SQL Error details:', {
+                code: checkError.code,
+                errno: checkError.errno,
+                sqlState: checkError.sqlState,
+                sqlMessage: checkError.sqlMessage
             });
+            
+            // If the table doesn't exist, create it first
+            if (checkError.code === 'ER_NO_SUCH_TABLE') {
+                console.log('➕ Users table does not exist, creating it...');
+                try {
+                    await pool.query(`
+                        CREATE TABLE users (
+                            id VARCHAR(255) PRIMARY KEY,
+                            name VARCHAR(255) NOT NULL,
+                            email VARCHAR(255) UNIQUE NOT NULL,
+                            username VARCHAR(255) UNIQUE NOT NULL,
+                            password VARCHAR(255) NOT NULL,
+                            role ENUM('admin', 'user') DEFAULT 'user',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            INDEX idx_email (email),
+                            INDEX idx_username (username),
+                            INDEX idx_role (role)
+                        )
+                    `);
+                    console.log('✅ Users table created successfully, retrying user check...');
+                    
+                    // Retry the user check
+                    const [retryUsers] = await pool.query(
+                        'SELECT id FROM users WHERE email = ? OR username = ?',
+                        [email, username]
+                    );
+                    
+                    if (retryUsers.length > 0) {
+                        return res.status(409).json({ 
+                            error: 'User already exists',
+                            message: 'A user with this email or username already exists'
+                        });
+                    }
+                } catch (createError) {
+                    console.error('❌ Failed to create users table:', createError);
+                    return res.status(500).json({ 
+                        error: 'Database setup failed',
+                        message: 'Could not create user table. Please try again later.',
+                        details: createError.message
+                    });
+                }
+            } else {
+                return res.status(500).json({ 
+                    error: 'Database check failed',
+                    message: 'Could not check for existing users. Please try again.',
+                    details: checkError.message
+                });
+            }
         }
         
         // Hash password
