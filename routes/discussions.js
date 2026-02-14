@@ -164,7 +164,7 @@ router.post('/', async (req, res) => {
 router.post('/:id/replies', authenticateUser, async (req, res) => {
   try {
     const discussionId = req.params.id;
-    const { content } = req.body;
+    const { content, user_name } = req.body;
     
     console.log('🔍 Reply route - Request received');
     console.log('🔍 Reply route - Discussion ID:', discussionId);
@@ -220,15 +220,23 @@ router.post('/:id/replies', authenticateUser, async (req, res) => {
     
     const [replyData] = await query(replyQuery, [result.insertId]);
     
+    // Use user name from request if database doesn't have it
+    const reply = replyData[0] || {
+      id: result.insertId,
+      discussion_id: discussionId,
+      content,
+      created_by: createdBy,
+      created_at: new Date().toISOString()
+    };
+    
+    // Fallback to user name from request header if no database name
+    if (!reply.author_name && user_name) {
+      reply.author_name = user_name;
+    }
+    
     res.json({ 
       success: true, 
-      data: replyData[0] || {
-        id: result.insertId,
-        discussion_id: discussionId,
-        content,
-        created_by: createdBy,
-        created_at: new Date().toISOString()
-      }
+      data: reply
     });
   } catch (error) {
     console.error('❌ Error adding reply:', error);

@@ -2556,10 +2556,12 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'x-user-id': userId.toString()
+                            'x-user-id': userId.toString(),
+                            'x-user-name': userName.toString()
                         },
                         body: JSON.stringify({
-                            content: replyContent
+                            content: replyContent,
+                            user_name: userName // Send user name directly to avoid database dependency
                         })
                     });
                     
