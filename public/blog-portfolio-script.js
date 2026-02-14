@@ -1208,13 +1208,20 @@ async function addTestSkill() {
 // Load experience for authenticated user
 async function loadExperience() {
     try {
+        console.log('🔍 Loading portfolio experience...');
         const response = await fetch(`${API_BASE}/portfolio/experience`);
         if (!response.ok) {
             throw new Error('Failed to fetch experience');
         }
         
         const experience = await response.json();
+        console.log('📊 Experience loaded:', experience);
+        
         const experienceTimeline = document.getElementById('experience-timeline');
+        if (!experienceTimeline) {
+            console.error('❌ Experience timeline not found');
+            return;
+        }
         
         if (!experienceTimeline) return;
         
@@ -1232,7 +1239,9 @@ async function loadExperience() {
             return;
         }
         
-        experienceTimeline.innerHTML = experience.map(exp => `
+        experienceTimeline.innerHTML = experience.map(exp => {
+            console.log('🔍 Rendering experience:', exp);
+            return `
             <div class="experience-item">
                 <div class="experience-header">
                     <h4>${exp.position || 'Position'}</h4>
@@ -1249,7 +1258,8 @@ async function loadExperience() {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
     } catch (error) {
         console.error('❌ Error loading experience:', error);
@@ -1259,13 +1269,20 @@ async function loadExperience() {
 // Load projects for authenticated user
 async function loadProjects() {
     try {
+        console.log('🔍 Loading portfolio projects...');
         const response = await fetch(`${API_BASE}/portfolio/projects`);
         if (!response.ok) {
             throw new Error('Failed to fetch projects');
         }
         
         const projects = await response.json();
+        console.log('📊 Projects loaded:', projects);
+        
         const projectsGrid = document.getElementById('projects-grid');
+        if (!projectsGrid) {
+            console.error('❌ Projects grid not found');
+            return;
+        }
         
         if (!projectsGrid) return;
         
@@ -1283,7 +1300,9 @@ async function loadProjects() {
             return;
         }
         
-        projectsGrid.innerHTML = projects.map(project => `
+        projectsGrid.innerHTML = projects.map(project => {
+            console.log('🔍 Rendering project:', project);
+            return `
             <div class="project-item">
                 <div class="project-header">
                     <h4>${project.name || 'Project Name'}</h4>
@@ -1301,7 +1320,8 @@ async function loadProjects() {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
     } catch (error) {
         console.error('❌ Error loading projects:', error);
@@ -1590,6 +1610,64 @@ async function testProfileSave() {
         if (window.notifications) {
             window.notifications.error('Test profile save failed: ' + error.message);
         }
+    }
+}
+
+// Test function to add a sample experience for testing
+async function addTestExperience() {
+    try {
+        console.log('🧪 Adding test experience...');
+        const response = await fetch(`${API_BASE}/portfolio/experience`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                company: 'Test Company',
+                position: 'Test Developer',
+                start_date: '2023-01-01',
+                end_date: '2023-12-31',
+                description: 'Test experience description'
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Test experience added successfully');
+            await loadExperience(); // Reload experience to show new one
+        } else {
+            console.error('❌ Failed to add test experience');
+        }
+    } catch (error) {
+        console.error('❌ Error adding test experience:', error);
+    }
+}
+
+// Test function to add a sample project for testing
+async function addTestProject() {
+    try {
+        console.log('🧪 Adding test project...');
+        const response = await fetch(`${API_BASE}/portfolio/projects`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: 'Test Project',
+                description: 'Test project description',
+                technologies: 'JavaScript, React, Node.js',
+                link: 'https://github.com/test/project',
+                image: 'https://picsum.photos/seed/test-project/300/200.jpg'
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Test project added successfully');
+            await loadProjects(); // Reload projects to show new one
+        } else {
+            console.error('❌ Failed to add test project');
+        }
+    } catch (error) {
+        console.error('❌ Error adding test project:', error);
     }
 }
 
@@ -3737,6 +3815,8 @@ window.editProject = editProject;
 window.cancelProfileEdit = cancelProfileEdit;
 window.addTestSkill = addTestSkill;
 window.testProfileSave = testProfileSave;
+window.addTestExperience = addTestExperience;
+window.addTestProject = addTestProject;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
