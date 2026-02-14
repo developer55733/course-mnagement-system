@@ -1518,14 +1518,32 @@ async function addProject(event) {
 }
 
 async function updateProfile(event) {
-    event.preventDefault();
+    // Prevent double execution
+    if (event) {
+        event.preventDefault();
+    }
+    
     alert('Profile save button clicked!'); // Simple test alert
     console.log('🔍 Profile save button clicked!');
-    console.log('📋 Form data:', event.target);
     
     try {
-        const formData = new FormData(event.target);
-        const profileData = Object.fromEntries(formData);
+        // Get form data - handle both click and submit events
+        let profileData;
+        if (event && event.target) {
+            // Form submission
+            const formData = new FormData(event.target);
+            profileData = Object.fromEntries(formData);
+            console.log('📋 Form data from event:', event.target);
+        } else {
+            // Button click - get form manually
+            const form = document.getElementById('edit-profile-form');
+            if (form) {
+                const formData = new FormData(form);
+                profileData = Object.fromEntries(formData);
+                console.log('📋 Form data from manual get:', profileData);
+            }
+        }
+        
         console.log('📊 Profile data to save:', profileData);
         
         const response = await fetch(`${API_BASE}/portfolio/profile`, {
