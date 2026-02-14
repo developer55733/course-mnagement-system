@@ -48,6 +48,7 @@ const adsRoutes = require('./routes/ads');
 const blogPortfolioRoutes = require('./routes/blog-portfolio');
 const sessionRoutes = require('./routes/session');
 const blogAuthRoutes = require('./routes/blog-auth');
+const blogInteractionsRoutes = require('./routes/blog-interactions');
 
 const app = express();
 
@@ -133,6 +134,7 @@ app.use('/api/ads', adsRoutes);
 app.use('/api', blogPortfolioRoutes);
 app.use('/api/session', sessionRoutes);
 app.use('/api/blog-auth', blogAuthRoutes);
+app.use('/api/blog-interactions', blogInteractionsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -191,8 +193,21 @@ initializeDatabase().then(success => {
           console.log('⚠️ Blog authentication migration failed');
         }
         
-        // Start server after all migrations
-        startServer();
+        // Run migration for blog interactions
+        const { migrateBlogInteractions } = require('./migrate-blog-interactions');
+        migrateBlogInteractions().then(interactionsMigrationSuccess => {
+          if (interactionsMigrationSuccess) {
+            console.log('✅ Blog interactions migration completed');
+          } else {
+            console.log('⚠️ Blog interactions migration failed');
+          }
+          
+          // Start server after all migrations
+          startServer();
+        }).catch(error => {
+          console.error('❌ Blog interactions migration error:', error);
+          startServer();
+        });
       }).catch(error => {
         console.error('❌ Blog authentication migration error:', error);
         startServer();

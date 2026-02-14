@@ -85,12 +85,15 @@ async function loadPublicBlogs() {
                 <div class="blog-post-excerpt">${post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'No excerpt available')}</div>
                 <div class="blog-post-footer">
                     <div class="blog-post-stats">
-                        <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
-                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
+                        <span><i class="fas fa-eye"></i> <span class="view-count-${post.id}">${post.views || 0}</span></span>
+                        <span><i class="fas fa-heart"></i> <span class="like-count-${post.id}">${post.likes || 0}</span></span>
                     </div>
                     <div class="blog-post-actions">
                         <button class="btn btn-primary" onclick="viewFullBlogPost('${post.id}')">
                             <i class="fas fa-book-open"></i> Read More
+                        </button>
+                        <button class="btn btn-outline like-btn" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+                            <i class="fas fa-heart"></i> <span class="like-text-${post.id}">Like</span>
                         </button>
                     </div>
                 </div>
@@ -534,11 +537,125 @@ function showBlogManagement() {
     }
 }
 
-// Fallback initialization
-function initializeEmptyState() {
-    console.log('Using empty state fallback');
-    displayEmptyBlogPosts();
-    displayEmptyPortfolio();
+// Blog Interactions Functions
+
+// Toggle like on a blog post
+async function toggleLike(blogId) {
+    try {
+        console.log('🔍 Toggling like for blog:', blogId);
+        
+        // Get current user info (for public users, use anonymous)
+        let userId = 'anonymous';
+        let userName = 'Anonymous User';
+        
+        if (blogCurrentUser) {
+            userId = blogCurrentUser.id;
+            userName = blogCurrentUser.name;
+        }
+        
+        const response = await fetch(`${API_BASE}/blog-interactions/blogs/${blogId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                user_name: userName
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to toggle like');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Like toggle result:', result);
+        
+        // Update UI
+        updateLikeButton(blogId, result.liked, result.totalLikes);
+        
+        // Show notification
+        if (window.notifications) {
+            window.notifications.success(result.message);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error toggling like:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to like blog post');
+        }
+    }
+}
+
+// Update like button UI
+function updateLikeButton(blogId, liked, totalLikes) {
+    const likeBtn = document.getElementById(`like-btn-${blogId}`);
+    const likeCount = document.querySelector(`.like-count-${blogId}`);
+    const likeText = document.querySelector(`.like-text-${blogId}`);
+    
+    if (likeBtn) {
+        if (liked) {
+            likeBtn.classList.add('liked');
+            likeBtn.classList.remove('btn-outline');
+            likeBtn.classList.add('btn-primary');
+        } else {
+            likeBtn.classList.remove('liked');
+            likeBtn.classList.add('btn-outline');
+            likeBtn.classList.remove('btn-primary');
+        }
+    }
+    
+    if (likeCount) {
+        likeCount.textContent = totalLikes;
+    }
+    
+    if (likeText) {
+        likeText.textContent = liked ? 'Liked' : 'Like';
+    }
+}
+
+// Increment blog views
+async function incrementBlogViews(blogId) {
+    try {
+        console.log('🔍 Incrementing views for blog:', blogId);
+        
+        const response = await fetch(`${API_BASE}/blog-interactions/blogs/${blogId}/views`, {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to increment views');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Views incremented:', result);
+        
+        // Update view count in UI
+        const viewCount = document.querySelector(`.view-count-${blogId}`);
+        if (viewCount) {
+            viewCount.textContent = result.views;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error incrementing views:', error);
+        // Don't show error for views as it's not critical
+    }
+}
+
+// Check if user has liked a blog
+async function checkUserLikeStatus(blogId) {
+    try {
+        if (!blogCurrentUser) return false;
+        
+        // For now, we'll determine like status from the button state
+        // In a real implementation, you'd check against the database
+        const likeBtn = document.getElementById(`like-btn-${blogId}`);
+        return likeBtn ? likeBtn.classList.contains('liked') : false;
+        
+    } catch (error) {
+        console.error('❌ Error checking like status:', error);
+        return false;
+    }
 }
 
 // Blog Management Functions
@@ -2298,3 +2415,5 @@ window.handleBlogRegister = handleBlogRegister;
 window.handleBlogLogout = handleBlogLogout;
 window.showBlogRegister = showBlogRegister;
 window.showBlogLogin = showBlogLogin;
+window.toggleLike = toggleLike;
+window.incrementBlogViews = incrementBlogViews;
