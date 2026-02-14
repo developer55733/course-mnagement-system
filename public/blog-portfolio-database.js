@@ -82,9 +82,17 @@ class BlogPortfolioDB {
     async addBlog(blogData) {
         if (!this.data) await this.loadDatabase();
         
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
         const newBlog = {
             id: Date.now().toString(),
             ...blogData,
+            createdBy: currentUser ? currentUser.id : 'anonymous',
+            createdByName: currentUser ? currentUser.name : 'Anonymous',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -96,6 +104,11 @@ class BlogPortfolioDB {
 
     async updateBlog(blogId, updateData) {
         if (!this.data) await this.loadDatabase();
+        
+        // Check if user can manage this blog
+        if (!this.canManageBlog(blogId)) {
+            throw new Error('You do not have permission to edit this blog');
+        }
         
         const blogIndex = this.data.blogs.findIndex(blog => blog.id === blogId);
         if (blogIndex !== -1) {
@@ -113,13 +126,34 @@ class BlogPortfolioDB {
     async deleteBlog(blogId) {
         if (!this.data) await this.loadDatabase();
         
+        // Check if user can manage this blog
+        if (!this.canManageBlog(blogId)) {
+            throw new Error('You do not have permission to delete this blog');
+        }
+        
         const blogIndex = this.data.blogs.findIndex(blog => blog.id === blogId);
         if (blogIndex !== -1) {
-            const deletedBlog = this.data.blogs.splice(blogIndex, 1)[0];
+            const deletedBlog = this.data.blogs[blogIndex];
+            this.data.blogs.splice(blogIndex, 1);
             await this.saveDatabase();
             return deletedBlog;
         }
         return null;
+    }
+
+    canManageBlog(blogId) {
+        const blog = this.data?.blogs?.find(b => b.id === blogId);
+        if (!blog) return false;
+        
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
+        // User can manage if they created the blog or if no user is logged in (demo mode)
+        if (!currentUser) return true; // Demo mode - allow all
+        return blog.createdBy === currentUser.id || blog.createdBy === 'anonymous';
     }
 
     async getBlogById(blogId) {

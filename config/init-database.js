@@ -93,11 +93,14 @@ async function initializeDatabase() {
                 status ENUM('draft', 'published') DEFAULT 'draft',
                 views INT DEFAULT 0,
                 likes INT DEFAULT 0,
+                created_by VARCHAR(50),
+                created_by_name VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_status (status),
                 INDEX idx_category (category),
-                INDEX idx_created_at (created_at)
+                INDEX idx_created_at (created_at),
+                INDEX idx_created_by (created_by)
             )
         `);
         console.log('✅ blogs table created/verified');

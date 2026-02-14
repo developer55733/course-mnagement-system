@@ -18,12 +18,12 @@ router.get('/blogs', async (req, res) => {
 // Create new blog
 router.post('/blogs', async (req, res) => {
     try {
-        const { title, category, excerpt, content, tags, featured_image, status } = req.body;
+        const { title, category, excerpt, content, tags, featured_image, status, created_by, created_by_name } = req.body;
         const id = Date.now().toString();
         
         const [result] = await pool.query(
-            'INSERT INTO blogs (id, title, category, excerpt, content, tags, featured_image, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, title, category || 'other', excerpt, content, JSON.stringify(tags || []), featured_image, status || 'draft']
+            'INSERT INTO blogs (id, title, category, excerpt, content, tags, featured_image, status, created_by, created_by_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, title, category || 'other', excerpt, content, JSON.stringify(tags || []), featured_image, status || 'draft', created_by || 'anonymous', created_by_name || 'Anonymous']
         );
         
         res.json({ id, ...req.body, created_at: new Date().toISOString() });
@@ -38,6 +38,20 @@ router.put('/blogs/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { title, category, excerpt, content, tags, featured_image, status } = req.body;
+        
+        // First check if blog exists and get ownership info
+        const [blogRows] = await pool.query('SELECT created_by FROM blogs WHERE id = ?', [id]);
+        if (blogRows.length === 0) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        
+        const blog = blogRows[0];
+        
+        // Check if user can manage this blog (demo mode allows all)
+        const userId = req.headers['x-user-id'];
+        if (userId && blog.created_by !== userId && blog.created_by !== 'anonymous') {
+            return res.status(403).json({ error: 'You do not have permission to edit this blog' });
+        }
         
         const [result] = await pool.query(
             'UPDATE blogs SET title = ?, category = ?, excerpt = ?, content = ?, tags = ?, featured_image = ?, status = ? WHERE id = ?',
@@ -59,6 +73,20 @@ router.put('/blogs/:id', async (req, res) => {
 router.delete('/blogs/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // First check if blog exists and get ownership info
+        const [blogRows] = await pool.query('SELECT created_by FROM blogs WHERE id = ?', [id]);
+        if (blogRows.length === 0) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        
+        const blog = blogRows[0];
+        
+        // Check if user can manage this blog (demo mode allows all)
+        const userId = req.headers['x-user-id'];
+        if (userId && blog.created_by !== userId && blog.created_by !== 'anonymous') {
+            return res.status(403).json({ error: 'You do not have permission to delete this blog' });
+        }
         
         const [result] = await pool.query('DELETE FROM blogs WHERE id = ?', [id]);
         

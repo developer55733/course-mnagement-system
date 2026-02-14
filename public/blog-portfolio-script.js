@@ -172,6 +172,12 @@ async function createBlogPost(e) {
     e.preventDefault();
     
     try {
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
         const formData = new FormData(e.target);
         const blogPost = {
             title: formData.get('blog-title') || '',
@@ -180,11 +186,17 @@ async function createBlogPost(e) {
             content: formData.get('blog-content') || '',
             tags: formData.get('blog-tags') ? formData.get('blog-tags').split(',').map(tag => tag.trim()) : [],
             featured_image: formData.get('blog-featured-image') || '',
-            status: 'published'
+            status: 'published',
+            created_by: currentUser ? currentUser.id : 'anonymous',
+            created_by_name: currentUser ? currentUser.name : 'Anonymous'
         };
         
         if (!blogPost.title || !blogPost.content) {
-            showMessage('blog-message', 'Please fill in at least title and content', 'error');
+            if (window.notifications) {
+                window.notifications.warning('Please fill in at least title and content');
+            } else {
+                showMessage('blog-message', 'Please fill in at least title and content', 'error');
+            }
             return;
         }
         
@@ -238,7 +250,11 @@ async function displayBlogPosts() {
             return;
         }
         
-        postsGrid.innerHTML = posts.map(post => `
+        postsGrid.innerHTML = posts.map(post => {
+            // Check if current user can manage this blog
+            const canManage = canCurrentUserManageBlog(post);
+            
+            return `
             <div class="blog-post-card">
                 <div class="blog-post-header">
                     <h4>${post.title || 'Untitled'}</h4>
@@ -246,6 +262,7 @@ async function displayBlogPosts() {
                         <span class="blog-category">${post.category || 'Uncategorized'}</span>
                         <span class="blog-date">${new Date(post.created_at).toLocaleDateString()}</span>
                         <span class="blog-status ${post.status}">${post.status || 'draft'}</span>
+                        ${post.created_by_name ? `<span class="blog-author">By ${post.created_by_name}</span>` : ''}
                     </div>
                 </div>
                 ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="blog-post-image">` : ''}
@@ -255,6 +272,7 @@ async function displayBlogPosts() {
                         <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
                         <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
                     </div>
+                    ${canManage ? `
                     <div class="blog-post-actions">
                         <button class="btn btn-primary" onclick="editBlogPost('${post.id}')">
                             <i class="fas fa-edit"></i> Edit
@@ -263,13 +281,30 @@ async function displayBlogPosts() {
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
+                    ` : ''}
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } catch (error) {
         console.error('Error displaying blog posts:', error);
         displayEmptyBlogPosts();
     }
+}
+
+// Check if current user can manage a blog
+function canCurrentUserManageBlog(blog) {
+    // Get current user info
+    let currentUser = null;
+    if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+        currentUser = window.sessionManager.getCurrentUser();
+    }
+    
+    // If no user is logged in (demo mode), allow all
+    if (!currentUser) return true;
+    
+    // User can manage if they created the blog
+    return blog.created_by === currentUser.id || blog.created_by === 'anonymous';
 }
 
 async function updateBlogStats() {
@@ -490,6 +525,12 @@ function updatePortfolioStats() {
 // Edit and Delete functions
 async function editBlogPost(postId) {
     try {
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
         // Fetch blog post data
         const response = await fetch(`${API_BASE}/blogs/${postId}`);
         if (!response.ok) {
@@ -497,6 +538,16 @@ async function editBlogPost(postId) {
         }
         
         const post = await response.json();
+        
+        // Check if current user can manage this blog
+        if (!canCurrentUserManageBlog(post)) {
+            if (window.notifications) {
+                window.notifications.error('You do not have permission to edit this blog');
+            } else {
+                alert('You do not have permission to edit this blog');
+            }
+            return;
+        }
         
         // Populate form with post data
         const titleEl = document.getElementById('blog-title');
@@ -532,6 +583,12 @@ async function editBlogPost(postId) {
 
 async function updateBlogPost(postId) {
     try {
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
         const form = document.getElementById('create-blog-form');
         const formData = new FormData(form);
         
@@ -544,11 +601,18 @@ async function updateBlogPost(postId) {
             featured_image: formData.get('blog-featured-image') || ''
         };
         
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        // Add user ID header if user is logged in
+        if (currentUser) {
+            headers['x-user-id'] = currentUser.id.toString();
+        }
+        
         const response = await fetch(`${API_BASE}/blogs/${postId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(updateData)
         });
         
@@ -569,20 +633,71 @@ async function updateBlogPost(postId) {
 }
 
 async function deleteBlogPost(postId) {
-    if (confirm('Are you sure you want to delete this blog post?')) {
-        try {
-            const response = await fetch(`${API_BASE}/blogs/${postId}`, {
-                method: 'DELETE'
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to delete blog post');
+    try {
+        // Get current user info
+        let currentUser = null;
+        if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+            currentUser = window.sessionManager.getCurrentUser();
+        }
+        
+        // First fetch the blog to check permissions
+        const response = await fetch(`${API_BASE}/blogs/${postId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load blog post');
+        }
+        
+        const post = await response.json();
+        
+        // Check if current user can manage this blog
+        if (!canCurrentUserManageBlog(post)) {
+            if (window.notifications) {
+                window.notifications.error('You do not have permission to delete this blog');
+            } else {
+                alert('You do not have permission to delete this blog');
             }
-            
+            return;
+        }
+        
+        // Show confirmation dialog
+        const confirmed = await new Promise((resolve) => {
+            if (window.notifications) {
+                window.notifications.confirm('Are you sure you want to delete this blog post?').then(resolve);
+            } else {
+                resolve(confirm('Are you sure you want to delete this blog post?'));
+            }
+        });
+        
+        if (!confirmed) return;
+        
+        // Prepare headers
+        const headers = {};
+        
+        // Add user ID header if user is logged in
+        if (currentUser) {
+            headers['x-user-id'] = currentUser.id.toString();
+        }
+        
+        // Proceed with deletion
+        const deleteResponse = await fetch(`${API_BASE}/blogs/${postId}`, {
+            method: 'DELETE',
+            headers: headers
+        });
+        
+        if (!deleteResponse.ok) {
+            throw new Error('Failed to delete blog post');
+        }
+        
+        if (window.notifications) {
+            window.notifications.success('Blog post deleted successfully!');
+        } else {
             showMessage('blog-message', 'Blog post deleted successfully!', 'success');
-            await loadBlogPosts();
-        } catch (error) {
-            console.error('Error deleting blog post:', error);
+        }
+        await loadBlogPosts();
+    } catch (error) {
+        console.error('Error deleting blog post:', error);
+        if (window.notifications) {
+            window.notifications.error('Failed to delete blog post');
+        } else {
             showMessage('blog-message', 'Failed to delete blog post', 'error');
         }
     }
