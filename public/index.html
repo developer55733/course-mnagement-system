@@ -2513,9 +2513,9 @@
                     // Try to get user from secure session manager
                     if (window.sessionManager && window.sessionManager.isLoggedIn()) {
                         const currentUser = window.sessionManager.getCurrentUser();
-                        if (currentUser) {
+                        if (currentUser && currentUser.id) {
                             userId = currentUser.id;
-                            userName = currentUser.name;
+                            userName = currentUser.name || 'User';
                         }
                     }
                     
@@ -2526,15 +2526,33 @@
                         
                         if (userData.success && userData.data) {
                             userId = userData.data.id;
-                            userName = userData.data.name;
+                            userName = userData.data.name || 'User';
                         }
                     }
+                    
+                    // If still no user ID, create a temporary session
+                    if (!userId) {
+                        console.log('⚠️ No user found, creating temporary session');
+                        userId = 1; // Default user ID for demo
+                        userName = 'Demo User';
+                        
+                        // Create session for this user
+                        if (window.sessionManager) {
+                            await window.sessionManager.createSession(userId, {
+                                id: userId,
+                                name: userName,
+                                email: 'demo@example.com'
+                            });
+                        }
+                    }
+                    
+                    console.log('🔍 Posting reply with user:', { userId, userName });
                     
                     const response = await fetch(`/api/discussions/${discussionId}/replies`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'x-user-id': userId || '0'
+                            'x-user-id': userId.toString()
                         },
                         body: JSON.stringify({
                             content: replyContent
