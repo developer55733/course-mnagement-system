@@ -1499,9 +1499,13 @@ async function addProject(event) {
 
 async function updateProfile(event) {
     event.preventDefault();
+    console.log('🔍 Profile save button clicked!');
+    console.log('📋 Form data:', event.target);
+    
     try {
         const formData = new FormData(event.target);
         const profileData = Object.fromEntries(formData);
+        console.log('📊 Profile data to save:', profileData);
         
         const response = await fetch(`${API_BASE}/portfolio/profile`, {
             method: 'PUT',
@@ -1511,9 +1515,16 @@ async function updateProfile(event) {
             body: JSON.stringify(profileData)
         });
         
+        console.log('📡 Profile update response:', response);
+        
         if (!response.ok) {
-            throw new Error('Failed to update profile');
+            const errorData = await response.json();
+            console.error('❌ Profile update failed:', errorData);
+            throw new Error(errorData.error || 'Failed to update profile');
         }
+        
+        const result = await response.json();
+        console.log('✅ Profile update result:', result);
         
         // Hide form and reload profile
         const formContainer = document.getElementById('profile-form-container');
@@ -1529,6 +1540,54 @@ async function updateProfile(event) {
         console.error('❌ Error updating profile:', error);
         if (window.notifications) {
             window.notifications.error('Failed to update profile: ' + error.message);
+        }
+    }
+}
+
+// Test function to verify profile save
+async function testProfileSave() {
+    console.log('🧪 Testing profile save...');
+    
+    const testProfileData = {
+        name: 'Test User',
+        title: 'Test Developer',
+        bio: 'Test bio for profile',
+        phone: '+1234567890',
+        location: 'Test City',
+        website: 'https://test.com',
+        category: 'professional'
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testProfileData)
+        });
+        
+        console.log('📡 Test profile save response:', response);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Test profile save failed:', errorData);
+            throw new Error(errorData.error || 'Failed to save test profile');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Test profile save result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Test profile saved successfully!');
+        }
+        
+        await loadProfile();
+        
+    } catch (error) {
+        console.error('❌ Error testing profile save:', error);
+        if (window.notifications) {
+            window.notifications.error('Test profile save failed: ' + error.message);
         }
     }
 }
@@ -3676,6 +3735,7 @@ window.editExperience = editExperience;
 window.editProject = editProject;
 window.cancelProfileEdit = cancelProfileEdit;
 window.addTestSkill = addTestSkill;
+window.testProfileSave = testProfileSave;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
