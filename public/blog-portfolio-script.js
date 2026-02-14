@@ -3,34 +3,41 @@
 // API Configuration
 const API_BASE = window.location.origin + '/api';
 
-// Initialize when DOM is loaded
+// Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        console.log('Initializing blog and portfolio system...');
-        
-        // Test API connection
-        await testAPIConnection();
-        
-        // Check blog authentication status
-        checkBlogAuthStatus();
-        
-        // Load public blogs (always available)
-        await loadPublicBlogs();
-        
-        // Load data (only if authenticated)
-        if (blogCurrentUser) {
-            await loadBlogPosts();
-            await loadPortfolioData();
-            updateBlogStats();
-            updatePortfolioStats();
-        }
-        
-        // Setup event listeners
-        setupEventListeners();
+    console.log(' Initializing blog and portfolio system...');
+    
+    // Check blog authentication status
+    checkBlogAuthStatus();
+    
+    // Check portfolio authentication status
+    checkPortfolioAuthStatus();
+    
+    // Load public blogs for everyone to see
+    await loadPublicBlogs();
+    
+    // Load portfolio data for everyone to see
+    await loadPublicPortfolioData();
+    
+    // Initialize tab switching
+    initializeTabSwitching();
+    
+    // Initialize mobile navigation
+    initializeMobileNavigation();
+    
+    // Test API connection
+    await testAPIConnection();
+    
+    // Load data (only if authenticated)
+    if (blogCurrentUser) {
+        await loadBlogPosts();
+        await loadPortfolioData();
+        updateBlogStats();
+        updatePortfolioStats();
         
         console.log('Blog and portfolio system initialized successfully');
-    } catch (error) {
-        console.error('Error initializing blog and portfolio system:', error);
+    } else {
+        console.log('Blog and portfolio system initialized (public mode)');
     }
 });
 
@@ -543,7 +550,415 @@ function showBlogManagement() {
     updateBlogStats();
 }
 
-// Blog Interactions Functions
+// Portfolio Authentication Variables
+let portfolioCurrentUser = null;
+
+// Portfolio Authentication Functions
+
+// Show portfolio login form
+function showPortfolioLogin() {
+    const authSection = document.getElementById('portfolio-auth-section');
+    const registerSection = document.getElementById('portfolio-register-section');
+    const managementSection = document.getElementById('portfolio-management-section');
+    const publicSection = document.querySelector('.public-portfolio-section');
+    
+    if (authSection) authSection.style.display = 'block';
+    if (registerSection) registerSection.style.display = 'none';
+    if (managementSection) managementSection.style.display = 'none';
+    if (publicSection) publicSection.style.display = 'none';
+}
+
+// Show portfolio registration form
+function showPortfolioRegister() {
+    const authSection = document.getElementById('portfolio-auth-section');
+    const registerSection = document.getElementById('portfolio-register-section');
+    const managementSection = document.getElementById('portfolio-management-section');
+    const publicSection = document.querySelector('.public-portfolio-section');
+    
+    if (authSection) authSection.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'block';
+    if (managementSection) managementSection.style.display = 'none';
+    if (publicSection) publicSection.style.display = 'none';
+}
+
+// Handle portfolio login
+async function handlePortfolioLogin() {
+    try {
+        const username = document.getElementById('portfolio-username').value;
+        const password = document.getElementById('portfolio-password').value;
+        
+        if (!username || !password) {
+            if (window.notifications) {
+                window.notifications.error('Please enter username and password');
+            } else {
+                alert('Please enter username and password');
+            }
+            return;
+        }
+        
+        console.log('🔍 Portfolio login attempt:', username);
+        
+        const response = await fetch(`${API_BASE}/blog-auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Login failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Portfolio login successful:', result);
+        
+        // Store portfolio user session
+        portfolioCurrentUser = result.user;
+        localStorage.setItem('portfolioCurrentUser', JSON.stringify(result.user));
+        
+        // Show management section
+        showPortfolioManagement();
+        
+        // Load portfolio data
+        await loadPortfolioData();
+        
+        if (window.notifications) {
+            window.notifications.success('Portfolio login successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Portfolio login error:', error);
+        if (window.notifications) {
+            window.notifications.error('Portfolio login failed: ' + error.message);
+        } else {
+            alert('Portfolio login failed: ' + error.message);
+        }
+    }
+}
+
+// Handle portfolio registration
+async function handlePortfolioRegister() {
+    try {
+        const name = document.getElementById('portfolio-register-name').value;
+        const email = document.getElementById('portfolio-register-email').value;
+        const username = document.getElementById('portfolio-register-username').value;
+        const password = document.getElementById('portfolio-register-password').value;
+        const confirmPassword = document.getElementById('portfolio-register-confirm-password').value;
+        
+        if (!name || !email || !username || !password) {
+            if (window.notifications) {
+                window.notifications.error('Please fill all required fields');
+            } else {
+                alert('Please fill all required fields');
+            }
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            if (window.notifications) {
+                window.notifications.error('Passwords do not match');
+            } else {
+                alert('Passwords do not match');
+            }
+            return;
+        }
+        
+        console.log('🔍 Portfolio registration attempt:', { name, email, username });
+        
+        const response = await fetch(`${API_BASE}/blog-auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                username: username,
+                password: password
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Registration failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Portfolio registration successful:', result);
+        
+        // Store portfolio user session
+        portfolioCurrentUser = result.user;
+        localStorage.setItem('portfolioCurrentUser', JSON.stringify(result.user));
+        
+        // Show management section
+        showPortfolioManagement();
+        
+        // Load portfolio data
+        await loadPortfolioData();
+        
+        if (window.notifications) {
+            window.notifications.success('Portfolio registration successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Portfolio registration error:', error);
+        if (window.notifications) {
+            window.notifications.error('Portfolio registration failed: ' + error.message);
+        } else {
+            alert('Portfolio registration failed: ' + error.message);
+        }
+    }
+}
+
+// Handle portfolio logout
+function handlePortfolioLogout() {
+    console.log('🔍 Portfolio logout');
+    
+    // Clear portfolio user session
+    portfolioCurrentUser = null;
+    localStorage.removeItem('portfolioCurrentUser');
+    
+    // Show public portfolio view
+    showPublicPortfolio();
+    
+    if (window.notifications) {
+        window.notifications.success('Portfolio logout successful!');
+    }
+}
+
+// Show portfolio management section
+function showPortfolioManagement() {
+    const authSection = document.getElementById('portfolio-auth-section');
+    const registerSection = document.getElementById('portfolio-register-section');
+    const managementSection = document.getElementById('portfolio-management-section');
+    const publicSection = document.querySelector('.public-portfolio-section');
+    
+    if (authSection) authSection.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'none';
+    if (managementSection) managementSection.style.display = 'block';
+    if (publicSection) publicSection.style.display = 'none';
+    
+    // Update user info
+    if (portfolioCurrentUser) {
+        const userNameEl = document.getElementById('portfolio-user-name');
+        if (userNameEl) userNameEl.textContent = portfolioCurrentUser.name;
+    }
+}
+
+// Show public portfolio view
+function showPublicPortfolio() {
+    const authSection = document.getElementById('portfolio-auth-section');
+    const registerSection = document.getElementById('portfolio-register-section');
+    const managementSection = document.getElementById('portfolio-management-section');
+    const publicSection = document.querySelector('.public-portfolio-section');
+    
+    if (authSection) authSection.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'none';
+    if (managementSection) managementSection.style.display = 'none';
+    if (publicSection) publicSection.style.display = 'block';
+    
+    // Load public portfolio data
+    loadPublicPortfolioData();
+}
+
+// Check portfolio authentication status
+function checkPortfolioAuthStatus() {
+    const storedUser = localStorage.getItem('portfolioCurrentUser');
+    if (storedUser) {
+        try {
+            portfolioCurrentUser = JSON.parse(storedUser);
+            console.log('🔍 Portfolio user found in storage:', portfolioCurrentUser);
+            showPortfolioManagement();
+        } catch (error) {
+            console.error('❌ Error parsing portfolio user:', error);
+            localStorage.removeItem('portfolioCurrentUser');
+            showPublicPortfolio();
+        }
+    } else {
+        console.log('🔍 No portfolio user found, showing public view');
+        showPublicPortfolio();
+    }
+}
+
+// Load public portfolio data (for everyone to see)
+async function loadPublicPortfolioData() {
+    try {
+        console.log('🔍 Loading public portfolio data...');
+        
+        // Load profile data for public view
+        await loadPublicProfile();
+        await loadPublicSkills();
+        await loadPublicExperience();
+        await loadPublicProjects();
+        
+    } catch (error) {
+        console.error('❌ Error loading public portfolio data:', error);
+    }
+}
+
+// Load public profile
+async function loadPublicProfile() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch public profile');
+        }
+        
+        const profile = await response.json();
+        
+        // Update public profile display
+        const publicNameEl = document.getElementById('public-profile-name');
+        const publicTitleEl = document.getElementById('public-profile-title');
+        const publicBioEl = document.getElementById('public-profile-bio');
+        const publicEmailEl = document.getElementById('public-profile-email');
+        const publicPhoneEl = document.getElementById('public-profile-phone');
+        const publicLocationEl = document.getElementById('public-profile-location');
+        const publicWebsiteEl = document.getElementById('public-profile-website');
+        const publicAvatarEl = document.getElementById('public-profile-avatar');
+        
+        if (publicNameEl) publicNameEl.textContent = profile.name || 'Professional Name';
+        if (publicTitleEl) publicTitleEl.textContent = profile.title || 'Professional Title';
+        if (publicBioEl) publicBioEl.textContent = profile.bio || 'Professional bio and description...';
+        if (publicEmailEl) publicEmailEl.textContent = profile.email || 'email@example.com';
+        if (publicPhoneEl) publicPhoneEl.textContent = profile.phone || '+1234567890';
+        if (publicLocationEl) publicLocationEl.textContent = profile.location || 'City, Country';
+        if (publicWebsiteEl) {
+            publicWebsiteEl.textContent = profile.website || 'Website';
+            publicWebsiteEl.href = profile.website || '#';
+        }
+        if (publicAvatarEl && profile.avatar) {
+            publicAvatarEl.src = profile.avatar;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading public profile:', error);
+    }
+}
+
+// Load public skills
+async function loadPublicSkills() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/skills`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch public skills');
+        }
+        
+        const skills = await response.json();
+        const publicSkillsGrid = document.getElementById('public-skills-grid');
+        
+        if (!publicSkillsGrid) return;
+        
+        if (skills.length === 0) {
+            publicSkillsGrid.innerHTML = `
+                <div class="no-skills-message">
+                    <i class="fas fa-cogs"></i>
+                    <h3>No skills to display</h3>
+                    <p>Skills will be shown here when added.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        publicSkillsGrid.innerHTML = skills.map(skill => `
+            <div class="skill-item">
+                <div class="skill-info">
+                    <h4>${skill.name || 'Unknown Skill'}</h4>
+                    <span class="skill-level ${skill.level || 'beginner'}">${skill.level || 'Beginner'}</span>
+                </div>
+                <div class="skill-description">${skill.description || 'No description available'}</div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading public skills:', error);
+    }
+}
+
+// Load public experience
+async function loadPublicExperience() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/experience`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch public experience');
+        }
+        
+        const experience = await response.json();
+        const publicExperienceTimeline = document.getElementById('public-experience-timeline');
+        
+        if (!publicExperienceTimeline) return;
+        
+        if (experience.length === 0) {
+            publicExperienceTimeline.innerHTML = `
+                <div class="no-experience-message">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>No experience to display</h3>
+                    <p>Work experience will be shown here when added.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        publicExperienceTimeline.innerHTML = experience.map(exp => `
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h4>${exp.position || 'Position'}</h4>
+                    <div class="experience-dates">${exp.start_date || 'Start'} - ${exp.end_date || 'Present'}</div>
+                </div>
+                <div class="experience-company">${exp.company || 'Company'}</div>
+                <div class="experience-description">${exp.description || 'No description available'}</div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading public experience:', error);
+    }
+}
+
+// Load public projects
+async function loadPublicProjects() {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/projects`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch public projects');
+        }
+        
+        const projects = await response.json();
+        const publicProjectsGrid = document.getElementById('public-projects-grid');
+        
+        if (!publicProjectsGrid) return;
+        
+        if (projects.length === 0) {
+            publicProjectsGrid.innerHTML = `
+                <div class="no-projects-message">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>No projects to display</h3>
+                    <p>Projects will be shown here when added.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        publicProjectsGrid.innerHTML = projects.map(project => `
+            <div class="project-item">
+                <div class="project-header">
+                    <h4>${project.name || 'Project Name'}</h4>
+                </div>
+                ${project.image ? `<img src="${project.image}" alt="${project.name}" class="project-image">` : ''}
+                <div class="project-description">${project.description || 'No description available'}</div>
+                <div class="project-tech">${project.technologies || 'Technologies'}</div>
+                ${project.link ? `<div class="project-link"><a href="${project.link}" target="_blank">View Project</a></div>` : ''}
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading public projects:', error);
+    }
+}
 
 // Track viewed blogs for current session
 const viewedBlogs = new Set();
@@ -2502,3 +2917,18 @@ window.toggleLike = toggleLike;
 window.incrementBlogViews = incrementBlogViews;
 window.updateBlogStats = updateBlogStats;
 window.startRealTimeStatsUpdates = startRealTimeStatsUpdates;
+
+// Portfolio authentication functions
+window.showPortfolioLogin = showPortfolioLogin;
+window.showPortfolioRegister = showPortfolioRegister;
+window.handlePortfolioLogin = handlePortfolioLogin;
+window.handlePortfolioRegister = handlePortfolioRegister;
+window.handlePortfolioLogout = handlePortfolioLogout;
+window.showPortfolioManagement = showPortfolioManagement;
+window.showPublicPortfolio = showPublicPortfolio;
+window.checkPortfolioAuthStatus = checkPortfolioAuthStatus;
+window.loadPublicPortfolioData = loadPublicPortfolioData;
+window.loadPublicProfile = loadPublicProfile;
+window.loadPublicSkills = loadPublicSkills;
+window.loadPublicExperience = loadPublicExperience;
+window.loadPublicProjects = loadPublicProjects;

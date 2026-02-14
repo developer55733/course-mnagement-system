@@ -1566,9 +1566,107 @@
         <!-- Portfolio Tab -->
         <div class="tab-content" id="portfolio">
             <div class="portfolio-container">
-                <div class="portfolio-header">
-                    <h2 class="page-title"><i class="fas fa-briefcase"></i> Portfolio Management</h2>
-                    <p class="portfolio-subtitle">Create and manage your professional portfolio - visible to everyone</p>
+                <!-- Public Portfolio Viewing Section -->
+                <div class="public-portfolio-section">
+                    <div class="portfolio-header">
+                        <h2 class="page-title"><i class="fas fa-briefcase"></i> Professional Portfolio</h2>
+                        <p class="portfolio-subtitle">View professional portfolio and work showcase</p>
+                    </div>
+                    
+                    <!-- Public Profile Display -->
+                    <div class="public-profile-display" id="public-profile-display">
+                        <div class="profile-card">
+                            <div class="profile-avatar-section">
+                                <img src="https://picsum.photos/seed/portfolio-avatar/200/200.jpg" alt="Profile Avatar" class="profile-avatar" id="public-profile-avatar">
+                            </div>
+                            <div class="profile-info">
+                                <h3 class="profile-name" id="public-profile-name">Professional Name</h3>
+                                <p class="profile-title" id="public-profile-title">Professional Title</p>
+                                <p class="profile-bio" id="public-profile-bio">Professional bio and description...</p>
+                                <div class="profile-contact">
+                                    <p><i class="fas fa-envelope"></i> <span id="public-profile-email">email@example.com</span></p>
+                                    <p><i class="fas fa-phone"></i> <span id="public-profile-phone">+1234567890</span></p>
+                                    <p><i class="fas fa-map-marker-alt"></i> <span id="public-profile-location">City, Country</span></p>
+                                    <p><i class="fas fa-globe"></i> <a href="#" id="public-profile-website" target="_blank">Website</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Public Skills Display -->
+                    <div class="public-skills-display" id="public-skills-display">
+                        <h3><i class="fas fa-cogs"></i> Skills & Expertise</h3>
+                        <div class="skills-grid" id="public-skills-grid">
+                            <!-- Skills will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Public Experience Display -->
+                    <div class="public-experience-display" id="public-experience-display">
+                        <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                        <div class="experience-timeline" id="public-experience-timeline">
+                            <!-- Experience will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Public Projects Display -->
+                    <div class="public-projects-display" id="public-projects-display">
+                        <h3><i class="fas fa-project-diagram"></i> Projects Showcase</h3>
+                        <div class="projects-grid" id="public-projects-grid">
+                            <!-- Projects will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Authentication Section -->
+                <div class="portfolio-auth-section" id="portfolio-auth-section">
+                    <div class="auth-container">
+                        <div class="auth-form">
+                            <h3><i class="fas fa-lock"></i> Portfolio Management</h3>
+                            <p>Sign in to manage your portfolio</p>
+                            
+                            <div class="form-group">
+                                <label for="portfolio-username">Username</label>
+                                <input type="text" id="portfolio-username" placeholder="Enter your username">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="portfolio-password">Password</label>
+                                <input type="password" id="portfolio-password" placeholder="Enter your password">
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="handlePortfolioLogin()">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In to Manage Portfolio
+                                </button>
+                                <button class="btn btn-outline" onclick="showPortfolioRegister()">
+                                    <i class="fas fa-user-plus"></i> Create Account
+                                </button>
+                            </div>
+                            
+                            <div class="auth-links">
+                                <a href="#" onclick="showPortfolioLogin(); return false;">Already have an account? Sign in</a>
+                                <a href="#" onclick="showPortfolioRegister(); return false;">Need an account? Register</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Registration Section (Hidden by default) -->
+                <div class="portfolio-register-section" id="portfolio-register-section" style="display: none;">
+                    <div class="section-header">
+                        <h3><i class="fas fa-user-plus"></i> Create Portfolio Account</h3>
+                        <p class="section-description">Register to start managing your professional portfolio</p>
+                        <h3><i class="fas fa-user-cog"></i> Your Portfolio Management</h3>
+                        <div class="user-info">
+                            <span class="user-welcome">Welcome, <strong id="portfolio-user-name">User</strong>!</span>
+                            <button class="btn btn-outline btn-sm" onclick="handlePortfolioLogout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Portfolio Statistics (Only visible to authenticated users) -->
                     <div class="portfolio-stats">
                         <div class="stat-card">
                             <i class="fas fa-eye"></i>
@@ -1586,38 +1684,6 @@
                             <span class="stat-label">Average Rating</span>
                         </div>
                     </div>
-                </div>
-                
-                <div class="portfolio-main">
-                    <!-- Portfolio Overview Section -->
-                    <div class="portfolio-overview-section">
-                        <div class="section-header">
-                            <h3><i class="fas fa-user"></i> Profile Overview</h3>
-                            <button class="btn btn-toggle" id="toggle-profile-form">
-                                <i class="fas fa-chevron-down"></i> Edit Profile
-                            </button>
-                        </div>
-                        
-                        <div class="profile-display" id="profile-display">
-                            <div class="profile-card">
-                                <div class="profile-avatar-section">
-                                    <img src="https://picsum.photos/seed/portfolio-avatar/200/200.jpg" alt="Profile Avatar" class="profile-avatar" id="profile-avatar-img">
-                                    <button class="btn btn-upload" onclick="uploadProfilePicture()">
-                                        <i class="fas fa-camera"></i> Change Photo
-                                    </button>
-                                </div>
-                                <div class="profile-info">
-                                    <h3 class="profile-name" id="profile-name-display">Your Name</h3>
-                                    <p class="profile-title" id="profile-title-display">Professional Title</p>
-                                    <p class="profile-bio" id="profile-bio-display">Your professional bio and description goes here...</p>
-                                    <div class="profile-contact">
-                                        <p><i class="fas fa-envelope"></i> <span id="profile-email-display">email@example.com</span></p>
-                                        <p><i class="fas fa-phone"></i> <span id="profile-phone-display">+1234567890</span></p>
-                                        <p><i class="fas fa-map-marker-alt"></i> <span id="profile-location-display">City, Country</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         
                         <div class="profile-form-container" id="profile-form-container" style="display: none;">
                             <form id="edit-profile-form" onsubmit="updateProfile(event)">
