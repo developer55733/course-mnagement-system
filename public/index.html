@@ -2506,27 +2506,41 @@
                 }
                 
                 try {
-                    // Get current user from secure session
-                    const userResponse = await fetch('/api/discussions/current-user');
-                    const userData = await userResponse.json();
-                    
+                    // Get current user info from localStorage or session
                     let userId = null;
                     let userName = 'Anonymous';
                     
-                    if (userData.success && userData.data) {
-                        userId = userData.data.id;
-                        userName = userData.data.name;
+                    // Try to get user from localStorage (from login)
+                    const currentUser = localStorage.getItem('currentUser');
+                    if (currentUser) {
+                        try {
+                            const user = JSON.parse(currentUser);
+                            userId = user.id;
+                            userName = user.name;
+                        } catch (e) {
+                            console.error('Error parsing user data:', e);
+                        }
+                    }
+                    
+                    // If no user in localStorage, try session
+                    if (!userId) {
+                        const userResponse = await fetch('/api/discussions/current-user');
+                        const userData = await userResponse.json();
+                        
+                        if (userData.success && userData.data) {
+                            userId = userData.data.id;
+                            userName = userData.data.name;
+                        }
                     }
                     
                     const response = await fetch(`/api/discussions/${discussionId}/replies`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'x-user-id': userId || '0'
                         },
                         body: JSON.stringify({
-                            content: replyContent,
-                            user_id: userId,
-                            user_name: userName
+                            content: replyContent
                         })
                     });
                     
@@ -2545,7 +2559,7 @@
                         // Refresh discussions list
                         loadDiscussions();
                     } else {
-                        alert('Failed to post reply: ' + (data.message || 'Unknown error'));
+                        alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
                     }
                 } catch (error) {
                     console.error('Error posting reply:', error);
