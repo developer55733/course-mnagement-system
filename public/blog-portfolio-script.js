@@ -1891,6 +1891,35 @@ async function testProfileAPI() {
     }
 }
 
+// Basic test function to check if routing works
+async function testBasicRouting() {
+    console.log('🧪 Testing basic routing...');
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/test-basic`);
+        console.log('📡 Basic test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('❌ Basic test failed:', response.status);
+            throw new Error('Basic test failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Basic test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Basic routing test successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing basic routing:', error);
+        if (window.notifications) {
+            window.notifications.error('Basic routing test failed: ' + error.message);
+        }
+    }
+}
+
 // Simple test function to use profile-simple endpoint
 async function testProfileSimple() {
     console.log('🧪 Testing simple profile update...');
@@ -4094,6 +4123,7 @@ window.addTestProject = addTestProject;
 window.saveProfileDirect = saveProfileDirect;
 window.testProfileAPI = testProfileAPI;
 window.testProfileSimple = testProfileSimple;
+window.testBasicRouting = testBasicRouting;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;

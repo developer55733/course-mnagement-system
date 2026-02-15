@@ -160,6 +160,16 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// Basic test endpoint to check if routing works
+router.get('/test-basic', (req, res) => {
+    console.log('🧪 Basic test endpoint hit');
+    res.json({
+        success: true,
+        message: 'Basic test endpoint working',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Simple test endpoint to bypass middleware and test profile update directly
 router.put('/profile-simple', async (req, res) => {
     try {
