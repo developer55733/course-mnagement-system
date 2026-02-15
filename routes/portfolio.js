@@ -160,6 +160,42 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// SESSION DEBUG ENDPOINT - CHECK SESSION STATE
+router.get('/session-debug', (req, res) => {
+    console.log('🔍 SESSION DEBUG ENDPOINT HIT');
+    console.log('👤 Full session object:', req.session);
+    console.log('👤 Session ID:', req.sessionID);
+    console.log('👤 Session keys:', Object.keys(req.session || {}));
+    console.log('👤 Portfolio user ID:', req.session?.portfolioUserId);
+    console.log('👤 Portfolio user:', req.session?.portfolioUser);
+    console.log('🍪 Request cookies:', req.headers.cookie);
+    console.log('🌐 Request headers:', {
+        'user-agent': req.headers['user-agent'],
+        'origin': req.headers.origin,
+        'referer': req.headers.referer
+    });
+    
+    res.json({
+        success: true,
+        message: 'Session debug information',
+        session: {
+            hasSession: !!req.session,
+            sessionId: req.sessionID,
+            sessionKeys: Object.keys(req.session || {}),
+            portfolioUserId: req.session?.portfolioUserId,
+            portfolioUser: req.session?.portfolioUser,
+            sessionData: req.session
+        },
+        request: {
+            cookies: req.headers.cookie,
+            userAgent: req.headers['user-agent'],
+            origin: req.headers.origin,
+            referer: req.headers.referer
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 // TEST ENDPOINT - BYPASS AUTHENTICATION TO TEST DATABASE
 router.post('/profile-test-bypass', async (req, res) => {
     try {

@@ -1904,6 +1904,51 @@ async function testProfileAPI() {
     }
 }
 
+// Session debug function to check session state
+async function debugSession() {
+    console.log('🔍 DEBUGGING SESSION STATE...');
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/session-debug`);
+        console.log('📡 Session debug response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Session debug failed:', errorData);
+            
+            if (window.notifications) {
+                window.notifications.error('Session debug failed: ' + errorData.error);
+            }
+            
+            return {
+                success: false,
+                error: errorData.error
+            };
+        }
+        
+        const result = await response.json();
+        console.log('✅ Session debug result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Session debug completed - check console for details');
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error debugging session:', error);
+        if (window.notifications) {
+            window.notifications.error('Session debug error: ' + error.message);
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
 // Test function to bypass authentication and test database directly
 async function testProfileBypass() {
     console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
@@ -4383,6 +4428,7 @@ window.testServerHealth = testServerHealth;
 window.testMinimalProfileUpdate = testMinimalProfileUpdate;
 window.checkSession = checkSession;
 window.testProfileBypass = testProfileBypass;
+window.debugSession = debugSession;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
