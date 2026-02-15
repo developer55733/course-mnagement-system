@@ -1904,6 +1904,61 @@ async function testProfileAPI() {
     }
 }
 
+// Test function to bypass authentication and test database directly
+async function testProfileBypass() {
+    console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
+    
+    const testData = {
+        name: 'Bypass Test User',
+        title: 'Bypass Test Title',
+        bio: 'Bypass Test Bio',
+        phone: '+1234567890',
+        location: 'Bypass Test Location',
+        website: 'https://bypass-test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending bypass test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-test-bypass`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Bypass test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Bypass test failed:', errorData);
+            throw new Error(errorData.error || 'Bypass test failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Bypass test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Bypass test successful!');
+        }
+        
+        // Reload profile to see changes
+        await loadProfile();
+        
+    } catch (error) {
+        console.error('❌ Error in bypass test:', error);
+        if (window.notifications) {
+            window.notifications.error('Bypass test failed: ' + error.message);
+        }
+    }
+}
+
 // Session check function to debug authentication issues
 async function checkSession() {
     console.log('🔍 Checking session status...');
@@ -4327,6 +4382,7 @@ window.testNoDatabase = testNoDatabase;
 window.testServerHealth = testServerHealth;
 window.testMinimalProfileUpdate = testMinimalProfileUpdate;
 window.checkSession = checkSession;
+window.testProfileBypass = testProfileBypass;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;

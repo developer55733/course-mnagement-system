@@ -160,6 +160,75 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// TEST ENDPOINT - BYPASS AUTHENTICATION TO TEST DATABASE
+router.post('/profile-test-bypass', async (req, res) => {
+    try {
+        console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
+        console.log('📋 Request body:', req.body);
+        
+        // Use hardcoded user ID for testing
+        const testUserId = 1; // Assuming user ID 1 exists
+        console.log('🔍 Using test user ID:', testUserId);
+        
+        const { name, title, bio, phone, location, website, category } = req.body;
+        console.log('📊 Received data:', { name, title, bio, phone, location, website, category });
+        
+        // Validate name only
+        if (!name || name.trim() === '') {
+            console.error('❌ Name is required');
+            return res.status(400).json({
+                success: false,
+                error: 'Name is required'
+            });
+        }
+        
+        // Test database operation
+        console.log('🔧 Testing database operation...');
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name.trim(), testUserId]);
+        
+        console.log('✅ Database test result:', result);
+        console.log('✅ Affected rows:', result.affectedRows);
+        
+        if (result.affectedRows === 0) {
+            console.log('🔧 No existing profile found, creating new one...');
+            const insertResult = await pool.execute(`
+                INSERT INTO portfolio_profile (user_id, name, created_at, updated_at)
+                VALUES (?, ?, NOW(), NOW())
+            `, [testUserId, name.trim()]);
+            
+            console.log('✅ Insert result:', insertResult);
+            console.log('✅ Insert ID:', insertResult.insertId);
+        }
+        
+        console.log('🎉 DATABASE TEST SUCCESSFUL');
+        res.json({
+            success: true,
+            message: 'Database test successful (AUTHENTICATION BYPASSED)',
+            affectedRows: result.affectedRows,
+            testUserId: testUserId
+        });
+        
+    } catch (error) {
+        console.error('❌ DATABASE TEST ERROR:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Database test failed'
+        });
+    }
+});
+
 // MINIMAL PROFILE UPDATE - COMPLETELY NEW APPROACH
 router.post('/profile-minimal', async (req, res) => {
     try {
