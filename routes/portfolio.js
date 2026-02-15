@@ -160,6 +160,59 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// Simple test endpoint to bypass middleware and test profile update directly
+router.put('/profile-simple', async (req, res) => {
+    try {
+        console.log('🧪 Simple profile update test');
+        console.log('📋 Request body:', req.body);
+        console.log('👤 Session data:', req.session);
+        
+        // Get user ID from session directly
+        const userId = req.session?.portfolioUserId;
+        console.log('🔍 User ID from session:', userId);
+        
+        if (!userId) {
+            console.error('❌ No user ID found in session');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+        
+        const { name, title, bio, phone, location, website, category } = req.body;
+        
+        console.log('📊 Simple test data:', { name, title, bio, phone, location, website, category });
+        
+        // Simple test - just update name field
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name, userId]);
+        
+        console.log('✅ Simple update result:', result);
+        console.log('✅ Simple affected rows:', result.affectedRows);
+        
+        res.json({
+            success: true,
+            message: 'Simple profile update successful',
+            affectedRows: result.affectedRows
+        });
+        
+    } catch (error) {
+        console.error('❌ Simple profile update error:', error);
+        console.error('❌ Simple error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Update portfolio profile
 router.put('/profile', async (req, res) => {
     try {

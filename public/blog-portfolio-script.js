@@ -1891,6 +1891,58 @@ async function testProfileAPI() {
     }
 }
 
+// Simple test function to use profile-simple endpoint
+async function testProfileSimple() {
+    console.log('🧪 Testing simple profile update...');
+    
+    const testData = {
+        name: 'Simple Test User',
+        title: 'Simple Test Developer',
+        bio: 'Simple test bio for profile',
+        phone: '+1234567890',
+        location: 'Simple Test City',
+        website: 'https://simple-test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending simple test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-simple`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Simple test API response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Simple test API failed:', errorData);
+            console.error('❌ Response text:', responseText);
+            throw new Error(errorData.error || 'Simple test API failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Simple test API result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Simple test API call successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing simple profile API:', error);
+        if (window.notifications) {
+            window.notifications.error('Simple test API failed: ' + error.message);
+        }
+    }
+}
+
 // Delete functions
 async function deleteSkill(skillId) {
     if (!confirm('Are you sure you want to delete this skill?')) return;
@@ -4041,6 +4093,7 @@ window.addTestExperience = addTestExperience;
 window.addTestProject = addTestProject;
 window.saveProfileDirect = saveProfileDirect;
 window.testProfileAPI = testProfileAPI;
+window.testProfileSimple = testProfileSimple;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
