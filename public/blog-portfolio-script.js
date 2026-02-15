@@ -1690,7 +1690,12 @@ async function addTestProject() {
 }
 
 // Direct save function that bypasses form submission entirely
-async function saveProfileDirect() {
+async function saveProfileDirect(event) {
+    // Prevent default form submission if called from onsubmit
+    if (event) {
+        event.preventDefault();
+    }
+    
     alert('Direct save button clicked!'); // Test alert
     console.log('🔍 Direct save button clicked!');
     
