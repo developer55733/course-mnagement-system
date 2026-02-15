@@ -1896,6 +1896,45 @@ async function testProfileAPI() {
     }
 }
 
+// Test function to check server health
+async function testServerHealth() {
+    console.log('🧪 Testing server health...');
+    
+    try {
+        // Test both possible URLs
+        const urls = [
+            window.location.origin + '/health',
+            'https://course-management-system.up.railway.app/health'
+        ];
+        
+        for (const url of urls) {
+            console.log('🔍 Testing URL:', url);
+            try {
+                const response = await fetch(url);
+                console.log('📡 Health check response for', url, ':', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Health check successful for', url, ':', result);
+                    if (window.notifications) {
+                        window.notifications.success(`Server health check successful for: ${url}`);
+                    }
+                } else {
+                    console.error('❌ Health check failed for', url, ':', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Health check error for', url, ':', error.message);
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing server health:', error);
+        if (window.notifications) {
+            window.notifications.error('Server health test failed: ' + error.message);
+        }
+    }
+}
+
 // Test function to check API without database
 async function testNoDatabase() {
     console.log('🧪 Testing API without database...');
@@ -4171,6 +4210,7 @@ window.testProfileAPI = testProfileAPI;
 window.testProfileSimple = testProfileSimple;
 window.testBasicRouting = testBasicRouting;
 window.testNoDatabase = testNoDatabase;
+window.testServerHealth = testServerHealth;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
