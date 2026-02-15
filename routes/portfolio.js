@@ -212,7 +212,7 @@ router.put('/profile', async (req, res) => {
         });
         res.status(500).json({ 
             success: false, 
-            error: 'Failed to update profile: ' + error.message 
+            error: error.message || 'Failed to update profile'
         });
     }
 });
