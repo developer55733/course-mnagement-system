@@ -1778,6 +1778,8 @@ async function saveProfileDirect() {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('❌ Profile update failed (direct):', errorData);
+            console.error('❌ Response status:', response.status);
+            console.error('❌ Response text:', await response.text());
             throw new Error(errorData.error || 'Failed to update profile');
         }
         
@@ -1798,6 +1800,58 @@ async function saveProfileDirect() {
         console.error('❌ Error updating profile (direct):', error);
         if (window.notifications) {
             window.notifications.error('Failed to update profile: ' + error.message);
+        }
+    }
+}
+
+// Test function to verify profile API works with hardcoded data
+async function testProfileAPI() {
+    console.log('🧪 Testing profile API with hardcoded data...');
+    
+    const testData = {
+        name: 'Test User',
+        title: 'Test Developer',
+        bio: 'Test bio for profile',
+        email: 'test@example.com',
+        phone: '+1234567890',
+        location: 'Test City',
+        website: 'https://test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Test API response:', response);
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', response.headers);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Test API failed:', errorData);
+            console.error('❌ Response text:', await response.text());
+            throw new Error(errorData.error || 'Test API failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Test API result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Test API call successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing profile API:', error);
+        if (window.notifications) {
+            window.notifications.error('Test API failed: ' + error.message);
         }
     }
 }
@@ -3949,6 +4003,7 @@ window.testProfileSave = testProfileSave;
 window.addTestExperience = addTestExperience;
 window.addTestProject = addTestProject;
 window.saveProfileDirect = saveProfileDirect;
+window.testProfileAPI = testProfileAPI;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
