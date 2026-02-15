@@ -1695,7 +1695,7 @@ async function saveProfileDirect() {
     console.log('🔍 Direct save button clicked!');
     
     try {
-        // Get form data directly
+        // Get form data directly with robust method
         const form = document.getElementById('edit-profile-form');
         if (!form) {
             console.error('❌ Profile form not found');
@@ -1703,29 +1703,20 @@ async function saveProfileDirect() {
         }
         
         console.log('🔍 Form element found:', form);
-        console.log('🔍 Form elements:', {
-            profileName: document.getElementById('profile-name'),
-            profileTitle: document.getElementById('profile-title'),
-            profileBio: document.getElementById('profile-bio'),
-            profileEmail: document.getElementById('profile-email'),
-            profilePhone: document.getElementById('profile-phone'),
-            profileLocation: document.getElementById('profile-location'),
-            profileWebsite: document.getElementById('profile-website'),
-            profileCategory: document.getElementById('profile-category')
-        });
         
-        // Check if all required elements exist
-        const requiredElements = ['profile-name', 'profile-title', 'profile-bio', 'profile-email', 'profile-phone', 'profile-location', 'profile-website', 'profile-category'];
-        const missingElements = requiredElements.filter(id => !document.getElementById(id));
+        // Robust data collection - manual extraction
+        const profileData = {
+            name: form.querySelector('#profile-name')?.value || '',
+            title: form.querySelector('#profile-title')?.value || '',
+            bio: form.querySelector('#profile-bio')?.value || '',
+            email: form.querySelector('#profile-email')?.value || '',
+            phone: form.querySelector('#profile-phone')?.value || '',
+            location: form.querySelector('#profile-location')?.value || '',
+            website: form.querySelector('#profile-website')?.value || '',
+            category: form.querySelector('#profile-category')?.value || ''
+        };
         
-        if (missingElements.length > 0) {
-            console.error('❌ Missing form elements:', missingElements);
-            alert('Missing required form elements: ' + missingElements.join(', '));
-            return;
-        }
-        
-        // Get form values
-        const formData = new FormData(form);
+        console.log('📊 Profile data to save (direct):', profileData);
         const profileData = Object.fromEntries(formData);
         console.log('📊 Form data from manual get:', profileData);
         console.log('📊 Form data details:', {
