@@ -1796,6 +1796,9 @@ async function saveProfileDirect() {
             console.error('❌ Profile update failed (direct):', errorData);
             console.error('❌ Response status:', response.status);
             console.error('❌ Response text:', responseText);
+            console.error('❌ Error data keys:', Object.keys(errorData || {}));
+            console.error('❌ Error data string:', JSON.stringify(errorData || {}));
+            console.error('❌ Error message specifically:', errorData?.error || 'No error message found');
             throw new Error(errorData.error || 'Failed to update profile');
         }
         
