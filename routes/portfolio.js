@@ -143,6 +143,13 @@ function authenticatePortfolio(req, res, next) {
 // Apply authentication middleware to all routes
 router.use(authenticatePortfolio);
 
+// Add CORS headers for portfolio routes
+router.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    next();
+});
+
 // Get portfolio profile
 router.get('/profile', async (req, res) => {
     try {

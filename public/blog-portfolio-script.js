@@ -1801,6 +1801,7 @@ async function saveProfileDirect(event) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include', // Include cookies for session
             body: JSON.stringify(apiData)
         });
         
@@ -1909,7 +1910,9 @@ async function debugSession() {
     console.log('🔍 DEBUGGING SESSION STATE...');
     
     try {
-        const response = await fetch(`${API_BASE}/portfolio/session-debug`);
+        const response = await fetch(`${API_BASE}/portfolio/session-debug`, {
+            credentials: 'include' // Include cookies for session
+        });
         console.log('📡 Session debug response:', response);
         console.log('📡 Response status:', response.status);
         
