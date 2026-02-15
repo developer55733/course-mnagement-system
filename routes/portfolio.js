@@ -160,6 +160,20 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// Simple test endpoint without database
+router.post('/test-no-db', (req, res) => {
+    console.log('🧪 Test no database endpoint hit');
+    console.log('📋 Request body:', req.body);
+    console.log('👤 Session data:', req.session);
+    
+    res.json({
+        success: true,
+        message: 'Test endpoint working without database',
+        receivedData: req.body,
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Basic test endpoint to check if routing works
 router.get('/test-basic', (req, res) => {
     console.log('🧪 Basic test endpoint hit');

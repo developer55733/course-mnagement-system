@@ -1896,6 +1896,47 @@ async function testProfileAPI() {
     }
 }
 
+// Test function to check API without database
+async function testNoDatabase() {
+    console.log('🧪 Testing API without database...');
+    
+    const testData = {
+        name: 'Test User No DB',
+        test: true
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/test-no-db`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 No database test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('❌ No database test failed:', response.status);
+            throw new Error('No database test failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ No database test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('No database test successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing no database API:', error);
+        if (window.notifications) {
+            window.notifications.error('No database test failed: ' + error.message);
+        }
+    }
+}
+
 // Basic test function to check if routing works
 async function testBasicRouting() {
     console.log('🧪 Testing basic routing...');
@@ -4129,6 +4170,7 @@ window.saveProfileDirect = saveProfileDirect;
 window.testProfileAPI = testProfileAPI;
 window.testProfileSimple = testProfileSimple;
 window.testBasicRouting = testBasicRouting;
+window.testNoDatabase = testNoDatabase;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
