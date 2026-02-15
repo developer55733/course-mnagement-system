@@ -1778,8 +1778,21 @@ async function saveProfileDirect() {
         if (!response.ok) {
             // Clone response to avoid stream conflicts
             const responseClone = response.clone();
-            const errorData = await responseClone.json();
-            const responseText = await responseClone.text();
+            let errorData;
+            let responseText;
+            
+            try {
+                errorData = await responseClone.json();
+                responseText = JSON.stringify(errorData);
+            } catch (e) {
+                responseText = await responseClone.text();
+                try {
+                    errorData = JSON.parse(responseText);
+                } catch (e2) {
+                    errorData = { error: responseText };
+                }
+            }
+            
             console.error('❌ Profile update failed (direct):', errorData);
             console.error('❌ Response status:', response.status);
             console.error('❌ Response text:', responseText);
@@ -1839,10 +1852,22 @@ async function testProfileAPI() {
         
         // Clone response to avoid stream conflicts
         const responseClone = response.clone();
-        const responseText = await responseClone.text(); // Read once and store
+        let errorData;
+        let responseText;
+        
+        try {
+            errorData = await responseClone.json();
+            responseText = JSON.stringify(errorData);
+        } catch (e) {
+            responseText = await responseClone.text();
+            try {
+                errorData = JSON.parse(responseText);
+            } catch (e2) {
+                errorData = { error: responseText };
+            }
+        }
         
         if (!response.ok) {
-            const errorData = JSON.parse(responseText);
             console.error('❌ Test API failed:', errorData);
             console.error('❌ Response text:', responseText);
             throw new Error(errorData.error || 'Test API failed');
