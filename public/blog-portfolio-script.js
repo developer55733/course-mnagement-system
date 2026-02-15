@@ -1689,7 +1689,7 @@ async function addTestProject() {
     }
 }
 
-// Direct save function that bypasses form submission entirely
+// Direct save function that uses the new minimal profile update system
 async function saveProfileDirect(event) {
     // Prevent default form submission if called from onsubmit
     if (event) {
@@ -1708,26 +1708,6 @@ async function saveProfileDirect(event) {
         }
         
         console.log('🔍 Form element found:', form);
-        console.log('🔍 Form elements:', {
-            profileName: document.getElementById('profile-name'),
-            profileTitle: document.getElementById('profile-title'),
-            profileBio: document.getElementById('profile-bio'),
-            profileEmail: document.getElementById('profile-email'),
-            profilePhone: document.getElementById('profile-phone'),
-            profileLocation: document.getElementById('profile-location'),
-            profileWebsite: document.getElementById('profile-website'),
-            profileCategory: document.getElementById('profile-category')
-        });
-        
-        // Check if all required elements exist
-        const requiredElements = ['profile-name', 'profile-title', 'profile-bio', 'profile-email', 'profile-phone', 'profile-location', 'profile-website', 'profile-category'];
-        const missingElements = requiredElements.filter(id => !document.getElementById(id));
-        
-        if (missingElements.length > 0) {
-            console.error('❌ Missing form elements:', missingElements);
-            alert('Missing required form elements: ' + missingElements.join(', '));
-            return;
-        }
         
         // Get form values
         const formData = new FormData(form);
@@ -1754,14 +1734,11 @@ async function saveProfileDirect(event) {
             return;
         }
         
-        console.log('🔍 Sending API request to:', `${API_BASE}/portfolio/profile`);
-        
-        // Transform form data to match backend expectations
+        // Transform form data to match minimal API expectations
         const apiData = {
             name: profileData['profile-name'],
             title: profileData['profile-title'],
             bio: profileData['profile-bio'],
-            email: profileData['profile-email'],
             phone: profileData['profile-phone'],
             location: profileData['profile-location'],
             website: profileData['profile-website'],
@@ -1769,46 +1746,30 @@ async function saveProfileDirect(event) {
         };
         
         console.log('📊 API data to send:', apiData);
+        console.log('🔍 Using NEW minimal profile update system');
         
-        const response = await fetch(`${API_BASE}/portfolio/profile`, {
-            method: 'PUT',
+        // Use the new minimal profile update system
+        const response = await fetch(`${API_BASE}/portfolio/profile-minimal`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(apiData)
         });
         
-        console.log('📡 Profile update response (direct):', response);
+        console.log('📡 Profile update response (MINIMAL):', response);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
         
         if (!response.ok) {
-            // Clone response to avoid stream conflicts
-            const responseClone = response.clone();
-            let errorData;
-            let responseText;
-            
-            try {
-                errorData = await responseClone.json();
-                responseText = JSON.stringify(errorData);
-            } catch (e) {
-                responseText = await responseClone.text();
-                try {
-                    errorData = JSON.parse(responseText);
-                } catch (e2) {
-                    errorData = { error: responseText };
-                }
-            }
-            
-            console.error('❌ Profile update failed (direct):', errorData);
-            console.error('❌ Response status:', response.status);
-            console.error('❌ Response text:', responseText);
-            console.error('❌ Error data keys:', Object.keys(errorData || {}));
-            console.error('❌ Error data string:', JSON.stringify(errorData || {}));
-            console.error('❌ Error message specifically:', errorData?.error || 'No error message found');
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Profile update failed (MINIMAL):', errorData);
             throw new Error(errorData.error || 'Failed to update profile');
         }
         
-        const result = await response.json();
-        console.log('✅ Profile update result (direct):', result);
+        const result = JSON.parse(responseText);
+        console.log('✅ Profile update result (MINIMAL):', result);
         
         // Hide form and reload profile
         const formContainer = document.getElementById('profile-form-container');
@@ -1821,7 +1782,7 @@ async function saveProfileDirect(event) {
         }
         
     } catch (error) {
-        console.error('❌ Error updating profile (direct):', error);
+        console.error('❌ Error updating profile (MINIMAL):', error);
         if (window.notifications) {
             window.notifications.error('Failed to update profile: ' + error.message);
         }
