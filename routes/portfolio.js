@@ -166,17 +166,40 @@ router.put('/profile', async (req, res) => {
         console.log('🔍 Profile update request received');
         console.log('📋 Request body:', req.body);
         console.log('👤 Portfolio user ID:', req.portfolioUserId);
+        console.log('🔍 Request headers:', req.headers);
+        console.log('🔍 Request method:', req.method);
+        console.log('🔍 Request URL:', req.url);
         
         const { name, title, bio, phone, location, website, category } = req.body;
         
         console.log('📊 Extracted fields:', { name, title, bio, phone, location, website, category });
+        console.log('📊 Field types:', {
+            name: typeof name,
+            title: typeof title,
+            bio: typeof bio,
+            phone: typeof phone,
+            location: typeof location,
+            website: typeof website,
+            category: typeof category
+        });
+        
+        // Validate required fields
+        if (!name || !title || !bio || !phone || !location || !website || !category) {
+            console.error('❌ Missing required fields:', { name, title, bio, phone, location, website, category });
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields'
+            });
+        }
         
         // Check if profile exists
+        console.log('🔍 Checking if profile exists for user:', req.portfolioUserId);
         const [existing] = await pool.execute(`
             SELECT id FROM portfolio_profile WHERE user_id = ?
         `, [req.portfolioUserId]);
         
         console.log('📋 Existing profile check:', existing.length > 0 ? 'Found' : 'Not found');
+        console.log('📋 Existing profile data:', existing);
         
         if (existing.length > 0) {
             console.log('🔧 Updating existing profile...');
@@ -188,17 +211,20 @@ router.put('/profile', async (req, res) => {
             `, [name, title, bio, phone, location, website, category, req.portfolioUserId]);
             
             console.log('✅ Profile update result:', result);
+            console.log('✅ Affected rows:', result.affectedRows);
         } else {
             console.log('🔧 Creating new profile...');
             // Create new profile
             const result = await pool.execute(`
                 INSERT INTO portfolio_profile (user_id, name, title, bio, phone, location, website, category)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `, [req.portfolioUserId, name, title, bio, phone, location, website, category]);
             
             console.log('✅ Profile insert result:', result);
+            console.log('✅ Insert ID:', result.insertId);
         }
         
+        console.log('🔍 Sending success response');
         res.json({
             success: true,
             message: 'Profile updated successfully'
@@ -208,8 +234,12 @@ router.put('/profile', async (req, res) => {
         console.error('❌ Error details:', {
             message: error.message,
             code: error.code,
-            stack: error.stack
+            stack: error.stack,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
         });
+        console.error('❌ Full error object:', error);
         res.status(500).json({ 
             success: false, 
             error: error.message || 'Failed to update profile'
