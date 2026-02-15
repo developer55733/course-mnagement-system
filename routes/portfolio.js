@@ -165,17 +165,33 @@ router.post('/profile-minimal', async (req, res) => {
     try {
         console.log('🚀 MINIMAL PROFILE UPDATE STARTED');
         console.log('📋 Request body:', req.body);
-        console.log('👤 Session data:', req.session);
+        console.log('👤 Full session object:', req.session);
+        console.log('👤 Session ID:', req.sessionID);
+        console.log('👤 Session keys:', Object.keys(req.session || {}));
+        console.log('👤 Portfolio user ID from session:', req.session?.portfolioUserId);
+        console.log('👤 Portfolio user from session:', req.session?.portfolioUser);
         
         // Get user ID from session
         const userId = req.session?.portfolioUserId;
-        console.log('🔍 User ID from session:', userId);
+        console.log('🔍 Final user ID:', userId);
         
         if (!userId) {
             console.error('❌ No user ID in session');
+            console.error('❌ Session details:', {
+                hasSession: !!req.session,
+                sessionId: req.sessionID,
+                sessionKeys: Object.keys(req.session || {}),
+                portfolioUserId: req.session?.portfolioUserId,
+                portfolioUser: req.session?.portfolioUser
+            });
             return res.status(401).json({
                 success: false,
-                error: 'Please login first'
+                error: 'Authentication required - Please login first',
+                debug: {
+                    hasSession: !!req.session,
+                    sessionId: req.sessionID,
+                    portfolioUserId: req.session?.portfolioUserId
+                }
             });
         }
         

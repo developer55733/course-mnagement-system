@@ -1904,6 +1904,57 @@ async function testProfileAPI() {
     }
 }
 
+// Session check function to debug authentication issues
+async function checkSession() {
+    console.log('🔍 Checking session status...');
+    
+    try {
+        // Test session by checking portfolio profile endpoint
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        console.log('📡 Session check response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Session check failed:', errorData);
+            
+            if (window.notifications) {
+                window.notifications.error('Session check failed: ' + errorData.error);
+            }
+            
+            return {
+                success: false,
+                error: errorData.error,
+                status: response.status
+            };
+        }
+        
+        const profile = await response.json();
+        console.log('✅ Session check successful:', profile);
+        
+        if (window.notifications) {
+            window.notifications.success('Session is valid and authenticated!');
+        }
+        
+        return {
+            success: true,
+            profile: profile,
+            status: response.status
+        };
+        
+    } catch (error) {
+        console.error('❌ Error checking session:', error);
+        if (window.notifications) {
+            window.notifications.error('Session check error: ' + error.message);
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
 // MINIMAL PROFILE UPDATE TEST - COMPLETELY NEW APPROACH
 async function testMinimalProfileUpdate() {
     console.log('🚀 TESTING MINIMAL PROFILE UPDATE');
@@ -4275,6 +4326,7 @@ window.testBasicRouting = testBasicRouting;
 window.testNoDatabase = testNoDatabase;
 window.testServerHealth = testServerHealth;
 window.testMinimalProfileUpdate = testMinimalProfileUpdate;
+window.checkSession = checkSession;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
