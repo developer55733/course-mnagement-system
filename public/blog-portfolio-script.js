@@ -1062,14 +1062,32 @@ async function loadPortfolioData() {
 // Load profile data for authenticated user
 async function loadProfile() {
     try {
+        console.log('🔄 Loading profile data...');
+        
+        // Use the working profile endpoint
         const response = await fetch(`${API_BASE}/portfolio/profile`);
         if (!response.ok) {
             throw new Error('Failed to fetch profile');
         }
         
         const profile = await response.json();
+        console.log('📊 Profile data loaded:', profile);
         
-        // Update profile display
+        // Show profile display and hide form
+        const profileDisplay = document.getElementById('profile-display');
+        const formContainer = document.getElementById('profile-form-container');
+        
+        if (profileDisplay) {
+            profileDisplay.style.display = 'block';
+            console.log('✅ Profile display shown');
+        }
+        
+        if (formContainer) {
+            formContainer.style.display = 'none';
+            console.log('✅ Profile form hidden');
+        }
+        
+        // Update profile display elements
         const nameEl = document.getElementById('profile-name-display');
         const titleEl = document.getElementById('profile-title-display');
         const bioEl = document.getElementById('profile-bio-display');
@@ -1079,21 +1097,43 @@ async function loadProfile() {
         const websiteEl = document.getElementById('profile-website-display');
         const avatarEl = document.getElementById('profile-avatar-img');
         
-        if (nameEl) nameEl.textContent = profile.name || 'Your Name';
-        if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
-        if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
-        if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
-        if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
-        if (locationEl) locationEl.textContent = profile.location || 'City, Country';
+        // Update display with actual data
+        if (nameEl) {
+            nameEl.textContent = profile.name || 'Your Name';
+            console.log('✅ Name updated:', profile.name);
+        }
+        if (titleEl) {
+            titleEl.textContent = profile.title || 'Professional Title';
+            console.log('✅ Title updated:', profile.title);
+        }
+        if (bioEl) {
+            bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
+            console.log('✅ Bio updated:', profile.bio);
+        }
+        if (emailEl) {
+            emailEl.textContent = profile.email || 'email@example.com';
+            console.log('✅ Email updated:', profile.email);
+        }
+        if (phoneEl) {
+            phoneEl.textContent = profile.phone || '+1234567890';
+            console.log('✅ Phone updated:', profile.phone);
+        }
+        if (locationEl) {
+            locationEl.textContent = profile.location || 'City, Country';
+            console.log('✅ Location updated:', profile.location);
+        }
         if (websiteEl) {
-            websiteEl.textContent = profile.website || 'Website';
+            const websiteText = profile.website || 'Website';
+            websiteEl.textContent = websiteText;
             websiteEl.href = profile.website || '#';
+            console.log('✅ Website updated:', profile.website);
         }
         if (avatarEl && profile.avatar) {
             avatarEl.src = profile.avatar;
+            console.log('✅ Avatar updated:', profile.avatar);
         }
         
-        // Update form fields
+        // Update form fields for editing
         const nameInput = document.getElementById('profile-name');
         const titleInput = document.getElementById('profile-title');
         const bioInput = document.getElementById('profile-bio');
@@ -1112,8 +1152,15 @@ async function loadProfile() {
         if (websiteInput) websiteInput.value = profile.website || '';
         if (categoryInput) categoryInput.value = profile.category || '';
         
+        console.log('✅ Profile loaded and display updated successfully');
+        
     } catch (error) {
         console.error('❌ Error loading profile:', error);
+        // Show default values if profile fails to load
+        const profileDisplay = document.getElementById('profile-display');
+        if (profileDisplay) {
+            profileDisplay.style.display = 'block';
+        }
     }
 }
 
