@@ -160,6 +160,84 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// MINIMAL PROFILE UPDATE - COMPLETELY NEW APPROACH
+router.post('/profile-minimal', async (req, res) => {
+    try {
+        console.log('🚀 MINIMAL PROFILE UPDATE STARTED');
+        console.log('📋 Request body:', req.body);
+        console.log('👤 Session data:', req.session);
+        
+        // Get user ID from session
+        const userId = req.session?.portfolioUserId;
+        console.log('🔍 User ID from session:', userId);
+        
+        if (!userId) {
+            console.error('❌ No user ID in session');
+            return res.status(401).json({
+                success: false,
+                error: 'Please login first'
+            });
+        }
+        
+        // Get data from request
+        const { name, title, bio, phone, location, website, category } = req.body;
+        console.log('📊 Received data:', { name, title, bio, phone, location, website, category });
+        
+        // Validate name only (minimal validation)
+        if (!name || name.trim() === '') {
+            console.error('❌ Name is required');
+            return res.status(400).json({
+                success: false,
+                error: 'Name is required'
+            });
+        }
+        
+        // Simple database operation - just update name field first
+        console.log('🔧 Updating profile name only...');
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name.trim(), userId]);
+        
+        console.log('✅ Update result:', result);
+        console.log('✅ Affected rows:', result.affectedRows);
+        
+        if (result.affectedRows === 0) {
+            console.log('🔧 No existing profile found, creating new one...');
+            const insertResult = await pool.execute(`
+                INSERT INTO portfolio_profile (user_id, name, created_at, updated_at)
+                VALUES (?, ?, NOW(), NOW())
+            `, [userId, name.trim()]);
+            
+            console.log('✅ Insert result:', insertResult);
+            console.log('✅ Insert ID:', insertResult.insertId);
+        }
+        
+        console.log('🎉 MINIMAL PROFILE UPDATE SUCCESSFUL');
+        res.json({
+            success: true,
+            message: 'Profile updated successfully (MINIMAL)',
+            affectedRows: result.affectedRows
+        });
+        
+    } catch (error) {
+        console.error('❌ MINIMAL PROFILE UPDATE ERROR:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Profile update failed'
+        });
+    }
+});
+
 // Simple test endpoint without database
 router.post('/test-no-db', (req, res) => {
     console.log('🧪 Test no database endpoint hit');

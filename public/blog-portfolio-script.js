@@ -1896,6 +1896,61 @@ async function testProfileAPI() {
     }
 }
 
+// MINIMAL PROFILE UPDATE TEST - COMPLETELY NEW APPROACH
+async function testMinimalProfileUpdate() {
+    console.log('🚀 TESTING MINIMAL PROFILE UPDATE');
+    
+    const minimalData = {
+        name: 'Minimal Test User',
+        title: 'Test Title',
+        bio: 'Test Bio',
+        phone: '+1234567890',
+        location: 'Test Location',
+        website: 'https://test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending minimal data:', minimalData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-minimal`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(minimalData)
+        });
+        
+        console.log('📡 Minimal update response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Minimal update failed:', errorData);
+            throw new Error(errorData.error || 'Minimal update failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Minimal update result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Minimal profile update successful!');
+        }
+        
+        // Reload profile to see changes
+        await loadProfile();
+        
+    } catch (error) {
+        console.error('❌ Error in minimal profile update:', error);
+        if (window.notifications) {
+            window.notifications.error('Minimal profile update failed: ' + error.message);
+        }
+    }
+}
+
 // Test function to check server health
 async function testServerHealth() {
     console.log('🧪 Testing server health...');
@@ -4211,6 +4266,7 @@ window.testProfileSimple = testProfileSimple;
 window.testBasicRouting = testBasicRouting;
 window.testNoDatabase = testNoDatabase;
 window.testServerHealth = testServerHealth;
+window.testMinimalProfileUpdate = testMinimalProfileUpdate;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;
