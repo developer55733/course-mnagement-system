@@ -166,9 +166,25 @@ router.post('/profile-test-bypass', async (req, res) => {
         console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
         console.log('📋 Request body:', req.body);
         
-        // Use hardcoded user ID for testing
-        const testUserId = 1; // Assuming user ID 1 exists
-        console.log('🔍 Using test user ID:', testUserId);
+        // First, check what users exist in portfolio_users table
+        console.log('🔍 Checking existing users in portfolio_users...');
+        const [users] = await pool.execute(`
+            SELECT id, name, email, username FROM portfolio_users LIMIT 5
+        `);
+        console.log('📊 Found users:', users);
+        
+        if (users.length === 0) {
+            console.error('❌ No users found in portfolio_users table');
+            return res.status(400).json({
+                success: false,
+                error: 'No users found in database. Please create a portfolio user first.',
+                debug: 'portfolio_users table is empty'
+            });
+        }
+        
+        // Use first existing user ID for testing
+        const testUserId = users[0].id;
+        console.log('🔍 Using test user ID:', testUserId, '(', users[0].name, ')');
         
         const { name, title, bio, phone, location, website, category } = req.body;
         console.log('📊 Received data:', { name, title, bio, phone, location, website, category });
@@ -209,7 +225,9 @@ router.post('/profile-test-bypass', async (req, res) => {
             success: true,
             message: 'Database test successful (AUTHENTICATION BYPASSED)',
             affectedRows: result.affectedRows,
-            testUserId: testUserId
+            testUserId: testUserId,
+            testUserName: users[0].name,
+            allUsers: users
         });
         
     } catch (error) {
