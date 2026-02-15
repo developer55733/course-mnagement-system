@@ -1729,18 +1729,18 @@ async function saveProfileDirect() {
         const profileData = Object.fromEntries(formData);
         console.log('📊 Form data from manual get:', profileData);
         console.log('📊 Form data details:', {
-            name: profileData.name,
-            title: profileData.title,
-            bio: profileData.bio,
-            email: profileData.email,
-            phone: profileData.phone,
-            location: profileData.location,
-            website: profileData.website,
-            category: profileData.category
+            name: profileData['profile-name'],
+            title: profileData['profile-title'],
+            bio: profileData['profile-bio'],
+            email: profileData['profile-email'],
+            phone: profileData['profile-phone'],
+            location: profileData['profile-location'],
+            website: profileData['profile-website'],
+            category: profileData['profile-category']
         });
         
         // Validate required fields
-        const requiredFields = ['name', 'title', 'bio', 'phone', 'location', 'website', 'category'];
+        const requiredFields = ['profile-name', 'profile-title', 'profile-bio', 'profile-phone', 'profile-location', 'profile-website', 'profile-category'];
         const missingFields = requiredFields.filter(field => !profileData[field]);
         
         if (missingFields.length > 0) {
@@ -1751,12 +1751,26 @@ async function saveProfileDirect() {
         
         console.log('🔍 Sending API request to:', `${API_BASE}/portfolio/profile`);
         
+        // Transform form data to match backend expectations
+        const apiData = {
+            name: profileData['profile-name'],
+            title: profileData['profile-title'],
+            bio: profileData['profile-bio'],
+            email: profileData['profile-email'],
+            phone: profileData['profile-phone'],
+            location: profileData['profile-location'],
+            website: profileData['profile-website'],
+            category: profileData['profile-category']
+        };
+        
+        console.log('📊 API data to send:', apiData);
+        
         const response = await fetch(`${API_BASE}/portfolio/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(profileData)
+            body: JSON.stringify(apiData)
         });
         
         console.log('📡 Profile update response (direct):', response);
