@@ -1837,6 +1837,8 @@ async function testProfileAPI() {
         console.log('📡 Response status:', response.status);
         console.log('📡 Response headers:', response.headers);
         
+        // Clone response to avoid stream conflicts
+        const responseClone = response.clone();
         const responseText = await responseClone.text(); // Read once and store
         
         if (!response.ok) {
@@ -2377,7 +2379,9 @@ async function createBlogPost(e) {
         console.log('🔍 API response ok:', response.ok);
         
         if (!response.ok) {
-            const errorText = await response.text();
+            // Clone response to avoid stream conflicts
+            const responseClone = response.clone();
+            const errorText = await responseClone.text();
             console.error('❌ API Error Response:', errorText);
             throw new Error(`Failed to publish blog post: ${response.status} ${errorText}`);
         }
