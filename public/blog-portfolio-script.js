@@ -1777,9 +1777,10 @@ async function saveProfileDirect() {
         
         if (!response.ok) {
             const errorData = await response.json();
+            const responseText = await response.text(); // Read once and store
             console.error('❌ Profile update failed (direct):', errorData);
             console.error('❌ Response status:', response.status);
-            console.error('❌ Response text:', await response.text());
+            console.error('❌ Response text:', responseText);
             throw new Error(errorData.error || 'Failed to update profile');
         }
         
@@ -1834,14 +1835,16 @@ async function testProfileAPI() {
         console.log('📡 Response status:', response.status);
         console.log('📡 Response headers:', response.headers);
         
+        const responseText = await response.text(); // Read once and store
+        
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = JSON.parse(responseText);
             console.error('❌ Test API failed:', errorData);
-            console.error('❌ Response text:', await response.text());
+            console.error('❌ Response text:', responseText);
             throw new Error(errorData.error || 'Test API failed');
         }
         
-        const result = await response.json();
+        const result = JSON.parse(responseText);
         console.log('✅ Test API result:', result);
         
         if (window.notifications) {
