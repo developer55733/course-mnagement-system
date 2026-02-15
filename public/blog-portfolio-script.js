@@ -1729,19 +1729,19 @@ async function saveProfileDirect() {
         const profileData = Object.fromEntries(formData);
         console.log('📊 Form data from manual get:', profileData);
         console.log('📊 Form data details:', {
-            name: profileData.get('name'),
-            title: profileData.get('title'),
-            bio: profileData.get('bio'),
-            email: profileData.get('email'),
-            phone: profileData.get('phone'),
-            location: profileData.get('location'),
-            website: profileData.get('website'),
-            category: profileData.get('category')
+            name: profileData.name,
+            title: profileData.title,
+            bio: profileData.bio,
+            email: profileData.email,
+            phone: profileData.phone,
+            location: profileData.location,
+            website: profileData.website,
+            category: profileData.category
         });
         
         // Validate required fields
         const requiredFields = ['name', 'title', 'bio', 'phone', 'location', 'website', 'category'];
-        const missingFields = requiredFields.filter(field => !profileData.get(field));
+        const missingFields = requiredFields.filter(field => !profileData[field]);
         
         if (missingFields.length > 0) {
             console.error('❌ Missing required fields:', missingFields);
