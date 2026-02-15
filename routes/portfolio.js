@@ -223,28 +223,29 @@ router.put('/profile-simple', async (req, res) => {
     }
 });
 
-// Update portfolio profile
+// Update portfolio profile (TEMPORARILY WITHOUT MIDDLEWARE FOR TESTING)
 router.put('/profile', async (req, res) => {
     try {
-        console.log('🔍 Profile update request received');
+        console.log('🔍 Profile update request received (NO MIDDLEWARE)');
         console.log('📋 Request body:', req.body);
-        console.log('👤 Portfolio user ID:', req.portfolioUserId);
-        console.log('🔍 Request headers:', req.headers);
-        console.log('🔍 Request method:', req.method);
-        console.log('🔍 Request URL:', req.url);
+        console.log('👤 Session data:', req.session);
+        console.log('👤 Portfolio user ID from session:', req.session?.portfolioUserId);
+        
+        // TEMPORARY: Get user ID directly from session for testing
+        const userId = req.session?.portfolioUserId;
+        if (!userId) {
+            console.error('❌ No user ID found in session');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required - No user ID in session'
+            });
+        }
+        
+        console.log('🔍 Using user ID:', userId);
         
         const { name, title, bio, phone, location, website, category } = req.body;
         
         console.log('📊 Extracted fields:', { name, title, bio, phone, location, website, category });
-        console.log('📊 Field types:', {
-            name: typeof name,
-            title: typeof title,
-            bio: typeof bio,
-            phone: typeof phone,
-            location: typeof location,
-            website: typeof website,
-            category: typeof category
-        });
         
         // Validate required fields
         if (!name || !title || !bio || !phone || !location || !website || !category) {
@@ -256,22 +257,21 @@ router.put('/profile', async (req, res) => {
         }
         
         // Check if profile exists
-        console.log('🔍 Checking if profile exists for user:', req.portfolioUserId);
+        console.log('🔍 Checking if profile exists for user:', userId);
         const [existing] = await pool.execute(`
             SELECT id FROM portfolio_profile WHERE user_id = ?
-        `, [req.portfolioUserId]);
+        `, [userId]);
         
         console.log('📋 Existing profile check:', existing.length > 0 ? 'Found' : 'Not found');
-        console.log('📋 Existing profile data:', existing);
         
         if (existing.length > 0) {
             console.log('🔧 Updating existing profile...');
             // Update existing profile
             const result = await pool.execute(`
                 UPDATE portfolio_profile 
-                SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?
+                SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?, updated_at = NOW()
                 WHERE user_id = ?
-            `, [name, title, bio, phone, location, website, category, req.portfolioUserId]);
+            `, [name, title, bio, phone, location, website, category, userId]);
             
             console.log('✅ Profile update result:', result);
             console.log('✅ Affected rows:', result.affectedRows);
@@ -281,7 +281,7 @@ router.put('/profile', async (req, res) => {
             const result = await pool.execute(`
                 INSERT INTO portfolio_profile (user_id, name, title, bio, phone, location, website, category)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `, [req.portfolioUserId, name, title, bio, phone, location, website, category]);
+            `, [userId, name, title, bio, phone, location, website, category]);
             
             console.log('✅ Profile insert result:', result);
             console.log('✅ Insert ID:', result.insertId);
@@ -290,10 +290,10 @@ router.put('/profile', async (req, res) => {
         console.log('🔍 Sending success response');
         res.json({
             success: true,
-            message: 'Profile updated successfully'
+            message: 'Profile updated successfully (NO MIDDLEWARE)'
         });
     } catch (error) {
-        console.error('❌ Error updating profile:', error);
+        console.error('❌ Error updating profile (NO MIDDLEWARE):', error);
         console.error('❌ Error details:', {
             message: error.message,
             code: error.code,
