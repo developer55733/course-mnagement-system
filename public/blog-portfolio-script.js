@@ -1776,8 +1776,10 @@ async function saveProfileDirect() {
         console.log('📡 Profile update response (direct):', response);
         
         if (!response.ok) {
-            const errorData = await response.json();
-            const responseText = await response.text(); // Read once and store
+            // Clone response to avoid stream conflicts
+            const responseClone = response.clone();
+            const errorData = await responseClone.json();
+            const responseText = await responseClone.text();
             console.error('❌ Profile update failed (direct):', errorData);
             console.error('❌ Response status:', response.status);
             console.error('❌ Response text:', responseText);
@@ -1835,7 +1837,7 @@ async function testProfileAPI() {
         console.log('📡 Response status:', response.status);
         console.log('📡 Response headers:', response.headers);
         
-        const responseText = await response.text(); // Read once and store
+        const responseText = await responseClone.text(); // Read once and store
         
         if (!response.ok) {
             const errorData = JSON.parse(responseText);
