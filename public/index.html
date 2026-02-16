@@ -550,111 +550,8 @@
                     <p class="news-subtitle">Stay updated with the latest announcements and events</p>
                 </div>
                 
-                <div class="news-filters">
-                    <div class="news-search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="news-search-input" placeholder="Search news by title or content...">
-                    </div>
-                    <div class="filter-group">
-                        <select id="news-category-filter" class="filter-select">
-                            <option value="">All Categories</option>
-                            <option value="general">General</option>
-                            <option value="academic">Academic</option>
-                            <option value="events">Events</option>
-                            <option value="announcements">Announcements</option>
-                        </select>
-                        <select id="news-priority-filter" class="filter-select">
-                            <option value="">All Priorities</option>
-                            <option value="high">High Priority</option>
-                            <option value="medium">Medium Priority</option>
-                            <option value="low">Low Priority</option>
-                        </select>
-                    </div>
-                </div>
-                
                 <div class="news-list" id="news-list">
-                    <!-- Sample News Item 1 -->
-                    <div class="news-item" data-category="academic" data-priority="high">
-                        <div class="news-item-header">
-                            <div>
-                                <h3 class="news-item-title">New Programming Course Available</h3>
-                                <div class="news-item-meta">
-                                    <span class="news-category">Academic</span>
-                                    <span class="news-priority high">High Priority</span>
-                                    <span class="news-date"><i class="fas fa-calendar"></i> December 15, 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <img src="https://picsum.photos/seed/programming-course/400/220.jpg" alt="Programming Course" class="news-item-image">
-                        <div class="news-item-content">
-                            We are excited to announce a new advanced programming course starting next semester. This comprehensive course covers modern web development, including React, Node.js, and cloud deployment strategies. Perfect for students looking to enhance their technical skills.
-                        </div>
-                        <div class="news-item-actions">
-                            <button class="news-btn news-btn-primary">Read More</button>
-                        </div>
-                    </div>
-
-                    <!-- Sample News Item 2 -->
-                    <div class="news-item" data-category="events" data-priority="medium">
-                        <div class="news-item-header">
-                            <div>
-                                <h3 class="news-item-title">Annual Tech Conference 2024</h3>
-                                <div class="news-item-meta">
-                                    <span class="news-category">Events</span>
-                                    <span class="news-priority medium">Medium Priority</span>
-                                    <span class="news-date"><i class="fas fa-calendar"></i> December 10, 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <img src="https://picsum.photos/seed/tech-conference/400/220.jpg" alt="Tech Conference" class="news-item-image">
-                        <div class="news-item-content">
-                            Join us for the annual technology conference featuring industry leaders, workshops, and networking opportunities. Early bird registration is now open. Don't miss this chance to connect with tech professionals and learn about the latest trends.
-                        </div>
-                        <div class="news-item-actions">
-                            <button class="news-btn news-btn-primary">Register Now</button>
-                        </div>
-                    </div>
-
-                    <!-- Sample News Item 3 -->
-                    <div class="news-item" data-category="announcements" data-priority="high">
-                        <div class="news-item-header">
-                            <div>
-                                <h3 class="news-item-title">System Maintenance Notice</h3>
-                                <div class="news-item-meta">
-                                    <span class="news-category">Announcements</span>
-                                    <span class="news-priority high">High Priority</span>
-                                    <span class="news-date"><i class="fas fa-calendar"></i> December 8, 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="news-item-content">
-                            Scheduled system maintenance will occur this weekend from Saturday 10 PM to Sunday 2 AM. During this time, the course management system will be unavailable. Please plan your activities accordingly and save any important work before the maintenance window.
-                        </div>
-                        <div class="news-item-actions">
-                            <button class="news-btn news-btn-primary">Learn More</button>
-                        </div>
-                    </div>
-
-                    <!-- Sample News Item 4 -->
-                    <div class="news-item" data-category="general" data-priority="low">
-                        <div class="news-item-header">
-                            <div>
-                                <h3 class="news-item-title">Student Success Story</h3>
-                                <div class="news-item-meta">
-                                    <span class="news-category">General</span>
-                                    <span class="news-priority low">Low Priority</span>
-                                    <span class="news-date"><i class="fas fa-calendar"></i> December 5, 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <img src="https://picsum.photos/seed/student-success/400/220.jpg" alt="Student Success" class="news-item-image">
-                        <div class="news-item-content">
-                            Congratulations to our recent graduate who secured a position at a leading tech company! Their journey through our IT program showcases the quality of education and opportunities available to our students.
-                        </div>
-                        <div class="news-item-actions">
-                            <button class="news-btn news-btn-primary">Read Story</button>
-                        </div>
-                    </div>
+                    <!-- News items will be loaded dynamically from database -->
                 </div>
             </div>
         </div>
@@ -672,31 +569,7 @@
                     <div class="ads-section">
                         <h3><i class="fas fa-video"></i> Video Ads</h3>
                         <div class="video-ads-container" id="video-ads">
-                            <!-- Sample Video Ad 1 -->
-                            <div class="video-ad">
-                                <div class="video-player">
-                                    <img src="https://picsum.photos/seed/tech-ad1/400/220.jpg" alt="Tech Product Ad" style="width: 100%; height: 100%; object-fit: cover; border-radius: 15px;">
-                                    <div class="video-controls">
-                                        <button class="mute-btn"><i class="fas fa-volume-up"></i></button>
-                                    </div>
-                                </div>
-                                <h4 class="ad-title">Latest Tech Gadgets 2024</h4>
-                                <p class="ad-description">Discover cutting-edge technology products that will transform your digital experience. Exclusive offers for students!</p>
-                                <a href="#" class="ad-redirect-btn">Watch Now</a>
-                            </div>
-                            
-                            <!-- Sample Video Ad 2 -->
-                            <div class="video-ad">
-                                <div class="video-player">
-                                    <img src="https://picsum.photos/seed/education-ad2/400/220.jpg" alt="Education Platform Ad" style="width: 100%; height: 100%; object-fit: cover; border-radius: 15px;">
-                                    <div class="video-controls">
-                                        <button class="mute-btn"><i class="fas fa-volume-up"></i></button>
-                                    </div>
-                                </div>
-                                <h4 class="ad-title">Premium Learning Platform</h4>
-                                <p class="ad-description">Access thousands of courses with special student discount. Enhance your skills today!</p>
-                                <a href="#" class="ad-redirect-btn">Learn More</a>
-                            </div>
+                            <!-- Video ads will be loaded dynamically from database -->
                         </div>
                     </div>
                     
@@ -704,21 +577,7 @@
                     <div class="ads-section">
                         <h3><i class="fas fa-image"></i> Banner Ads</h3>
                         <div class="banner-ads-container" id="banner-ads">
-                            <!-- Sample Banner Ad 1 -->
-                            <div class="banner-ad">
-                                <img src="https://picsum.photos/seed/software-banner/350/200.jpg" alt="Software Deal" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
-                                <h4 class="ad-title">Student Software Bundle</h4>
-                                <p class="ad-description">Get 70% off on premium software packages. Limited time offer for verified students.</p>
-                                <a href="#" class="ad-redirect-btn">Get Deal</a>
-                            </div>
-                            
-                            <!-- Sample Banner Ad 2 -->
-                            <div class="banner-ad">
-                                <img src="https://picsum.photos/seed/course-banner/350/200.jpg" alt="Online Course" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
-                                <h4 class="ad-title">Advanced Programming Course</h4>
-                                <p class="ad-description">Master modern web development with expert instructors. Certificate included.</p>
-                                <a href="#" class="ad-redirect-btn">Enroll Now</a>
-                            </div>
+                            <!-- Banner ads will be loaded dynamically from database -->
                         </div>
                     </div>
                     
@@ -900,36 +759,7 @@
                                 </tr>
                             </thead>
                             <tbody id="modules-tbody">
-                                <tr>
-                                    <td data-label="Code:">IT101</td>
-                                    <td data-label="Module:">Introduction to Programming</td>
-                                    <td data-label="Credits:">3</td>
-                                    <td data-label="Lecturer:">Dr. Smith</td>
-                                </tr>
-                                <tr>
-                                    <td data-label="Code:">IT102</td>
-                                    <td data-label="Module:">Web Development Fundamentals</td>
-                                    <td data-label="Credits:">3</td>
-                                    <td data-label="Lecturer:">Dr. Johnson</td>
-                                </tr>
-                                <tr>
-                                    <td data-label="Code:">IT103</td>
-                                    <td data-label="Module:">Database Management Systems</td>
-                                    <td data-label="Credits:">3</td>
-                                    <td data-label="Lecturer:">Dr. Williams</td>
-                                </tr>
-                                <tr>
-                                    <td data-label="Code:">IT104</td>
-                                    <td data-label="Module:">Data Structures & Algorithms</td>
-                                    <td data-label="Credits:">3</td>
-                                    <td data-label="Lecturer:">Dr. Brown</td>
-                                </tr>
-                                <tr>
-                                    <td data-label="Code:">IT105</td>
-                                    <td data-label="Module:">Computer Networks</td>
-                                    <td data-label="Credits:">3</td>
-                                    <td data-label="Lecturer:">Dr. Davis</td>
-                                </tr>
+                                <!-- Modules will be loaded dynamically from database -->
                             </tbody>
                         </table>
                     </div>

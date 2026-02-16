@@ -922,13 +922,29 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // Delete Note function
-  window.deleteNote = function(id) {
+  window.deleteNote = async function(id) {
     const isConfirmed = confirm('Are you sure you want to delete this note? This action cannot be undone.');
     if (!isConfirmed) return;
 
-    notesData = notesData.filter(n => n.id !== id);
-    displayNotes(notesData);
-    showMessage('noteMsg', 'Note deleted successfully!', false);
+    try {
+      const response = await axios.delete(`/api/admin/notes/${id}`, {
+        headers: {
+          'x-admin-secret': ADMIN_SECRET
+        }
+      });
+      
+      if (response.data.success) {
+        // Remove from frontend data after successful backend deletion
+        notesData = notesData.filter(n => n.id !== id);
+        displayNotes(notesData);
+        showMessage('noteMsg', 'Note deleted successfully!', false);
+      } else {
+        showMessage('noteMsg', response.data.message || 'Failed to delete note', true);
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      showMessage('noteMsg', `Failed to delete note: ${error.response?.data?.message || error.message}`, true);
+    }
   };
 
   // Search Notes button handler
