@@ -19,6 +19,13 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
+        registry-url: 'https://registry.npmjs.org/'
+        
+    - name: Configure npm
+      run: |
+        npm config set fetch-timeout 60000
+        npm config set fetch-retry-mintimeout 20000
+        npm config set fetch-retry-maxtimeout 120000
         
     - name: Install dependencies
       run: |
@@ -26,7 +33,7 @@ jobs:
         echo "Node version: $(node --version)"
         echo "NPM version: $(npm --version)"
         echo "Installing dependencies..."
-        npm install --no-audit --no-fund --prefer-offline
+        npm install --no-audit --no-fund --prefer-offline --timeout=120000
         echo "Dependencies installed successfully"
       
     - name: Run tests (if available)
