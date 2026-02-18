@@ -17,23 +17,11 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        registry-url: 'https://registry.npmjs.org/'
-        
-    - name: Configure npm
-      run: |
-        npm config set fetch-timeout 60000
-        npm config set fetch-retry-mintimeout 20000
-        npm config set fetch-retry-maxtimeout 120000
+        node-version: '18'
+        cache: 'npm'
         
     - name: Install dependencies
-      run: |
-        set -e
-        echo "Node version: $(node --version)"
-        echo "NPM version: $(npm --version)"
-        echo "Installing dependencies..."
-        npm install --no-audit --no-fund --prefer-offline --timeout=120000
-        echo "Dependencies installed successfully"
+      run: npm ci
       
     - name: Run tests (if available)
       run: npm test || echo "No tests configured - skipping"
@@ -42,8 +30,8 @@ jobs:
       run: npm run build || echo "No build script - skipping"
       
     - name: Deploy to Railway
-      uses: bervProject/railway-deploy@main
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      uses: railway-app/railway-action@v1
       with:
+        api-token: ${{ secrets.RAILWAY_TOKEN }}
         service: ${{ secrets.RAILWAY_SERVICE_ID }}
+        environment: production
