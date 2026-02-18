@@ -2526,7 +2526,7 @@
 
         .about-card-small {
             background: white;
-            border-radius: 12px;
+            border-radius: 2px;
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;
@@ -2738,7 +2738,7 @@
 
         .zoom-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 2px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;

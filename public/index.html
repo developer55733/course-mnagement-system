@@ -1,2581 +1,5163 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>IT Course Management System</title>
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="blog-portfolio-styles.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 </head>
+
 <body>
+
     <div class="container">
+
         <header>
+
             <div>
+
                 <h1><i class="fas fa-laptop-code"></i> IT Course Management System</h1>
+
                 <p>Student Portal for Modules, Tests, and Lecturer Contact</p>
+
             </div>
+
             
+
                                     
+
             <!-- User Profile Header (shown when logged in) -->
+
             <div class="user-profile-header hidden" id="user-profile-header">
+
                 <div class="user-avatar" id="user-avatar">U</div>
+
                 <div class="user-details-popup" id="user-details-popup">
+
                     <div class="user-profile-header-popup">
+
                         <div class="profile-picture-container">
+
                             <img id="profile-picture" src="https://picsum.photos/seed/default-avatar/100/100.jpg" alt="Profile Picture" class="profile-picture">
+
                             <div class="profile-picture-overlay">
+
                                 <i class="fas fa-camera"></i>
+
                                 <span>Change Photo</span>
+
                             </div>
+
                             <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+
                         </div>
+
                         <div class="profile-name-section">
+
                             <h3 id="popup-name">John Doe</h3>
+
                             <span id="popup-account-type" class="account-type-badge">Student</span>
+
                         </div>
+
                     </div>
+
                     <div class="user-detail-item">
+
                         <span class="user-detail-label"><i class="fas fa-id-card"></i> Registration No:</span>
+
                         <span class="user-detail-value" id="popup-reg-no">IT2023001</span>
+
                     </div>
+
                     <div class="user-detail-item">
+
                         <span class="user-detail-label"><i class="fas fa-envelope"></i> Gmail:</span>
+
                         <span class="user-detail-value" id="popup-email">john@student.edu</span>
+
                     </div>
+
                     <div class="user-detail-item">
+
                         <span class="user-detail-label"><i class="fas fa-graduation-cap"></i> Student ID:</span>
+
                         <span class="user-detail-value" id="popup-student-id">IT2023001</span>
+
                     </div>
+
                     <div class="user-detail-item">
+
                         <span class="user-detail-label"><i class="fas fa-user-tag"></i> Account Type:</span>
+
                         <span class="user-detail-value" id="popup-account-type-detail">Student</span>
+
                         <span class="status-indicator" id="admin-status">
+
                             <span class="status-dot active"></span>
+
                             <span class="status-text">Active</span>
+
                         </span>
+
                     </div>
+
                     <div class="user-detail-actions" id="admin-actions" style="display: none;">
+
                         <button class="admin-action-btn delete-btn" onclick="deleteAccount()">
+
                             <i class="fas fa-trash"></i> Delete Account
+
                         </button>
+
                         <button class="logout-btn" onclick="logout()" title="Logout (Ctrl+L)" aria-label="Logout from the system">
+
                             <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+
                         </button>
+
                     </div>
+
                     <div class="user-detail-actions" id="user-actions">
+
                         <button class="logout-btn" onclick="logout()" title="Logout (Ctrl+L)" aria-label="Logout from the system">
+
                             <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+
                         </button>
+
                     </div>
+
                 </div>
+
             </div>
+
         </header>
+
         
+
         <div class="tabs">
+
             <button class="tab-btn active" data-tab="login">Login</button>
+
             <button class="tab-btn" data-tab="register">Register</button>
+
             <button class="tab-btn" data-tab="about">About</button>
+
             <button class="tab-btn" data-tab="contact">Contact</button>
+
             <button class="tab-btn" data-tab="zoom-meeting" id="zoom-tab">Zoom Meeting</button>
+
             <button class="tab-btn" data-tab="news" id="news-tab">News & Info</button>
+
             <button class="tab-btn" data-tab="ads" id="ads-tab">Ads</button>
+
             <button class="tab-btn hidden" data-tab="dashboard" id="dashboard-tab">Dashboard</button>
+
             <button class="tab-btn hidden" data-tab="discussion-forum" id="discussion-tab">Discussion Forum</button>
+
             <button class="tab-btn hidden" data-tab="assignments" id="assignments-tab">
+
                 <i class="fas fa-tasks"></i> Assignments
+
                 <span class="notification-badge hidden" id="assignment-notification-badge">
+
                     <i class="fas fa-exclamation-circle"></i>
+
                 </span>
+
             </button>
+
             <button class="tab-btn hidden" data-tab="blog" id="blog-tab">
+
                 <i class="fas fa-blog"></i> Blog
+
             </button>
+
             <button class="tab-btn hidden" data-tab="portfolio" id="portfolio-tab">
+
                 <i class="fas fa-briefcase"></i> Portfolio
+
             </button>
+
         </div>
+
         
+
         <!-- About Page -->
+
         <div class="tab-content" id="about">
+
             <div class="about-container">
+
                 <div class="about-header">
+
                     <h2 class="page-title"><i class="fas fa-info-circle"></i> About IT Course Management System</h2>
+
                     <p class="about-subtitle">A comprehensive platform for modern educational management</p>
+
                 </div>
+
                 
+
                 <div class="about-grid">
+
                     <!-- Developer Info Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-user-circle"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Developer</h3>
+
                             <p><strong>Chrispin Golden</strong></p>
+
                             <p>System Developer & Administrator</p>
+
                             <a href="mailto:chrispingolden@gmail.com" class="contact-link">
+
                                 <i class="fas fa-envelope"></i> chrispingolden@gmail.com
+
                             </a>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- System Overview Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-lightbulb"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>System Purpose</h3>
+
                             <p>Comprehensive platform for managing:</p>
+
                             <ul class="feature-list">
+
                                 <li>Course modules & schedules</li>
+
                                 <li>Student progress tracking</li>
+
                                 <li>Academic communication</li>
+
                                 <li>Administrative tools</li>
+
                             </ul>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Key Features Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-star"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Core Features</h3>
+
                             <ul class="feature-list">
+
                                 <li>Student Dashboard</li>
+
                                 <li>Admin Panel</li>
+
                                 <li>Discussion Forum</li>
+
                                 <li>Assignment Management</li>
+
                                 <li>Real-time Updates</li>
+
                             </ul>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Technology Stack Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-cog"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Technology</h3>
+
                             <div class="tech-stack">
+
                                 <span class="tech-item">HTML/CSS/JS</span>
+
                                 <span class="tech-item">Node.js</span>
+
                                 <span class="tech-item">Express.js</span>
+
                                 <span class="tech-item">MySQL</span>
+
                                 <span class="tech-item">Railway.app</span>
+
                             </div>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Future Plans Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-chart-line"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Coming Soon</h3>
+
                             <ul class="feature-list">
+
                                 <li>Mobile Apps</li>
+
                                 <li>WhatsApp Integration</li>
+
                                 <li>Video Classes</li>
+
                                 <li>Analytics Dashboard</li>
+
                                 <li>Multi-language Support</li>
+
                             </ul>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- System Stats Card -->
+
                     <div class="about-card-small">
+
                         <div class="card-icon">
+
                             <i class="fas fa-chart-bar"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>System Capabilities</h3>
+
                             <div class="stats-grid">
+
                                 <div class="stat-item">
+
                                     <i class="fas fa-users"></i>
+
                                     <span>Multi-user Support</span>
+
                                 </div>
+
                                 <div class="stat-item">
+
                                     <i class="fas fa-shield-alt"></i>
+
                                     <span>Secure Authentication</span>
+
                                 </div>
+
                                 <div class="stat-item">
+
                                     <i class="fas fa-database"></i>
+
                                     <span>Cloud Database</span>
+
                                 </div>
+
                                 <div class="stat-item">
+
                                     <i class="fas fa-mobile-alt"></i>
+
                                     <span>Responsive Design</span>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
 
+
+
                 <!-- Footer Info -->
+
                 <div class="about-footer">
+
                     <div class="footer-section">
+
                         <h4><i class="fas fa-code"></i> Development</h4>
+
                         <p>Built with modern web technologies for optimal performance and user experience.</p>
+
                     </div>
+
                     <div class="footer-section">
+
                         <h4><i class="fas fa-graduation-cap"></i> Education</h4>
+
                         <p>Designed to streamline educational processes and enhance learning outcomes.</p>
+
                     </div>
+
                     <div class="footer-section">
+
                         <h4><i class="fas fa-rocket"></i> Innovation</h4>
+
                         <p>Continuously evolving with new features and improvements based on user feedback.</p>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Contact Page -->
+
         <div class="tab-content" id="contact">
+
             <div class="page-container">
+
                 <h2 class="page-title"><i class="fas fa-envelope"></i> Contact Us</h2>
+
                 
+
                 <div class="contact-container">
+
                     <div class="contact-form-section">
+
                         <h3>Send us a Message</h3>
+
                         <p>If you have any issues, questions, or suggestions, please fill out the form below and we'll get back to you shortly.</p>
+
                         
+
                         <form id="contact-form">
+
                             <div class="form-group">
+
                                 <label for="contact-name">Full Name</label>
+
                                 <input type="text" id="contact-name" required placeholder="Enter your full name">
+
                             </div>
+
                             
+
                             <div class="form-group">
+
                                 <label for="contact-email">Email Address</label>
+
                                 <input type="email" id="contact-email" required placeholder="Enter your email address">
+
                             </div>
+
                             
+
                             <div class="form-group">
+
                                 <label for="contact-phone">Phone Number</label>
+
                                 <input type="tel" id="contact-phone" required placeholder="Enter your phone number (for WhatsApp)">
+
                                 <small class="whatsapp-hint">
+
                                     <i class="fab fa-whatsapp"></i> Message will be sent via WhatsApp automatically
+
                                 </small>
+
                             </div>
+
                             
+
                             <div class="form-group">
+
                                 <label for="contact-subject">Subject</label>
+
                                 <select id="contact-subject" required>
+
                                     <option value="">Select a subject</option>
+
                                     <option value="technical_issue">Technical Issue</option>
+
                                     <option value="course_inquiry">Course Inquiry</option>
+
                                     <option value="general_feedback">General Feedback</option>
+
                                     <option value="feature_request">Feature Request</option>
+
                                     <option value="bug_report">Bug Report</option>
+
                                     <option value="other">Other</option>
+
                                 </select>
+
                             </div>
+
                             
+
                             <div class="form-group">
+
                                 <label for="contact-message">Message</label>
+
                                 <textarea id="contact-message" required placeholder="Please describe your issue or message..." rows="6"></textarea>
+
                             </div>
+
                             
+
                             <div class="form-actions">
+
                                 <button type="submit" class="btn btn-submit">
+
                                     <i class="fas fa-paper-plane"></i> Send Message
+
                                 </button>
+
                                 <button type="button" class="btn btn-whatsapp" id="whatsapp-btn">
+
                                     <i class="fab fa-whatsapp"></i> Send via WhatsApp
+
                                 </button>
+
                             </div>
+
                             <div class="message" id="contact-message-status"></div>
+
                         </form>
+
                     </div>
+
                     
+
                     <div class="contact-info-section">
+
                         <h3>Contact Information</h3>
+
                         
+
                         <div class="contact-info-item">
+
                             <div class="contact-icon">
+
                                 <i class="fas fa-envelope"></i>
+
                             </div>
+
                             <div class="contact-details">
+
                                 <h4>Email</h4>
+
                                 <p><a href="mailto:chrispingolden@gmail.com">chrispingolden@gmail.com</a></p>
+
                                 <p class="contact-note">Response time: 24-48 hours</p>
+
                             </div>
+
                         </div>
+
                         
+
                         <div class="contact-info-item">
+
                             <div class="contact-icon">
+
                                 <i class="fas fa-phone"></i>
+
                             </div>
+
                             <div class="contact-details">
+
                                 <h4>Phone Support</h4>
+
                                 <p>Available for urgent issues</p>
+
                                 <p class="contact-note">Business hours: Monday - Friday, 9:00 AM - 5:00 PM</p>
+
                             </div>
+
                         </div>
+
                         
+
                         <div class="contact-info-item">
+
                             <div class="contact-icon">
+
                                 <i class="fas fa-clock"></i>
+
                             </div>
+
                             <div class="contact-details">
+
                                 <h4>Support Hours</h4>
+
                                 <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
+
                                 <p>Saturday - Sunday: Closed</p>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Zoom Meeting Tab -->
+
         <div class="tab-content" id="zoom-meeting">
+
             <div class="zoom-container">
+
                 <div class="zoom-header">
+
                     <h2 class="page-title"><i class="fas fa-video"></i> Zoom Meeting</h2>
+
                     <p class="zoom-subtitle">Quick access to your virtual classes</p>
+
                 </div>
+
                 
+
                 <div class="zoom-grid">
+
                     <!-- Join Meeting Card -->
+
                     <div class="zoom-card">
+
                         <div class="card-icon">
+
                             <i class="fas fa-video"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Join Meeting</h3>
+
                             <form id="zoom-meeting-form" class="zoom-form">
+
                                 <div class="form-group">
+
                                     <input type="url" id="zoom-link" required placeholder="Meeting link (https://zoom.us/j/...)" class="form-input">
+
                                 </div>
+
                                 <div class="form-row">
+
                                     <div class="form-group">
+
                                         <input type="text" id="meeting-name" required placeholder="Your name" class="form-input">
+
                                     </div>
+
                                     <div class="form-group">
+
                                         <input type="password" id="meeting-password" placeholder="Password (optional)" class="form-input">
+
                                     </div>
+
                                 </div>
+
                                 <button type="submit" class="btn btn-primary btn-small">
+
                                     <i class="fas fa-sign-in-alt"></i> Join Now
+
                                 </button>
+
                             </form>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Quick Tips Card -->
+
                     <div class="zoom-card">
+
                         <div class="card-icon">
+
                             <i class="fas fa-lightbulb"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Quick Tips</h3>
+
                             <ul class="tips-list">
+
                                 <li><i class="fas fa-wifi"></i> Stable internet</li>
+
                                 <li><i class="fas fa-microphone"></i> Test audio</li>
+
                                 <li><i class="fas fa-camera"></i> Check camera</li>
+
                                 <li><i class="fas fa-clock"></i> Join early</li>
+
                             </ul>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Meeting Info Card -->
+
                     <div class="zoom-card">
+
                         <div class="card-icon">
+
                             <i class="fas fa-info-circle"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>How to Join</h3>
+
                             <ol class="steps-list">
+
                                 <li>Copy meeting link</li>
+
                                 <li>Paste in field above</li>
+
                                 <li>Enter your name</li>
+
                                 <li>Click "Join Now"</li>
+
                             </ol>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Support Card -->
+
                     <div class="zoom-card">
+
                         <div class="card-icon">
+
                             <i class="fas fa-headset"></i>
+
                         </div>
+
                         <div class="card-content">
+
                             <h3>Need Help?</h3>
+
                             <p>Having trouble joining?</p>
+
                             <button class="btn btn-outline-primary btn-small">
+
                                 <i class="fas fa-question-circle"></i> Get Support
+
                             </button>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
 
                 <!-- Footer Info -->
+
                 <div class="zoom-footer">
+
                     <div class="footer-item">
+
                         <i class="fas fa-shield-alt"></i>
+
                         <span>Secure connection</span>
+
                     </div>
+
                     <div class="footer-item">
+
                         <i class="fas fa-users"></i>
+
                         <span>Multiple participants</span>
+
                     </div>
+
                     <div class="footer-item">
+
                         <i class="fas fa-desktop"></i>
+
                         <span>Screen sharing available</span>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- News & Information Tab -->
+
         <div class="tab-content" id="news">
+
             <div class="news-container">
+
                 <div class="news-header">
+
                     <h2 class="page-title"><i class="fas fa-newspaper"></i> News & Information</h2>
+
                     <p class="news-subtitle">Stay updated with the latest announcements and events</p>
+
                 </div>
+
                 
+
                 <div class="news-list" id="news-list">
+
                     <!-- News items will be loaded dynamically from database -->
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Ads Tab -->
+
         <div class="tab-content" id="ads">
+
             <div class="ads-container">
+
                 <div class="ads-header">
+
                     <h2 class="page-title"><i class="fas fa-ad"></i> Advertisements</h2>
+
                     <p class="ads-subtitle">Discover relevant products and services</p>
+
                 </div>
+
                 
+
                 <div class="ads-grid" id="ads-grid">
+
                     <!-- Video Ads Section -->
+
                     <div class="ads-section">
+
                         <h3><i class="fas fa-video"></i></h3>
+
                         <div class="video-ads-container" id="video-ads">
+
                             <!-- Video ads will be loaded dynamically from database -->
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Banner Ads Section -->
+
                     <div class="ads-section">
+
                         <h3><i class="fas fa-image"></i></h3>
+
                         <div class="banner-ads-container" id="banner-ads">
+
                             <!-- Banner ads will be loaded dynamically from database -->
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Popup Ads Section -->
+
                     <div class="ads-section">
+
                         <h3><i class="fas fa-window-restore"></i></h3>
+
                         <div class="popup-ads-container" id="popup-ads">
+
                             <div class="no-ads-message">
+
                                 <i class="fas fa-window-restore"></i>
+
                                 <p></p>
+
                             </div>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Position-based Ads -->
+
                     <div class="ads-section">
+
                         <h3><i class="fas fa-map-marker-alt"></i></h3>
+
                         <div class="position-ads-container">
+
                             <div class="position-section">
+
                                 <h4><i class="fas fa-arrow-up"></i></h4>
+
                                 <div id="top-ads">
+
                                     <div class="no-ads-message">
+
                                         <p></p>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             <div class="position-section">
+
                                 <h4><i class="fas fa-arrows-alt-h"></i></h4>
+
                                 <div id="sidebar-ads">
+
                                     <div class="no-ads-message">
+
                                         <p></p>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             <div class="position-section">
+
                                 <h4><i class="fas fa-arrow-down"></i></h4>
+
                                 <div id="bottom-ads">
+
                                     <div class="no-ads-message">
+
                                         <p></p>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             <div class="position-section">
+
                                 <h4><i class="fas fa-window-restore"></i></h4>
+
                                 <div id="popup-position-ads">
+
                                     <div class="no-ads-message">
+
                                         <p></p>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Login Tab -->
+
         <div class="tab-content active" id="login">
+
             <div class="login-container">
+
                 <div class="login-header">
+
                     <h2 class="login-title"><i class="fas fa-sign-in-alt"></i> Student Login</h2>
+
                     <p class="login-subtitle">Access your course portal</p>
+
                 </div>
+
                 <div class="message" id="login-message"></div>
+
                 <form id="login-form" class="login-form">
+
                     <div class="form-group">
+
                         <label for="login-email" class="login-label">
+
                             <i class="fas fa-user"></i> Student ID / Email
+
                         </label>
+
                         <input type="text" id="login-email" required placeholder="Enter your student ID or email" class="login-input">
+
                     </div>
+
                     <div class="form-group">
+
                         <label for="login-password" class="login-label">
+
                             <i class="fas fa-lock"></i> Password
+
                         </label>
+
                         <input type="password" id="login-password" required placeholder="Enter your password" class="login-input">
+
                     </div>
+
                     <button type="submit" class="btn btn-login">
+
                         <i class="fas fa-sign-in-alt"></i> Login
+
                     </button>
+
                 </form>
+
                 <div class="login-footer">
+
                     <p>Don't have an account? <a href="#" id="go-to-register" class="register-link">Register here</a></p>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Register Tab -->
+
         <div class="tab-content" id="register">
+
             <div class="register-container">
+
                 <div class="register-header">
+
                     <h2 class="register-title"><i class="fas fa-user-plus"></i> Student Registration</h2>
+
                     <p class="register-subtitle">Create your account to access course materials</p>
+
                 </div>
+
                 <div class="message" id="register-message"></div>
+
                 <form id="register-form" class="register-form">
+
                     <div class="register-grid">
+
                         <!-- Left Column -->
+
                         <div class="register-column">
+
                             <div class="form-group">
+
                                 <label for="reg-name" class="form-label">
+
                                     <i class="fas fa-user"></i> Full Name
+
                                 </label>
+
                                 <input type="text" id="reg-name" required placeholder="Enter your full name" class="form-input">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="reg-email" class="form-label">
+
                                     <i class="fas fa-envelope"></i> Email Address
+
                                 </label>
+
                                 <input type="email" id="reg-email" required placeholder="Enter your email" class="form-input">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="reg-student-id" class="form-label">
+
                                     <i class="fas fa-id-card"></i> Student ID
+
                                 </label>
+
                                 <input type="text" id="reg-student-id" required placeholder="NIT/CICT/2024/1434" 
+
                                        pattern="[A-Z]+/[A-Z]+/[0-9]{4}/[0-9]{4}" class="form-input">
+
                                 <small class="format-hint">
+
                                     <i class="fas fa-info-circle"></i> Format: NIT/CICT/YEAR/FOUR-DIGITS
+
                                 </small>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- Right Column -->
+
                         <div class="register-column">
+
                             <div class="form-group">
+
                                 <label for="reg-password" class="form-label">
+
                                     <i class="fas fa-lock"></i> Password
+
                                 </label>
+
                                 <input type="password" id="reg-password" required placeholder="Create a password" class="form-input">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="reg-confirm-password" class="form-label">
+
                                     <i class="fas fa-lock"></i> Confirm Password
+
                                 </label>
+
                                 <input type="password" id="reg-confirm-password" required placeholder="Confirm your password" class="form-input">
+
                             </div>
+
                             <div class="form-group">
+
                                 <button type="submit" class="btn btn-register">
+
                                     <i class="fas fa-user-plus"></i> Create Account
+
                                 </button>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </form>
+
                 <div class="register-footer">
+
                     <p>Already have an account? <a href="#" id="go-to-login" class="login-link">Login here</a></p>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Dashboard Tab -->
+
         <div class="tab-content" id="dashboard">
+
             <div class="dashboard-header">
+
                 <div class="user-info">
+
                     Welcome, <span class="user-name" id="dashboard-username">Student Name</span>
+
                     <span id="admin-badge" class="admin-badge hidden">Admin</span>
+
                 </div>
+
                 <div class="header-actions">
+
                     <button id="admin-panel-btn" class="btn btn-admin-panel hidden" onclick="window.open('/admin', '_blank')">
+
                         <i class="fas fa-cog"></i> Admin Panel
+
                     </button>
+
                     <button class="logout-btn" id="logout-btn" onclick="testLogout()" title="Logout (Ctrl+L)" aria-label="Logout from system">Logout <i class="fas fa-sign-out-alt"></i></button>
+
                 </div>
+
             </div>
+
             
+
             <div class="dashboard-grid">
+
                 <!-- Modules Card -->
+
                 <div class="card card-modules">
+
                     <h3><i class="fas fa-book"></i> Course Modules</h3>
+
                     <div class="table-container modules-wrapper">
+
                         <table class="modules-table">
+
                             <thead>
+
                                 <tr>
+
                                     <th data-priority="1">Code</th>
+
                                     <th data-priority="2">Module Name</th>
+
                                     <th data-priority="3">Credits</th>
+
                                     <th data-priority="4">Lecturer</th>
+
                                 </tr>
+
                             </thead>
+
                             <tbody id="modules-tbody">
+
                                 <!-- Modules will be loaded dynamically from database -->
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Lecturers Card -->
+
                 <div class="card card-lecturers">
+
                     <h3><i class="fas fa-chalkboard-teacher"></i> Course Lecturers</h3>
+
                     <div class="table-container lecturers-wrapper">
+
                         <table class="lecturers-table">
+
                             <thead>
+
                                 <tr>
+
                                     <th data-priority="1">Name</th>
+
                                     <th data-priority="2">Module</th>
+
                                     <th data-priority="3">Phone</th>
+
                                     <th id="admin-lecturer-action-header" class="hidden">Action</th>
+
                                 </tr>
+
                             </thead>
+
                             <tbody id="lecturers-list">
+
                                 <!-- Lecturers will be loaded here -->
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                     
+
                     <!-- Admin Controls for Lecturers (Only visible to admins) -->
+
                     <div class="admin-controls" id="lecturer-admin-controls">
+
                         <h4><i class="fas fa-user-shield"></i> Admin: Manage Lecturers</h4>
+
                         <form id="add-lecturer-form">
+
                             <div class="form-group">
+
                                 <label for="lecturer-name">Lecturer Name</label>
+
                                 <input type="text" id="lecturer-name" placeholder="Enter lecturer's full name">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="lecturer-module">Module</label>
+
                                 <select id="lecturer-module">
+
                                     <option value="">Select Module</option>
+
                                     <option value="IT101 - Introduction to Programming">IT101 - Introduction to Programming</option>
+
                                     <option value="IT102 - Web Development Fundamentals">IT102 - Web Development Fundamentals</option>
+
                                     <option value="IT103 - Database Management Systems">IT103 - Database Management Systems</option>
+
                                     <option value="IT104 - Data Structures & Algorithms">IT104 - Data Structures & Algorithms</option>
+
                                     <option value="IT105 - Computer Networks">IT105 - Computer Networks</option>
+
                                 </select>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="lecturer-phone">Phone Number</label>
+
                                 <input type="text" id="lecturer-phone" placeholder="Enter phone number with country code">
+
                             </div>
+
                             <button type="submit" class="btn btn-admin">Add Lecturer</button>
+
                         </form>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Test Timetable Card -->
+
                 <div class="card card-timetable">
+
                     <h3><i class="fas fa-calendar-alt"></i> Test Timetable</h3>
+
                     <div class="timetable-wrapper">
+
                         <table class="test-timetable">
+
                             <thead>
+
                                 <tr>
+
                                     <th>Test</th>
+
                                     <th>Module</th>
+
                                     <th>Date</th>
+
                                     <th>Time</th>
+
                                     <th>Venue</th>
+
                                     <th id="admin-action-header" class="hidden">Action</th>
+
                                 </tr>
+
                             </thead>
+
                             <tbody id="timetable-body">
+
                                 <!-- Timetable will be loaded here -->
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                     
+
                     <!-- Admin Controls for Timetable (Only visible to admins) -->
+
                     <div class="admin-controls" id="timetable-admin-controls">
+
                         <h4><i class="fas fa-user-shield"></i> Admin: Manage Test Timetable</h4>
+
                         <form id="add-timetable-form">
+
                             <div class="form-group">
+
                                 <label for="timetable-test">Test Name</label>
+
                                 <input type="text" id="timetable-test" placeholder="e.g., Test 01, Midterm, Final">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="timetable-module">Module</label>
+
                                 <select id="timetable-module">
+
                                     <option value="">Select Module</option>
+
                                     <option value="IT101">IT101 - Introduction to Programming</option>
+
                                     <option value="IT102">IT102 - Web Development Fundamentals</option>
+
                                     <option value="IT103">IT103 - Database Management Systems</option>
+
                                     <option value="IT104">IT104 - Data Structures & Algorithms</option>
+
                                     <option value="IT105">IT105 - Computer Networks</option>
+
                                 </select>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="timetable-date">Date</label>
+
                                 <input type="date" id="timetable-date">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="timetable-time">Time</label>
+
                                 <input type="time" id="timetable-time">
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="timetable-venue">Venue</label>
+
                                 <input type="text" id="timetable-venue" placeholder="e.g., Room 101, Lab 3">
+
                             </div>
+
                             <button type="submit" class="btn btn-admin">Add Test</button>
+
                         </form>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Class Timetable Card -->
+
                 <div class="card card-class-timetable">
+
                     <h3><i class="fas fa-chalkboard"></i> Class Timetable</h3>
+
                     <div class="class-timetable-wrapper">
+
                         <table class="class-timetable">
+
                             <thead>
+
                                 <tr>
+
                                     <th>Module Code</th>
+
                                     <th>Module Name</th>
+
                                     <th>Lecturer</th>
+
                                     <th>Day</th>
+
                                     <th>Time</th>
+
                                     <th>Venue</th>
+
                                     <th id="admin-class-action-header" class="hidden">Action</th>
+
                                 </tr>
+
                             </thead>
+
                             <tbody id="class-timetable-body">
+
                                 <!-- Class timetable will be loaded here -->
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                     
+
                     <!-- Admin Controls for Class Timetable (Only visible to admins) -->
+
                     <div class="admin-controls" id="class-timetable-admin-controls">
+
                         <h4><i class="fas fa-user-shield"></i> Admin: Manage Class Timetable</h4>
+
                         <form id="add-class-timetable-form">
+
                             <div class="form-group">
+
                                 <label for="class-module-code">Module Code</label>
+
                                 <input type="text" id="class-module-code" placeholder="e.g., IT101" required>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="class-module-name">Module Name</label>
+
                                 <input type="text" id="class-module-name" placeholder="e.g., Introduction to Programming" required>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="class-lecturer-name">Lecturer Name</label>
+
                                 <input type="text" id="class-lecturer-name" placeholder="Enter lecturer's full name" required>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="class-venue">Venue</label>
+
                                 <input type="text" id="class-venue" placeholder="e.g., Room 101, Lab 3" required>
+
                             </div>
+
                             <div class="form-group">
+
                                 <label for="class-day">Day of Week</label>
+
                                 <select id="class-day" required>
+
                                     <option value="">Select Day</option>
+
                                     <option value="Monday">Monday</option>
+
                                     <option value="Tuesday">Tuesday</option>
+
                                     <option value="Wednesday">Wednesday</option>
+
                                     <option value="Thursday">Thursday</option>
+
                                     <option value="Friday">Friday</option>
+
                                     <option value="Saturday">Saturday</option>
+
                                     <option value="Sunday">Sunday</option>
+
                                 </select>
+
                             </div>
+
                             <div class="form-row">
+
                                 <div class="form-group">
+
                                     <label for="class-start-time">Start Time</label>
+
                                     <input type="time" id="class-start-time" required>
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="class-end-time">End Time</label>
+
                                     <input type="time" id="class-end-time" required>
+
                                 </div>
+
                             </div>
+
                             <button type="submit" class="btn btn-admin">Add Class Session</button>
+
                         </form>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Study Notes Card -->
+
                 <div class="card card-notes">
+
                     <h3><i class="fas fa-file-alt"></i> Study Notes</h3>
+
                     <div class="notes-wrapper">
+
                         <div class="notes-controls">
+
                             <div class="search-filter-group">
+
                                 <input type="text" id="user-search-notes" placeholder="Search notes by title or module...">
+
                                 <select id="user-filter-notes">
+
                                     <option value="">All Types</option>
+
                                     <option value="lecture">Lecture Notes</option>
+
                                     <option value="tutorial">Tutorial Notes</option>
+
                                     <option value="assignment">Assignment Guidelines</option>
+
                                     <option value="exam">Exam Preparation</option>
+
                                     <option value="reference">Reference Material</option>
+
                                 </select>
+
                             </div>
+
                         </div>
+
                         <div class="notes-list" id="user-notes-list">
+
                             <div class="no-notes-message">
+
                                 <i class="fas fa-file-alt"></i>
+
                                 <p>No study notes available yet.</p>
+
                                 <p>Admin will add study materials for your courses.</p>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Discussion Forum Tab -->
+
         <div class="tab-content" id="discussion-forum">
+
             <div class="forum-container">
+
                 <h2 class="page-title"><i class="fas fa-comments"></i> Discussion Forum</h2>
+
                 <div class="message" id="forum-message"></div>
+
                 
+
                 <!-- Discussions List -->
+
                 <div class="discussions-list">
+
                     <h3><i class="fas fa-list"></i> Recent Discussions</h3>
+
                     <div id="discussions-container">
+
                         <div class="no-discussions">
+
                             <i class="fas fa-comments"></i>
+
                             <p>No discussions yet. Admin will post discussions here.</p>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Discussion View Modal -->
+
         <div id="discussion-modal" class="modal" style="display: none;">
+
             <div class="modal-content">
+
                 <div class="modal-header">
+
                     <h3><i class="fas fa-comments"></i> Discussion Details</h3>
+
                     <button class="close-btn" onclick="closeDiscussionModal()">&times;</button>
+
                 </div>
+
                 <div class="modal-body">
+
                     <div id="discussion-detail-content">
+
                         <!-- Discussion details will be loaded here -->
+
                     </div>
+
                     
+
                     <!-- Reply Section -->
+
                     <div class="reply-section">
+
                         <h4><i class="fas fa-reply"></i> Replies</h4>
+
                         <div id="replies-container">
+
                             <!-- Replies will be loaded here -->
+
                         </div>
+
                         
+
                         <!-- Add Reply Form -->
+
                         <div class="add-reply-form" id="add-reply-form">
+
                             <h5><i class="fas fa-plus"></i> Add Your Reply</h5>
+
                             <form id="reply-form">
+
                                 <div class="form-group">
+
                                     <textarea id="reply-content" required placeholder="Write your reply..." rows="4"></textarea>
+
                                 </div>
+
                                 <button type="submit" class="btn btn-primary">
+
                                     <i class="fas fa-paper-plane"></i> Post Reply
+
                                 </button>
+
                             </form>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Assignments Tab -->
+
         <div class="tab-content" id="assignments">
+
             <div class="assignments-container">
+
                 <h2 class="page-title"><i class="fas fa-tasks"></i> Assignments</h2>
+
                 <div class="message" id="assignments-message"></div>
+
                 
+
                 <!-- Assignment Notifications -->
+
                 <div class="notifications-section" id="assignment-notifications">
+
                     <h3><i class="fas fa-bell"></i> Assignment Notifications</h3>
+
                     <div id="notifications-container">
+
                         <div class="no-notifications">
+
                             <i class="fas fa-bell-slash"></i>
+
                             <p>No new assignment notifications</p>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Admin Assignment Management -->
+
                 <div class="admin-assignments-section" id="admin-assignments-section" style="display: none;">
+
                     <h3><i class="fas fa-user-shield"></i> Post New Assignment</h3>
+
                     <form id="create-assignment-form">
+
                         <div class="form-group">
+
                             <label for="assignment-title">Assignment Title</label>
+
                             <input type="text" id="assignment-title" required placeholder="Enter assignment title">
+
                         </div>
+
                         <div class="form-group">
+
                             <label for="assignment-module">Module</label>
+
                             <select id="assignment-module" required>
+
                                 <option value="">Select Module</option>
+
                                 <option value="IT101">IT101 - Introduction to Programming</option>
+
                                 <option value="IT102">IT102 - Web Development Fundamentals</option>
+
                                 <option value="IT103">IT103 - Database Management Systems</option>
+
                                 <option value="IT104">IT104 - Data Structures & Algorithms</option>
+
                                 <option value="IT105">IT105 - Computer Networks</option>
+
                             </select>
+
                         </div>
+
                         <div class="form-group">
+
                             <label for="assignment-description">Assignment Description</label>
+
                             <textarea id="assignment-description" required placeholder="Enter assignment details and requirements..." rows="6"></textarea>
+
                         </div>
+
                         <div class="form-group">
+
                             <label for="assignment-due-date">Due Date & Time</label>
+
                             <input type="datetime-local" id="assignment-due-date" required>
+
                         </div>
+
                         <button type="submit" class="btn btn-primary">
+
                             <i class="fas fa-plus"></i> Post Assignment
+
                         </button>
+
                     </form>
+
                 </div>
+
                 
+
                 <!-- Assignments List -->
+
                 <div class="assignments-list">
+
                     <h3><i class="fas fa-list"></i> All Assignments</h3>
+
                     <div id="assignments-container">
+
                         <div class="no-assignments">
+
                             <i class="fas fa-tasks"></i>
+
                             <p>No assignments posted yet.</p>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Blog Tab -->
+
         <div class="tab-content" id="blog">
+
             <div class="blog-container">
+
                 <div class="blog-header">
+
                     <h2 class="page-title"><i class="fas fa-blog"></i> Blog Management</h2>
+
                     <p class="blog-subtitle">Create and manage your blog posts - visible to everyone</p>
+
                 </div>
+
                 
+
                 <!-- Public Blog Viewing Section -->
+
                 <div class="public-blog-section">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-globe"></i> Published Blog Posts</h3>
+
                         <p class="section-description">Read blog posts published by all users</p>
+
                         <div class="blog-controls">
+
                             <div class="search-filter-group">
+
                                 <input type="text" id="public-blog-search" placeholder="Search published blogs...">
+
                                 <select id="public-blog-filter-category">
+
                                     <option value="">All Categories</option>
+
                                     <option value="technology">Technology</option>
+
                                     <option value="programming">Programming</option>
+
                                     <option value="web-development">Web Development</option>
+
                                     <option value="database">Database</option>
+
                                     <option value="networking">Networking</option>
+
                                     <option value="career">Career</option>
+
                                     <option value="education">Education</option>
+
                                     <option value="business">Business</option>
+
                                     <option value="services">Services</option>
+
                                     <option value="student-life">Student Life</option>
+
                                     <option value="other">Other</option>
+
                                 </select>
+
                                 <select id="public-blog-filter-sort">
+
                                     <option value="newest">Newest First</option>
+
                                     <option value="oldest">Oldest First</option>
+
                                     <option value="most-viewed">Most Viewed</option>
+
                                     <option value="most-liked">Most Liked</option>
+
                                 </select>
+
                             </div>
+
                             <button class="btn btn-primary" onclick="refreshPublicBlogs()">
+
                                 <i class="fas fa-sync"></i> Refresh
+
                             </button>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="public-blogs-grid" id="public-blogs-grid">
+
                         <!-- Public blog posts will be dynamically loaded here -->
+
                         <div class="no-posts-message">
+
                             <i class="fas fa-newspaper"></i>
+
                             <h3>No Published Blogs Yet</h3>
+
                             <p>Be the first to publish a blog post and share your knowledge!</p>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Blog Authentication Section -->
+
                 <div class="blog-auth-section" id="blog-auth-section">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-lock"></i> Blog Management Access</h3>
+
                         <p class="section-description">Login to create, edit, or manage your blog posts</p>
+
                     </div>
+
                     
+
                     <div class="auth-container">
+
                         <div class="auth-form-container">
+
                             <form id="blog-login-form" onsubmit="handleBlogLogin(event)">
+
                                 <div class="form-group">
+
                                     <label for="blog-login-email">Email or Username</label>
+
                                     <input type="text" id="blog-login-email" required placeholder="Enter your email or username">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="blog-login-password">Password</label>
+
                                     <input type="password" id="blog-login-password" required placeholder="Enter your password">
+
                                 </div>
+
                                 <div class="form-actions">
+
                                     <button type="submit" class="btn btn-primary">
+
                                         <i class="fas fa-sign-in-alt"></i> Login to Manage Blogs
+
                                     </button>
+
                                     <button type="button" class="btn btn-outline" onclick="showBlogRegister()">
+
                                         <i class="fas fa-user-plus"></i> Create Account
+
                                     </button>
+
                                 </div>
+
                             </form>
+
                         </div>
+
                         
+
                         <div class="auth-info">
+
                             <div class="info-card">
+
                                 <i class="fas fa-user-shield"></i>
+
                                 <h4>Secure Blog Management</h4>
+
                                 <p>Only authenticated users can create, edit, or delete blog posts. Your content is protected and only you can manage your own blogs.</p>
+
                             </div>
+
                             <div class="info-card">
+
                                 <i class="fas fa-globe"></i>
+
                                 <h4>Public Reading Access</h4>
+
                                 <p>Everyone can read published blog posts without logging in. Share your knowledge with the world while keeping control over your content.</p>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Blog Registration Section (Hidden by default) -->
+
                 <div class="blog-register-section" id="blog-register-section" style="display: none;">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-user-plus"></i> Create Blog Account</h3>
+
                         <p class="section-description">Register to start creating and managing your blog posts</p>
+
                     </div>
+
                     
+
                     <div class="auth-container">
+
                         <div class="auth-form-container">
+
                             <form id="blog-register-form" onsubmit="handleBlogRegister(event)">
+
                                 <div class="form-group">
+
                                     <label for="blog-register-name">Full Name</label>
+
                                     <input type="text" id="blog-register-name" required placeholder="Enter your full name">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="blog-register-email">Email</label>
+
                                     <input type="email" id="blog-register-email" required placeholder="Enter your email">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="blog-register-username">Username</label>
+
                                     <input type="text" id="blog-register-username" required placeholder="Choose a username">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="blog-register-password">Password</label>
+
                                     <input type="password" id="blog-register-password" required placeholder="Create a password">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="blog-register-confirm-password">Confirm Password</label>
+
                                     <input type="password" id="blog-register-confirm-password" required placeholder="Confirm your password">
+
                                 </div>
+
                                 <div class="form-actions">
+
                                     <button type="submit" class="btn btn-primary">
+
                                         <i class="fas fa-user-plus"></i> Create Account
+
                                     </button>
+
                                     <button type="button" class="btn btn-outline" onclick="showBlogLogin()">
+
                                         <i class="fas fa-sign-in-alt"></i> Back to Login
+
                                     </button>
+
                                 </div>
+
                             </form>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Blog Management Section (Hidden until authenticated) -->
+
                 <div class="blog-management-section" id="blog-management-section" style="display: none;">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-user-cog"></i> Your Blog Management</h3>
+
                         <div class="user-info">
+
                             <span class="user-welcome">Welcome, <strong id="blog-user-name">User</strong>!</span>
+
                             <button class="btn btn-outline btn-sm" onclick="handleBlogLogout()">
+
                                 <i class="fas fa-sign-out-alt"></i> Logout
+
                             </button>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Blog Statistics (Only visible to authenticated users) -->
+
                     <div class="blog-stats">
+
                         <div class="stat-card">
+
                             <i class="fas fa-newspaper"></i>
+
                             <span class="stat-number" id="total-posts">0</span>
+
                             <span class="stat-label">Your Posts</span>
+
                         </div>
+
                         <div class="stat-card">
+
                             <i class="fas fa-eye"></i>
+
                             <span class="stat-number" id="total-views">0</span>
+
                             <span class="stat-label">Total Views</span>
+
                         </div>
+
                         <div class="stat-card">
+
                             <i class="fas fa-heart"></i>
+
                             <span class="stat-number" id="total-likes">0</span>
+
                             <span class="stat-label">Total Likes</span>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="blog-main">
+
                         <!-- Create New Blog Post Section -->
+
                         <div class="blog-create-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-plus-circle"></i> Create New Blog Post</h3>
+
                                 <button class="btn btn-toggle" id="toggle-blog-form">
+
                                     <i class="fas fa-chevron-down"></i> Show Form
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="blog-form-container" id="blog-form-container" style="display: none;">
+
                                 <form id="create-blog-form" onsubmit="createBlogPost(event)">
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="blog-title">Blog Title</label>
+
                                             <input type="text" id="blog-title" name="blog-title" required placeholder="Enter an engaging title for your blog post">
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="blog-category">Category</label>
+
                                             <select id="blog-category" name="blog-category" required>
+
                                                 <option value="">Select Category</option>
+
                                                 <option value="technology">Technology</option>
+
                                                 <option value="programming">Programming</option>
+
                                                 <option value="web-development">Web Development</option>
+
                                                 <option value="database">Database</option>
+
                                                 <option value="networking">Networking</option>
+
                                                 <option value="career">Career</option>
+
                                                 <option value="education">Education</option>
+
                                                 <option value="business">Business</option>
+
                                                 <option value="services">Services</option>
+
                                                 <option value="student-life">Student Life</option>
+
                                                 <option value="other">Other</option>
+
                                             </select>
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="blog-excerpt">Short Description</label>
+
                                         <input type="text" id="blog-excerpt" name="blog-excerpt" placeholder="Brief description of your blog post (shown in previews)">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="blog-content">Blog Content</label>
+
                                         <textarea id="blog-content" name="blog-content" required placeholder="Write your blog post content here..." rows="12"></textarea>
+
                                         <div class="editor-toolbar">
+
                                             <button type="button" class="toolbar-btn" onclick="formatText('bold')">
+
                                                 <i class="fas fa-bold"></i>
+
                                             </button>
+
                                             <button type="button" class="toolbar-btn" onclick="formatText('italic')">
+
                                                 <i class="fas fa-italic"></i>
+
                                             </button>
+
                                             <button type="button" class="toolbar-btn" onclick="formatText('underline')">
+
                                                 <i class="fas fa-underline"></i>
+
                                             </button>
+
                                             <button type="button" class="toolbar-btn" onclick="insertLink()">
+
                                                 <i class="fas fa-link"></i>
+
                                             </button>
+
                                             <button type="button" class="toolbar-btn" onclick="insertImage()">
+
                                                 <i class="fas fa-image"></i>
+
                                             </button>
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="blog-tags">Tags (comma separated)</label>
+
                                         <input type="text" id="blog-tags" name="blog-tags" placeholder="e.g., javascript, web development, tutorial">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="blog-featured-image">Featured Image URL</label>
+
                                         <input type="url" id="blog-featured-image" name="blog-featured-image" placeholder="https://example.com/image.jpg">
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="submit" class="btn btn-primary">
+
                                             <i class="fas fa-paper-plane"></i> Publish Post
+
                                         </button>
+
                                         <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+
                                             <i class="fas fa-save"></i> Save Draft
+
                                         </button>
+
                                         <button type="button" class="btn btn-info" onclick="previewBlogPost()">
+
                                             <i class="fas fa-eye"></i> Preview
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="clearBlogForm()">
+
                                             <i class="fas fa-times"></i> Clear
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- Blog Posts Management -->
+
                         <div class="blog-posts-management">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-list"></i> Your Blog Posts</h3>
+
                                 <div class="blog-controls">
+
                                     <div class="search-filter-group">
+
                                         <input type="text" id="blog-search" placeholder="Search your posts...">
+
                                         <select id="blog-filter-category">
+
                                             <option value="">All Categories</option>
+
                                             <option value="technology">Technology</option>
+
                                             <option value="programming">Programming</option>
+
                                             <option value="web-development">Web Development</option>
+
                                             <option value="business">Business</option>
+
                                             <option value="services">Services</option>
+
                                             <option value="student-life">Student Life</option>
+
                                         </select>
+
                                         <select id="blog-filter-status">
+
                                             <option value="">All Status</option>
+
                                             <option value="published">Published</option>
+
                                             <option value="draft">Draft</option>
+
                                         </select>
+
                                     </div>
+
                                     <button class="btn btn-primary" onclick="showCreateForm()">
+
                                         <i class="fas fa-plus"></i> New Post
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="blog-posts-grid" id="blog-posts-grid">
+
                                 <!-- Blog posts will be dynamically loaded here -->
+
                                 <div class="no-posts-message">
+
                                     <i class="fas fa-newspaper"></i>
+
                                     <h3>No blog posts yet</h3>
+
                                     <p>Start creating amazing content to share with the world!</p>
+
                                     <button class="btn btn-primary" onclick="showCreateForm()">
+
                                         <i class="fas fa-plus"></i> Create Your First Post
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
+
         <!-- Portfolio Tab -->
+
         <div class="tab-content" id="portfolio">
+
             <div class="portfolio-container">
+
                 <!-- Public Portfolio Viewing Section -->
+
                 <div class="public-portfolio-section">
+
                     <div class="portfolio-header">
+
                         <h2 class="page-title"><i class="fas fa-briefcase"></i> Professional Portfolio</h2>
+
                         <p class="portfolio-subtitle">View professional portfolio and work showcase</p>
+
                         <div class="portfolio-actions">
+
                             <button class="btn btn-primary" onclick="showPortfolioLogin()">
+
                                 <i class="fas fa-user-cog"></i> Manage Your Portfolio
+
                             </button>
+
                             <span class="action-separator">or</span>
+
                             <button class="btn btn-outline" onclick="showPortfolioRegister()">
+
                                 <i class="fas fa-user-plus"></i> Create Portfolio Account
+
                             </button>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Public Profile Display -->
+
                     <div class="public-profile-display" id="public-profile-display">
+
                         <div class="profile-card">
+
                             <div class="profile-avatar-section">
+
                                 <img src="https://picsum.photos/seed/portfolio-avatar/200/200.jpg" alt="Profile Avatar" class="profile-avatar" id="public-profile-avatar">
+
                             </div>
+
                             <div class="profile-info">
+
                                 <h3 class="profile-name" id="public-profile-name">Professional Name</h3>
+
                                 <p class="profile-title" id="public-profile-title">Professional Title</p>
+
                                 <p class="profile-bio" id="public-profile-bio">Professional bio and description...</p>
+
                                 <div class="profile-contact">
+
                                     <p><i class="fas fa-envelope"></i> <span id="public-profile-email">email@example.com</span></p>
+
                                     <p><i class="fas fa-phone"></i> <span id="public-profile-phone">+1234567890</span></p>
+
                                     <p><i class="fas fa-map-marker-alt"></i> <span id="public-profile-location">City, Country</span></p>
+
                                     <p><i class="fas fa-globe"></i> <a href="#" id="public-profile-website" target="_blank">Website</a></p>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Public Skills Display -->
+
                     <div class="public-skills-display" id="public-skills-display">
+
                         <h3><i class="fas fa-cogs"></i> Skills & Expertise</h3>
+
                         <div class="skills-grid" id="public-skills-grid">
+
                             <!-- Skills will be loaded here -->
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Public Experience Display -->
+
                     <div class="public-experience-display" id="public-experience-display">
+
                         <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+
                         <div class="experience-timeline" id="public-experience-timeline">
+
                             <!-- Experience will be loaded here -->
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Public Projects Display -->
+
                     <div class="public-projects-display" id="public-projects-display">
+
                         <h3><i class="fas fa-project-diagram"></i> Projects Showcase</h3>
+
                         <div class="projects-grid" id="public-projects-grid">
+
                             <!-- Projects will be loaded here -->
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Portfolio Authentication Section -->
+
                 <div class="portfolio-auth-section" id="portfolio-auth-section">
+
                     <div class="auth-container">
+
                         <div class="auth-form">
+
                             <h3><i class="fas fa-lock"></i> Portfolio Management</h3>
+
                             <p>Sign in to manage your portfolio</p>
+
                             
+
                             <div class="form-group">
+
                                 <label for="portfolio-username">Username</label>
+
                                 <input type="text" id="portfolio-username" placeholder="Enter your username">
+
                             </div>
+
                             
+
                             <div class="form-group">
+
                                 <label for="portfolio-password">Password</label>
+
                                 <input type="password" id="portfolio-password" placeholder="Enter your password">
+
                             </div>
+
                             
+
                             <div class="form-actions">
+
                                 <button class="btn btn-primary" onclick="handlePortfolioLogin()">
+
                                     <i class="fas fa-sign-in-alt"></i> Sign In to Manage Portfolio
+
                                 </button>
+
                                 <button class="btn btn-outline" onclick="showPortfolioRegister()">
+
                                     <i class="fas fa-user-plus"></i> Create Account
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="auth-links">
+
                                 <a href="#" onclick="showPortfolioLogin(); return false;">Already have an account? Sign in</a>
+
                                 <a href="#" onclick="showPortfolioRegister(); return false;">Need an account? Register</a>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Portfolio Registration Section (Hidden by default) -->
+
                 <div class="portfolio-register-section" id="portfolio-register-section" style="display: none;">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-user-plus"></i> Create Portfolio Account</h3>
+
                         <p class="section-description">Register to start managing your professional portfolio</p>
+
                     </div>
+
                     
+
                     <div class="auth-container">
+
                         <div class="auth-form-container">
+
                             <form id="portfolio-register-form" onsubmit="handlePortfolioRegister(event)">
+
                                 <div class="form-group">
+
                                     <label for="portfolio-register-name">Full Name</label>
+
                                     <input type="text" id="portfolio-register-name" required placeholder="Enter your full name">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="portfolio-register-email">Email</label>
+
                                     <input type="email" id="portfolio-register-email" required placeholder="Enter your email">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="portfolio-register-username">Username</label>
+
                                     <input type="text" id="portfolio-register-username" required placeholder="Choose a username">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="portfolio-register-password">Password</label>
+
                                     <input type="password" id="portfolio-register-password" required placeholder="Create a password">
+
                                 </div>
+
                                 <div class="form-group">
+
                                     <label for="portfolio-register-confirm-password">Confirm Password</label>
+
                                     <input type="password" id="portfolio-register-confirm-password" required placeholder="Confirm your password">
+
                                 </div>
+
                                 <div class="form-actions">
+
                                     <button type="submit" class="btn btn-primary">
+
                                         <i class="fas fa-user-plus"></i> Create Portfolio Account
+
                                     </button>
+
                                     <button type="button" class="btn btn-outline" onclick="showPortfolioLogin()">
+
                                         <i class="fas fa-sign-in-alt"></i> Back to Login
+
                                     </button>
+
                                 </div>
+
                             </form>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- Portfolio Management Section (Hidden until authenticated) -->
+
                 <div class="portfolio-management-section" id="portfolio-management-section" style="display: none;">
+
                     <div class="section-header">
+
                         <h3><i class="fas fa-user-cog"></i> Your Portfolio Management</h3>
+
                         <div class="user-info">
+
                             <span class="user-welcome">Welcome, <strong id="portfolio-user-name">User</strong>!</span>
+
                             <button class="btn btn-outline btn-sm" onclick="handlePortfolioLogout()">
+
                                 <i class="fas fa-sign-out-alt"></i> Logout
+
                             </button>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- Portfolio Statistics (Only visible to authenticated users) -->
+
                     <div class="portfolio-stats">
+
                         <div class="stat-card">
+
                             <i class="fas fa-eye"></i>
+
                             <span class="stat-number" id="portfolio-views">0</span>
+
                             <span class="stat-label">Profile Views</span>
+
                         </div>
+
                         <div class="stat-card">
+
                             <i class="fas fa-project-diagram"></i>
+
                             <span class="stat-number" id="total-projects">0</span>
+
                             <span class="stat-label">Projects</span>
+
                         </div>
+
                         <div class="stat-card">
+
                             <i class="fas fa-star"></i>
+
                             <span class="stat-number" id="portfolio-rating">0</span>
+
                             <span class="stat-label">Average Rating</span>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="portfolio-main">
+
                         <!-- Portfolio Overview Section -->
+
                         <div class="portfolio-overview-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-user"></i> Profile Overview</h3>
+
                                 <button class="btn btn-toggle" id="toggle-profile-form">
+
                                     <i class="fas fa-chevron-down"></i> Edit Profile
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="profile-display" id="profile-display">
+
                                 <div class="profile-card">
+
                                     <div class="profile-avatar-section">
+
                                         <img src="https://picsum.photos/seed/portfolio-avatar/200/200.jpg" alt="Profile Avatar" class="profile-avatar" id="profile-avatar-img">
+
                                         <button class="btn btn-upload" onclick="uploadProfilePicture()">
+
                                             <i class="fas fa-camera"></i> Change Photo
+
                                         </button>
+
                                     </div>
+
                                     <div class="profile-info">
+
                                         <h3 class="profile-name" id="profile-name-display">Your Name</h3>
+
                                         <p class="profile-title" id="profile-title-display">Professional Title</p>
+
                                         <p class="profile-bio" id="profile-bio-display">Your professional bio and description goes here...</p>
+
                                         <div class="profile-contact">
+
                                             <p><i class="fas fa-envelope"></i> <span id="profile-email-display">email@example.com</span></p>
+
                                             <p><i class="fas fa-phone"></i> <span id="profile-phone-display">+1234567890</span></p>
+
                                             <p><i class="fas fa-map-marker-alt"></i> <span id="profile-location-display">City, Country</span></p>
+
                                             <p><i class="fas fa-globe"></i> <a href="#" id="profile-website-display" target="_blank">Website</a></p>
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="profile-form-container" id="profile-form-container" style="display: none;">
+
                                 <form id="edit-profile-form" onsubmit="saveProfileDirect(event)">
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="profile-name">Full Name</label>
+
                                             <input type="text" id="profile-name" name="profile-name" required placeholder="Enter your full name">
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="profile-title">Professional Title</label>
+
                                             <input type="text" id="profile-title" name="profile-title" placeholder="e.g., Software Developer, Designer, etc.">
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="profile-bio">Professional Bio</label>
+
                                         <textarea id="profile-bio" name="profile-bio" required placeholder="Describe your professional background, skills, and experience..." rows="6"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="profile-email">Email</label>
+
                                             <input type="email" id="profile-email" name="profile-email" required placeholder="your.email@example.com">
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="profile-phone">Phone</label>
+
                                             <input type="tel" id="profile-phone" name="profile-phone" placeholder="+1234567890">
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="profile-location">Location</label>
+
                                             <input type="text" id="profile-location" name="profile-location" placeholder="City, Country">
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="profile-website">Website/Portfolio</label>
+
                                             <input type="url" id="profile-website" name="profile-website" placeholder="https://yourwebsite.com">
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="profile-category">Portfolio Category</label>
+
                                         <select id="profile-category" name="profile-category" required>
+
                                             <option value="">Select Category</option>
+
                                             <option value="business">Business</option>
+
                                             <option value="services">Services</option>
+
                                             <option value="student">Student</option>
+
                                             <option value="freelancer">Freelancer</option>
+
                                             <option value="professional">Professional</option>
+
                                             <option value="academic">Academic</option>
+
                                         </select>
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="button" class="btn btn-primary" onclick="saveProfileDirect()">
+
                                             <i class="fas fa-save"></i> Save Profile
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="cancelProfileEdit()">
+
                                             <i class="fas fa-times"></i> Cancel
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- Skills Section -->
+
                         <div class="portfolio-skills-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-cogs"></i> Skills & Expertise</h3>
+
                                 <button class="btn btn-primary" onclick="showAddSkillForm()">
+
                                     <i class="fas fa-plus"></i> Add Skill
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="skills-form-container" id="skills-form-container" style="display: none;">
+
                                 <form id="add-skill-form" onsubmit="addSkill(event)">
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="skill-name">Skill Name</label>
+
                                             <input type="text" id="skill-name" name="skill-name" required placeholder="e.g., JavaScript, Project Management">
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="skill-level">Proficiency Level</label>
+
                                             <select id="skill-level" name="skill-level" required>
+
                                                 <option value="">Select Level</option>
+
                                                 <option value="beginner">Beginner</option>
+
                                                 <option value="intermediate">Intermediate</option>
+
                                                 <option value="advanced">Advanced</option>
+
                                                 <option value="expert">Expert</option>
+
                                             </select>
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="skill-category">Category</label>
+
                                         <select id="skill-category" name="skill-category" required>
+
                                             <option value="">Select Category</option>
+
                                             <option value="technical">Technical Skills</option>
+
                                             <option value="soft">Soft Skills</option>
+
                                             <option value="language">Languages</option>
+
                                             <option value="tool">Tools & Software</option>
+
                                         </select>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="skill-description">Description</label>
+
                                         <textarea id="skill-description" name="skill-description" placeholder="Brief description of your skill and experience..." rows="3"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="submit" class="btn btn-primary">
+
                                             <i class="fas fa-plus"></i> Add Skill
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="hideSkillForm()">
+
                                             <i class="fas fa-times"></i> Cancel
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                             
+
                             <div class="skills-grid" id="skills-grid">
+
                                 <div class="no-skills-message">
+
                                     <i class="fas fa-cogs"></i>
+
                                     <h3>No skills added yet</h3>
+
                                     <p>Add your skills to showcase your expertise!</p>
+
                                     <button class="btn btn-primary" onclick="showAddSkillForm()">
+
                                         <i class="fas fa-plus"></i> Add Your First Skill
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- Experience Section -->
+
                         <div class="portfolio-experience-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+
                                 <button class="btn btn-primary" onclick="showAddExperienceForm()">
+
                                     <i class="fas fa-plus"></i> Add Experience
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="experience-form-container" id="experience-form-container" style="display: none;">
+
                                 <form id="add-experience-form" onsubmit="addExperience(event)">
+
                                     <div class="form-group">
+
                                         <label for="exp-company">Company Name</label>
+
                                         <input type="text" id="exp-company" name="exp-company" required placeholder="e.g., Tech Company Inc.">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="exp-position">Position/Role</label>
+
                                         <input type="text" id="exp-position" name="exp-position" required placeholder="e.g., Software Developer">
+
                                     </div>
+
                                     
+
                                     <div class="form-row">
+
                                         <div class="form-group">
+
                                             <label for="exp-start-date">Start Date</label>
+
                                             <input type="date" id="exp-start-date" name="exp-start-date" required>
+
                                         </div>
+
                                         <div class="form-group">
+
                                             <label for="exp-end-date">End Date</label>
+
                                             <input type="date" id="exp-end-date" name="exp-end-date" placeholder="Leave empty if current">
+
                                         </div>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="exp-description">Job Description</label>
+
                                         <textarea id="exp-description" name="exp-description" required placeholder="Describe your responsibilities and achievements..." rows="6"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="submit" class="btn btn-primary">
+
                                             <i class="fas fa-plus"></i> Add Experience
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="hideExperienceForm()">
+
                                             <i class="fas fa-times"></i> Cancel
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                             
+
                             <div class="experience-timeline" id="experience-timeline">
+
                                 <div class="no-experience-message">
+
                                     <i class="fas fa-briefcase"></i>
+
                                     <h3>No experience added yet</h3>
+
                                     <p>Add your work experience to build your professional profile!</p>
+
                                     <button class="btn btn-primary" onclick="showAddExperienceForm()">
+
                                         <i class="fas fa-plus"></i> Add Your First Experience
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- Projects Section -->
+
                         <div class="portfolio-projects-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-project-diagram"></i> Projects Showcase</h3>
+
                                 <button class="btn btn-primary" onclick="showAddProjectForm()">
+
                                     <i class="fas fa-plus"></i> Add Project
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="project-form-container" id="project-form-container" style="display: none;">
+
                                 <form id="add-project-form" onsubmit="addProject(event)">
+
                                     <div class="form-group">
+
                                         <label for="project-name">Project Name</label>
+
                                         <input type="text" id="project-name" name="project-name" required placeholder="e.g., E-commerce Website">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="project-description">Project Description</label>
+
                                         <textarea id="project-description" name="project-description" required placeholder="Describe your project, its purpose, and your role..." rows="4"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="project-technologies">Technologies Used</label>
+
                                         <input type="text" id="project-technologies" name="project-technologies" placeholder="e.g., React, Node.js, MongoDB">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="project-link">Project Link</label>
+
                                         <input type="url" id="project-link" name="project-link" placeholder="https://github.com/username/project">
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="project-image">Project Image URL</label>
+
                                         <input type="url" id="project-image" name="project-image" placeholder="https://example.com/project-image.jpg">
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="submit" class="btn btn-primary">
+
                                             <i class="fas fa-plus"></i> Add Project
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="hideProjectForm()">
+
                                             <i class="fas fa-times"></i> Cancel
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                             
+
                             <div class="projects-grid" id="projects-grid">
+
                                 <div class="no-projects-message">
+
                                     <i class="fas fa-project-diagram"></i>
+
                                     <h3>No projects added yet</h3>
+
                                     <p>Add your projects to showcase your work!</p>
+
                                     <button class="btn btn-primary" onclick="showAddProjectForm()">
+
                                         <i class="fas fa-plus"></i> Add Your First Project
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- CV Builder Section -->
+
                         <div class="portfolio-cv-section">
+
                             <div class="section-header">
+
                                 <h3><i class="fas fa-file-alt"></i> CV Builder</h3>
+
                                 <button class="btn btn-primary" onclick="showCVBuilder()">
+
                                     <i class="fas fa-download"></i> Generate CV
+
                                 </button>
+
                             </div>
+
                             
+
                             <div class="cv-builder-container" id="cv-builder-container" style="display: none;">
+
                                 <div class="cv-preview" id="cv-preview">
+
                                     <!-- CV preview will be generated here -->
+
                                         <div class="cv-section">
+
                                             <h3>Skills</h3>
+
                                             <div id="cv-skills-preview">Skills will be listed here...</div>
+
                                         </div>
+
                                         <div class="cv-section">
+
                                             <h3>Experience</h3>
+
                                             <div id="cv-experience-preview">Experience will be listed here...</div>
+
                                         </div>
+
                                         <div class="cv-section">
+
                                             <h3>Education</h3>
+
                                             <div id="cv-education-preview">Education details will appear here...</div>
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
                                 <div class="cv-actions">
+
                                     <button class="btn btn-primary" onclick="downloadCV()">
+
                                         <i class="fas fa-download"></i> Download PDF
+
                                     </button>
+
                                     <button class="btn btn-secondary" onclick="printCV()">
+
                                         <i class="fas fa-print"></i> Print CV
+
                                     </button>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="cv-form-section">
+
                                 <form id="cv-builder-form" onsubmit="saveCV(event)">
+
                                     <div class="form-group">
+
                                         <label for="cv-summary">Professional Summary</label>
+
                                         <textarea id="cv-summary" name="cv-summary" placeholder="Write a compelling professional summary..." rows="4"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="cv-education">Education</label>
+
                                         <textarea id="cv-education" name="cv-education" placeholder="List your educational qualifications..." rows="4"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="cv-certifications">Certifications</label>
+
                                         <textarea id="cv-certifications" name="cv-certifications" placeholder="List your professional certifications..." rows="3"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="cv-languages">Languages</label>
+
                                         <textarea id="cv-languages" name="cv-languages" placeholder="List languages you speak..." rows="2"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-group">
+
                                         <label for="cv-references">References</label>
+
                                         <textarea id="cv-references" name="cv-references" placeholder="Professional references (optional)..." rows="3"></textarea>
+
                                     </div>
+
                                     
+
                                     <div class="form-actions">
+
                                         <button type="submit" class="btn btn-primary">
+
                                             <i class="fas fa-save"></i> Save CV
+
                                         </button>
+
                                         <button type="button" class="btn btn-secondary" onclick="updateCVPreview()">
+
                                             <i class="fas fa-sync"></i> Update Preview
+
                                         </button>
+
                                         <button type="button" class="btn btn-outline" onclick="hideCVBuilder()">
+
                                             <i class="fas fa-times"></i> Close
+
                                         </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
         
-                
+
+        <!-- Mobile Navigation Menu -->
+
+        
+
    <script src="working-script.js"></script>
+
    <script src="blog-portfolio-database.js"></script>
+
    <script src="blog-portfolio-script.js"></script>
+
    <script>
+
         // Mobile Navigation Functionality
+
         document.addEventListener('DOMContentLoaded', function() {
+
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+
             const mobileNav = document.getElementById('mobile-nav');
+
             const mobileCloseBtn = document.getElementById('mobile-close-btn');
+
             const mobileNavTabs = document.querySelectorAll('.mobile-nav-tab');
+
             
+
             // Toggle mobile menu
+
             mobileMenuToggle.addEventListener('click', function() {
+
                 mobileNav.style.display = 'block';
+
                 document.body.style.overflow = 'hidden';
+
             });
+
             
+
             // Close mobile menu
+
             mobileCloseBtn.addEventListener('click', function() {
+
                 mobileNav.style.display = 'none';
+
                 document.body.style.overflow = 'auto';
+
             });
+
             
+
             // Handle mobile tab clicks
+
             mobileNavTabs.forEach(tab => {
+
                 tab.addEventListener('click', function() {
+
                     const tabName = this.getAttribute('data-tab');
+
                     
+
                     // Close mobile menu
+
                     mobileNav.style.display = 'none';
+
                     document.body.style.overflow = 'auto';
+
                     
+
                     // Switch to the selected tab using existing function
+
                     if (typeof switchToTab === 'function') {
+
                         switchToTab(tabName);
+
                     } else {
+
                         // Fallback: trigger click on desktop tab
+
                         const desktopTab = document.querySelector(`[data-tab="${tabName}"]`);
+
                         if (desktopTab) {
+
                             desktopTab.click();
+
                         }
+
                     }
+
                 });
+
             });
+
             
+
             // Close mobile menu when clicking outside
+
             mobileNav.addEventListener('click', function(e) {
+
                 if (e.target === mobileNav) {
+
                     mobileNav.style.display = 'none';
+
                     document.body.style.overflow = 'auto';
+
                 }
+
             });
+
             
+
             // Handle escape key
+
             document.addEventListener('keydown', function(e) {
+
                 if (e.key === 'Escape' && mobileNav.style.display === 'block') {
+
                     mobileNav.style.display = 'none';
+
                     document.body.style.overflow = 'auto';
+
                 }
+
             });
+
             
+
             // Update mobile nav tabs when user logs in/out
+
             updateMobileNavTabs();
+
         });
+
         
+
         // Update mobile navigation tabs based on login status
+
         function updateMobileNavTabs() {
+
             const isLoggedIn = document.getElementById('user-profile-header').classList.contains('hidden') === false;
+
             const mobileNavTabs = document.querySelectorAll('.mobile-nav-tab');
+
             
+
             mobileNavTabs.forEach(tab => {
+
                 const tabName = tab.getAttribute('data-tab');
+
                 
+
                 if (isLoggedIn) {
+
                     // Show logged-in tabs
+
                     if (['dashboard', 'discussion-forum', 'assignments'].includes(tabName)) {
+
                         tab.classList.remove('hidden');
+
                     }
+
                     if (['login', 'register'].includes(tabName)) {
+
                         tab.classList.add('hidden');
+
                     }
+
                 } else {
+
                     // Show logged-out tabs
+
                     if (['login', 'register', 'news', 'ads'].includes(tabName)) {
+
                         tab.classList.remove('hidden');
+
                     }
+
                     if (['dashboard', 'discussion-forum', 'assignments'].includes(tabName)) {
+
                         tab.classList.add('hidden');
+
                     }
+
                 }
+
             });
+
         }
+
         
+
         // Add touch gestures for mobile
+
         let touchStartX = 0;
+
         let touchEndX = 0;
+
         
+
         document.addEventListener('touchstart', function(e) {
+
             touchStartX = e.changedTouches[0].screenX;
+
         });
+
         
+
         document.addEventListener('touchend', function(e) {
+
             touchEndX = e.changedTouches[0].screenX;
+
             handleSwipe();
+
         });
+
         
+
         function handleSwipe() {
+
             const swipeThreshold = 50;
+
             const diff = touchStartX - touchEndX;
+
             
+
             if (Math.abs(diff) > swipeThreshold) {
+
                 if (diff > 0) {
+
                     // Swipe left - could trigger next tab
+
                     console.log('Swipe left detected');
+
                 } else {
+
                     // Swipe right - could open mobile menu
+
                     const mobileNav = document.getElementById('mobile-nav');
+
                     if (mobileNav.style.display === 'none' || mobileNav.style.display === '') {
+
                         mobileNav.style.display = 'block';
+
                         document.body.style.overflow = 'hidden';
+
                     }
+
                 }
+
             }
+
         }
+
         
+
         // Optimize for mobile performance
+
         if ('serviceWorker' in navigator) {
+
             // Register service worker for PWA capabilities
+
             navigator.serviceWorker.register('/sw.js').catch(function() {
+
                 console.log('Service Worker registration failed');
+
             });
+
         }
+
         
+
         // Add mobile-specific optimizations
+
         function optimizeForMobile() {
+
             // Prevent double-tap zoom
+
             let lastTouchEnd = 0;
+
             document.addEventListener('touchend', function(e) {
+
                 const now = Date.now();
+
                 if (now - lastTouchEnd <= 300) {
+
                     e.preventDefault();
+
                 }
+
                 lastTouchEnd = now;
+
             });
+
             
+
             // Add smooth scrolling
+
             document.documentElement.style.scrollBehavior = 'smooth';
+
             
+
             // Optimize images for mobile
+
             const images = document.querySelectorAll('img');
+
             images.forEach(img => {
+
                 img.loading = 'lazy';
+
             });
+
         }
+
         
+
         // Initialize mobile optimizations
+
         optimizeForMobile();
+
         
+
         // Listen for login/logout events to update mobile nav
+
         const observer = new MutationObserver(function(mutations) {
+
             mutations.forEach(function(mutation) {
+
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+
                     updateMobileNavTabs();
+
                 }
+
             });
+
         });
+
         
+
         const userProfileHeader = document.getElementById('user-profile-header');
+
         if (userProfileHeader) {
+
             observer.observe(userProfileHeader, { attributes: true });
+
         }
+
+
 
         // News and Ads Management Functions
+
         async function loadNews() {
+
             try {
+
                 const response = await fetch('/api/news');
+
                 const data = await response.json();
+
                 
+
                 const newsList = document.getElementById('news-list');
+
                 if (data.success && data.data && data.data.length > 0) {
+
                     newsList.innerHTML = data.data.map(news => `
+
                         <div class="news-item" data-news-id="${news.id}">
+
                             <div class="news-item-header">
+
                                 <div>
+
                                     <h3 class="news-item-title">${news.title}</h3>
+
                                     <div class="news-item-meta">
+
                                         <span class="news-date">${new Date(news.created_at).toLocaleDateString()}</span>
+
                                         <span class="news-views">${news.view_count || 0} views</span>
+
                                         <span class="news-author">By ${news.created_by_name || 'Unknown'}</span>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             ${news.image_url ? `<img src="${news.image_url}" alt="${news.title}" class="news-item-image">` : ''}
+
                             <div class="news-item-content">${news.content}</div>
+
                         </div>
+
                     `).join('');
+
                     
+
                     // Track views for all loaded news articles immediately
+
                     data.data.forEach(news => trackNewsView(news.id));
+
                 } else {
+
                     newsList.innerHTML = `
+
                         <div class="no-news-message">
+
                             <i class="fas fa-newspaper"></i>
+
                             <p>No news articles available yet.</p>
+
                             <p>Admin will post news and updates here.</p>
+
                         </div>
+
                     `;
+
                 }
+
             } catch (error) {
+
                 console.error('Error loading news:', error);
+
             }
+
         }
+
+
 
         async function loadAds() {
+
             try {
+
                 const response = await fetch('/api/ads');
+
                 const data = await response.json();
+
                 
+
                 // Get all containers
+
                 const videoAdsContainer = document.getElementById('video-ads');
+
                 const bannerAdsContainer = document.getElementById('banner-ads');
+
                 const popupAdsContainer = document.getElementById('popup-ads');
+
                 const topAdsContainer = document.getElementById('top-ads');
+
                 const sidebarAdsContainer = document.getElementById('sidebar-ads');
+
                 const bottomAdsContainer = document.getElementById('bottom-ads');
+
                 const popupPositionAdsContainer = document.getElementById('popup-position-ads');
+
                 
+
                 if (data.success && data.data && data.data.length > 0) {
+
                     // Filter ads by type
+
                     const videoAds = data.data.filter(ad => ad.ad_type === 'video');
+
                     const bannerAds = data.data.filter(ad => ad.ad_type === 'banner');
+
                     const popupAds = data.data.filter(ad => ad.ad_type === 'popup');
+
                     
+
                     // Filter ads by position
+
                     const topAds = data.data.filter(ad => ad.position === 'top');
+
                     const sidebarAds = data.data.filter(ad => ad.position === 'sidebar');
+
                     const bottomAds = data.data.filter(ad => ad.position === 'bottom');
+
                     const popupPositionAds = data.data.filter(ad => ad.position === 'popup');
+
                     
+
                     // Load video ads
+
                     if (videoAds.length > 0) {
+
                         videoAdsContainer.innerHTML = videoAds.map(ad => `
+
                             <div class="video-ad" data-ad-id="${ad.id}">
+
                                 <div class="video-player">
+
                                     <video ${ad.auto_play ? 'autoplay muted loop' : ''} controls>
+
                                         <source src="${ad.video_url}" type="video/mp4">
+
                                         Your browser does not support the video tag.
+
                                     </video>
+
                                     <div class="video-controls">
+
                                         <button class="mute-btn" onclick="toggleMute(this)">
+
                                             <i class="fas fa-volume-mute"></i>
+
                                         </button>
+
                                     </div>
+
                                 </div>
+
                                 <h4 class="ad-title">${ad.title}</h4>
+
                                 <p class="ad-description">${ad.description}</p>
+
                                 <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                     Learn More <i class="fas fa-external-link-alt"></i>
+
                                 </a>
+
                             </div>
+
                         `).join('');
+
                     } else {
+
                         videoAdsContainer.innerHTML = `
+
                             <div class="no-ads-message">
+
                                 <i class="fas fa-video"></i>
+
                                 <p>No video ads available at the moment.</p>
+
                             </div>
+
                         `;
+
                     }
+
                     
+
                     // Load banner ads
+
                     if (bannerAds.length > 0) {
+
                         bannerAdsContainer.innerHTML = bannerAds.map(ad => `
+
                             <div class="banner-ad" data-ad-id="${ad.id}">
+
                                 <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
+
                                 <h4 class="ad-title">${ad.title}</h4>
+
                                 <p class="ad-description">${ad.description}</p>
+
                                 <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                     Learn More <i class="fas fa-external-link-alt"></i>
+
                                 </a>
+
                             </div>
+
                         `).join('');
+
                     } else {
+
                         bannerAdsContainer.innerHTML = `
+
                             <div class="no-ads-message">
+
                                 <i class="fas fa-image"></i>
+
                                 <p>No banner ads available at the moment.</p>
+
                             </div>
+
                         `;
+
                     }
+
                     
+
                     // Load popup ads
+
                     if (popupAds.length > 0) {
+
                         popupAdsContainer.innerHTML = popupAds.map(ad => `
+
                             <div class="popup-ad" data-ad-id="${ad.id}">
+
                                 <div class="popup-content">
+
                                     <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
+
                                     <h4 class="ad-title">${ad.title}</h4>
+
                                     <p class="ad-description">${ad.description}</p>
+
                                     <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                         Learn More <i class="fas fa-external-link-alt"></i>
+
                                     </a>
+
                                 </div>
+
                             </div>
+
                         `).join('');
+
                     } else {
+
                         popupAdsContainer.innerHTML = `
+
                             <div class="no-ads-message">
+
                                 <i class="fas fa-window-restore"></i>
+
                                 <p>No popup ads available at the moment.</p>
+
                             </div>
+
                         `;
+
                     }
+
                     
+
                     // Load position-based ads
+
                     const renderPositionAd = (ad, container) => {
+
                         if (ad.ad_type === 'video') {
+
                             container.innerHTML = `
+
                                 <div class="position-ad video-ad" data-ad-id="${ad.id}">
+
                                     <div class="video-player">
+
                                         <video ${ad.auto_play ? 'autoplay muted loop' : ''} controls>
+
                                             <source src="${ad.video_url}" type="video/mp4">
+
                                             Your browser does not support the video tag.
+
                                         </video>
+
                                     </div>
+
                                     <h4 class="ad-title">${ad.title}</h4>
+
                                     <p class="ad-description">${ad.description}</p>
+
                                     <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                         Learn More <i class="fas fa-external-link-alt"></i>
+
                                     </a>
+
                                 </div>
+
                             `;
+
                         } else if (ad.ad_type === 'banner') {
+
                             container.innerHTML = `
+
                                 <div class="position-ad banner-ad" data-ad-id="${ad.id}">
+
                                     <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
+
                                     <h4 class="ad-title">${ad.title}</h4>
+
                                     <p class="ad-description">${ad.description}</p>
+
                                     <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                         Learn More <i class="fas fa-external-link-alt"></i>
+
                                     </a>
+
                                 </div>
+
                             `;
+
                         } else if (ad.ad_type === 'popup') {
+
                             container.innerHTML = `
+
                                 <div class="position-ad popup-ad" data-ad-id="${ad.id}">
+
                                     <div class="popup-content">
+
                                         <img src="${ad.image_url || ad.video_url}" alt="${ad.title}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://picsum.photos/seed/ad-${ad.id}/400/200.jpg'">
+
                                         <h4 class="ad-title">${ad.title}</h4>
+
                                         <p class="ad-description">${ad.description}</p>
+
                                         <a href="${ad.redirect_url}" target="_blank" class="ad-redirect-btn" onclick="trackAdClick(${ad.id})">
+
                                             Learn More <i class="fas fa-external-link-alt"></i>
+
                                         </a>
+
                                     </div>
+
                                 </div>
+
                             `;
+
                         }
+
                     };
+
                     
+
                     // Render position-based ads
+
                     if (topAds.length > 0) {
+
                         renderPositionAd(topAds[0], topAdsContainer);
+
                     } else {
+
                         topAdsContainer.innerHTML = '<div class="no-ads-message"><p>No top position ads available.</p></div>';
+
                     }
+
                     
+
                     if (sidebarAds.length > 0) {
+
                         renderPositionAd(sidebarAds[0], sidebarAdsContainer);
+
                     } else {
+
                         sidebarAdsContainer.innerHTML = '<div class="no-ads-message"><p>No sidebar position ads available.</p></div>';
+
                     }
+
                     
+
                     if (bottomAds.length > 0) {
+
                         renderPositionAd(bottomAds[0], bottomAdsContainer);
+
                     } else {
+
                         bottomAdsContainer.innerHTML = '<div class="no-ads-message"><p>No bottom position ads available.</p></div>';
+
                     }
+
                     
+
                     if (popupPositionAds.length > 0) {
+
                         renderPositionAd(popupPositionAds[0], popupPositionAdsContainer);
+
                     } else {
+
                         popupPositionAdsContainer.innerHTML = '<div class="no-ads-message"><p>No popup position ads available.</p></div>';
+
                     }
+
                     
+
                     // Track views for all ads
+
                     data.data.forEach(ad => trackAdView(ad.id));
+
                 } else {
+
                     // Clear all containers
+
                     videoAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-video"></i><p>No video ads available at the moment.</p></div>';
+
                     bannerAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-image"></i><p>No banner ads available at the moment.</p></div>';
+
                     popupAdsContainer.innerHTML = '<div class="no-ads-message"><i class="fas fa-window-restore"></i><p>No popup ads available at the moment.</p></div>';
+
                     topAdsContainer.innerHTML = '<div class="no-ads-message"><p>No top position ads available.</p></div>';
+
                     sidebarAdsContainer.innerHTML = '<div class="no-ads-message"><p>No sidebar position ads available.</p></div>';
+
                     bottomAdsContainer.innerHTML = '<div class="no-ads-message"><p>No bottom position ads available.</p></div>';
+
                     popupPositionAdsContainer.innerHTML = '<div class="no-ads-message"><p>No popup position ads available.</p></div>';
+
                 }
+
             } catch (error) {
+
                 console.error('Error loading ads:', error);
+
             }
+
         }
+
+
 
         function toggleMute(button) {
+
             const video = button.closest('.video-ad').querySelector('video');
+
             const icon = button.querySelector('i');
+
             
+
             if (video.muted) {
+
                 video.muted = false;
+
                 icon.className = 'fas fa-volume-up';
+
             } else {
+
                 video.muted = true;
+
                 icon.className = 'fas fa-volume-mute';
+
             }
+
         }
+
+
 
         async function trackAdView(adId) {
+
             try {
+
                 await fetch('/api/ads/track-view', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     body: JSON.stringify({ ad_id: adId })
+
                 });
+
             } catch (error) {
+
                 console.error('Error tracking ad view:', error);
+
             }
+
         }
+
+
 
         async function trackAdClick(adId) {
+
             try {
+
                 await fetch('/api/ads/track-click', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     body: JSON.stringify({ ad_id: adId })
+
                 });
+
             } catch (error) {
+
                 console.error('Error tracking ad click:', error);
+
             }
+
         }
+
+
 
         // Filter functionality
+
         document.getElementById('news-category-filter')?.addEventListener('change', loadNews);
+
         document.getElementById('news-priority-filter')?.addEventListener('change', loadNews);
 
+
+
         // Track news views when displayed
+
         document.addEventListener('DOMContentLoaded', function() {
+
             // Track views for news articles when they are displayed
+
             const trackNewsView = async (newsId) => {
+
                 try {
+
                     await fetch('/api/news/track-view', {
+
                         method: 'POST',
+
                         headers: {
+
                             'Content-Type': 'application/json'
+
                         },
+
                         body: JSON.stringify({ news_id: newsId })
+
                     });
+
                 } catch (error) {
+
                     console.error('Error tracking news view:', error);
+
                 }
+
             };
+
             
+
             // Track views for all visible news articles
+
             const trackAllNewsViews = async () => {
+
                 const newsItems = document.querySelectorAll('.news-item');
+
                 newsItems.forEach(item => {
+
                     const newsId = item.getAttribute('data-news-id');
+
                     if (newsId) {
+
                         trackNewsView(newsId);
+
                     }
+
                 });
+
             };
+
             
+
             // Track views periodically
+
             setInterval(trackAllNewsViews, 30000); // Track every 30 seconds
+
         });
+
         
+
         // Load news and ads when tabs are opened
+
         document.addEventListener('DOMContentLoaded', function() {
+
             // Load news and ads when their tabs are clicked
+
             document.querySelector('[data-tab="news"]')?.addEventListener('click', loadNews);
+
             document.querySelector('[data-tab="ads"]')?.addEventListener('click', loadAds);
+
             document.querySelector('[data-tab="discussion-forum"]')?.addEventListener('click', loadDiscussions);
+
             
+
             // Start auto-refresh intervals
+
             setInterval(() => {
+
                 // Check if tabs are active and refresh data
+
                 if (document.getElementById('news').classList.contains('active')) {
+
                     loadNews();
+
                 }
+
                 if (document.getElementById('ads').classList.contains('active')) {
+
                     loadAds();
+
                 }
+
                 if (document.getElementById('discussion-forum').classList.contains('active')) {
+
                     loadDiscussions();
+
                 }
+
             }, 30000); // Refresh every 30 seconds
+
         });
+
         
+
         // Auto-refresh discussions function for main interface
+
         async function loadDiscussions() {
+
             try {
+
                 const response = await fetch('/api/discussions');
+
                 const data = await response.json();
+
                 
+
                 const discussionsContainer = document.getElementById('discussions-container');
+
                 if (data.success && data.data && data.data.length > 0) {
+
                     discussionsContainer.innerHTML = data.data.map(discussion => `
+
                         <div class="discussion-item" onclick="viewDiscussion(${discussion.id})">
+
                             <div class="discussion-header">
+
                                 <h4>${discussion.title}</h4>
+
                                 <div class="discussion-meta">
+
                                     <span class="discussion-module">${discussion.module_code || 'General'}</span>
+
                                     <span class="discussion-date">${new Date(discussion.created_at).toLocaleDateString()}</span>
+
                                     <span class="discussion-author">By ${discussion.author_name || 'Admin'}</span>
+
                                 </div>
+
                             </div>
+
                             <div class="discussion-content">
+
                                 <p>${discussion.content.substring(0, 200)}${discussion.content.length > 200 ? '...' : ''}</p>
+
                             </div>
+
                             <div class="discussion-stats">
+
                                 <span><i class="fas fa-comments"></i> ${discussion.reply_count || 0} replies</span>
+
                             </div>
+
                         </div>
+
                     `).join('');
+
                 } else {
+
                     discussionsContainer.innerHTML = `
+
                         <div class="no-discussions">
+
                             <i class="fas fa-comments"></i>
+
                             <p>No discussions yet. Admin will post discussions here.</p>
+
                         </div>
+
                     `;
+
                 }
+
             } catch (error) {
+
                 console.error('Error loading discussions:', error);
+
             }
+
         }
+
         
+
         // View discussion function
+
         function viewDiscussion(id) {
+
             // Open discussion modal or navigate to discussion detail
+
             window.openDiscussionModal(id);
+
         }
+
         
+
         // Discussion Modal Functions
+
         window.openDiscussionModal = async (id) => {
+
             try {
+
                 const response = await fetch(`/api/discussions/${id}`);
+
                 const data = await response.json();
+
                 
+
                 if (data.success) {
+
                     const discussion = data.data.discussion;
+
                     const replies = data.data.replies;
+
                     
+
                     // Display discussion details
+
                     document.getElementById('discussion-detail-content').innerHTML = `
+
                         <div class="discussion-detail">
+
                             <h4>${discussion.title}</h4>
+
                             <div class="discussion-meta">
+
                                 <span class="discussion-module">${discussion.module_code || 'General'}</span>
+
                                 <span class="discussion-date">${new Date(discussion.created_at).toLocaleDateString()}</span>
+
                                 <span class="discussion-author">By ${discussion.author_name || 'Admin'}</span>
+
                             </div>
+
                             <div class="discussion-content-full">
+
                                 <p>${discussion.content}</p>
+
                             </div>
+
                         </div>
+
                     `;
+
                     
+
                     // Display replies
+
                     const repliesContainer = document.getElementById('replies-container');
+
                     if (replies && replies.length > 0) {
+
                         repliesContainer.innerHTML = replies.map(reply => `
+
                             <div class="reply-item">
+
                                 <div class="reply-header">
+
                                     <strong>${reply.author_name || 'Anonymous'}</strong>
+
                                     <small class="reply-date">${new Date(reply.created_at).toLocaleDateString()}</small>
+
                                 </div>
+
                                 <div class="reply-content">
+
                                     <p>${reply.content}</p>
+
                                 </div>
+
                             </div>
+
                         `).join('');
+
                     } else {
+
                         repliesContainer.innerHTML = '<p class="text-muted">No replies yet. Be the first to reply!</p>';
+
                     }
+
                     
+
                     // Show modal
+
                     document.getElementById('discussion-modal').style.display = 'block';
+
                     
+
                     // Set up reply form
+
                     setupReplyForm(id);
+
                 } else {
+
                     console.error('Failed to load discussion:', data.message);
+
                 }
+
             } catch (error) {
+
                 console.error('Error loading discussion:', error);
+
             }
+
         };
+
         
+
         window.closeDiscussionModal = () => {
+
             document.getElementById('discussion-modal').style.display = 'none';
+
         };
+
         
+
         function setupReplyForm(discussionId) {
+
             const replyForm = document.getElementById('reply-form');
+
             
+
             // Remove existing event listener
+
             const newReplyForm = replyForm.cloneNode(true);
+
             replyForm.parentNode.replaceChild(newReplyForm, replyForm);
+
             
+
             // Add new event listener
+
             newReplyForm.addEventListener('submit', async (e) => {
+
                 e.preventDefault();
+
                 
+
                 const replyContent = document.getElementById('reply-content').value;
+
                 
+
                 if (!replyContent.trim()) {
+
                     if (window.notifications) {
+
                         window.notifications.warning('Please write a reply before submitting.');
+
                     } else {
+
                         alert('Please write a reply before submitting.');
+
                     }
+
                     return;
+
                 }
+
                 
+
                 try {
+
                     // Get current user info from secure session
+
                     let userId = null;
+
                     let userName = 'Anonymous';
+
                     
+
                     // Try to get user from secure session manager
+
                     if (window.sessionManager && window.sessionManager.isLoggedIn()) {
+
                         const currentUser = window.sessionManager.getCurrentUser();
+
                         if (currentUser && currentUser.id) {
+
                             userId = currentUser.id;
+
                             userName = currentUser.name || 'User';
+
                         }
+
                     }
+
                     
+
                     // If no user in session, try session endpoint
+
                     if (!userId) {
+
                         const userResponse = await fetch('/api/discussions/current-user');
+
                         const userData = await userResponse.json();
+
                         
+
                         if (userData.success && userData.data) {
+
                             userId = userData.data.id;
+
                             userName = userData.data.name || 'User';
+
                         }
+
                     }
+
                     
+
                     // If still no user ID, create a temporary session
+
                     if (!userId) {
+
                         console.log('⚠️ No user found, creating temporary session');
+
                         userId = 1; // Default user ID for demo
+
                         userName = 'Demo User';
+
                         
+
                         // Create session for this user
+
                         if (window.sessionManager) {
+
                             await window.sessionManager.createSession(userId, {
+
                                 id: userId,
+
                                 name: userName,
+
                                 email: 'demo@example.com'
+
                             });
+
                         }
+
                     }
+
                     
+
                     console.log('🔍 Posting reply with user:', { userId, userName });
+
                     
+
                     const response = await fetch(`/api/discussions/${discussionId}/replies`, {
+
                         method: 'POST',
+
                         headers: {
+
                             'Content-Type': 'application/json',
+
                             'x-user-id': userId.toString(),
+
                             'x-user-name': userName.toString()
+
                         },
+
                         body: JSON.stringify({
+
                             content: replyContent,
+
                             user_name: userName // Send user name directly to avoid database dependency
+
                         })
+
                     });
+
                     
+
                     const data = await response.json();
+
                     
+
                     if (data.success) {
+
                         // Clear form
+
                         document.getElementById('reply-content').value = '';
+
                         
+
                         // Add new reply immediately to display
+
                         const repliesContainer = document.getElementById('replies-container');
+
                         const newReply = {
+
                             id: data.data.id,
+
                             content: replyContent,
+
                             author_name: userName,
+
                             created_at: new Date().toISOString()
+
                         };
+
                         
+
                         // Create reply element
+
                         const replyElement = document.createElement('div');
+
                         replyElement.className = 'reply-item';
+
                         replyElement.innerHTML = `
+
                             <div class="reply-header">
+
                                 <strong>${newReply.author_name || 'Anonymous'}</strong>
+
                                 <small class="reply-date">${new Date(newReply.created_at).toLocaleDateString()}</small>
+
                             </div>
+
                             <div class="reply-content">
+
                                 <p>${newReply.content}</p>
+
                             </div>
+
                         `;
+
                         
+
                         // Add to container
+
                         if (repliesContainer.children.length === 1 && repliesContainer.children[0].classList.contains('text-muted')) {
+
                             // Remove "No replies yet" message
+
                             repliesContainer.innerHTML = '';
+
                         }
+
                         repliesContainer.appendChild(replyElement);
+
                         
+
                         // Show success message
+
                         if (window.notifications) {
+
                             window.notifications.success('Reply posted successfully!');
+
                         } else {
+
                             alert('Reply posted successfully!');
+
                         }
+
                         
+
                         // Refresh discussions list in background
+
                         loadDiscussions();
+
                     } else {
+
                         if (window.notifications) {
+
                             window.notifications.error('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+
                         } else {
+
                             alert('Failed to post reply: ' + (data.error || data.message || 'Unknown error'));
+
                         }
+
                     }
+
                 } catch (error) {
+
                     console.error('Error posting reply:', error);
+
                     if (window.notifications) {
+
                         window.notifications.error('Failed to post reply. Please try again.');
+
                     } else {
+
                         alert('Failed to post reply. Please try again.');
+
                     }
+
                 }
+
             });
+
         }
+
         
+
         // Close modal when clicking outside
+
         window.addEventListener('click', (e) => {
+
             const modal = document.getElementById('discussion-modal');
+
             if (e.target === modal) {
+
                 closeDiscussionModal();
+
             }
+
         });
+
    </script>
+
    <script src="notification-system.js"></script>
+
    <script src="secure-session.js"></script>
+
    <script src="working-script.js"></script>
+
    <script src="blog-portfolio-database.js"></script>
+
    <script src="blog-portfolio-script.js"></script>
+
 </body>
+
 </html>
