@@ -32,13 +32,24 @@ jobs:
         echo "📦 Installing dependencies..."
         echo "📋 Node.js version: $(node --version)"
         
-        # Ensure npm is available
-        if ! command -v npm &> /dev/null; then
-          echo "❌ npm not found, installing npm..."
-          npm install -g npm@latest
+        # Ensure npm is available - multiple methods
+        NPM_CMD=""
+        if command -v npm &> /dev/null; then
+          echo "✅ npm found via command"
+          NPM_CMD="npm"
+        elif [ -f "/usr/local/bin/npm" ]; then
+          echo "✅ npm found at /usr/local/bin/npm"
+          NPM_CMD="/usr/local/bin/npm"
+        elif [ -f "/opt/hostedtoolcache/node/18.20.8/x64/bin/npm" ]; then
+          echo "✅ npm found at hostedtoolcache path"
+          NPM_CMD="/opt/hostedtoolcache/node/18.20.8/x64/bin/npm"
+        else
+          echo "❌ npm not found, trying to install..."
+          curl -L https://www.npmjs.com/install.sh | sh
+          NPM_CMD="npm"
         fi
         
-        echo "📋 npm version: $(npm --version)"
+        echo "📋 npm version: $($NPM_CMD --version)"
         echo "📋 Current directory: $(pwd)"
         echo "📋 Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')"
         echo "📋 Package-lock.json exists: $(test -f package-lock.json && echo 'YES' || echo 'NO')"
@@ -49,13 +60,13 @@ jobs:
           rm package-lock.json
         fi
         
-        # Try npm install with explicit npm path
-        $(which npm) install --verbose || {
+        # Try npm install with found npm command
+        $NPM_CMD install --verbose || {
           echo "❌ npm install failed, trying alternative approach..."
           echo "📦 Trying npm install with legacy peer deps..."
-          $(which npm) install --legacy-peer-deps || {
+          $NPM_CMD install --legacy-peer-deps || {
             echo "❌ Still failing, trying without optional deps..."
-            $(which npm) install --no-optional || {
+            $NPM_CMD install --no-optional || {
               echo "❌ All npm install methods failed, trying yarn..."
               if command -v yarn &> /dev/null; then
                 echo "🧶 Trying yarn install..."
