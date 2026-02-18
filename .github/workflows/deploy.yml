@@ -19,20 +19,10 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Clear npm cache
-      run: |
-        npm cache clean --force
-        echo "✅ NPM cache cleared"
-        
-    - name: Configure npm cache
-      run: |
-        npm config set cache /tmp/.npm
-        echo "✅ NPM cache configured to /tmp/.npm"
-        
-    - name: Cache npm dependencies
+    - name: Cache node_modules
       uses: actions/cache@v3
       with:
-        path: /tmp/.npm
+        path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
