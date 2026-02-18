@@ -150,14 +150,40 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Deploy to Railway
-      uses: ayungavis/railway-preview-deploy@v1.0.2
-      with:
-        railway_api_token: ${{ secrets.RAILWAY_API_TOKEN }}
-        project_id: ${{ secrets.RAILWAY_PROJECT_ID }}
-        environment_name: 'production'
-        preview_environment_name: 'production-deploy'
-        branch_name: 'main'
-        cleanup: 'false'
+      run: |
+        echo "🚀 Preparing Railway deployment..."
+        
+        # Check if Railway secrets are available
+        if [ -z "${{ secrets.RAILWAY_API_TOKEN }}" ]; then
+          echo "❌ RAILWAY_API_TOKEN secret is not set"
+          echo "💡 Please add RAILWAY_API_TOKEN to your repository secrets"
+          exit 1
+        fi
+        
+        if [ -z "${{ secrets.RAILWAY_PROJECT_ID }}" ]; then
+          echo "❌ RAILWAY_PROJECT_ID secret is not set"
+          echo "💡 Please add RAILWAY_PROJECT_ID to your repository secrets"
+          echo "📖 You can find your Project ID in your Railway dashboard"
+          exit 1
+        fi
+        
+        echo "✅ Railway secrets validated"
+        echo "🔑 API Token: [REDACTED]"
+        echo "🆔 Project ID: ${{ secrets.RAILWAY_PROJECT_ID }}"
+        
+        # Use the official Railway CLI for deployment
+        echo "📦 Installing Railway CLI..."
+        npm install -g @railway/cli
+        
+        echo "🚀 Deploying to Railway..."
+        railway login --token ${{ secrets.RAILWAY_API_TOKEN }}
+        railway deploy --environment production || {
+          echo "❌ Railway deployment failed"
+          echo "💡 Please check your project ID and API token"
+          exit 1
+        }
+        
+        echo "✅ Railway deployment completed successfully"
         
     - name: Verify deployment
       run: |
