@@ -143,6 +143,13 @@ function authenticatePortfolio(req, res, next) {
 // Apply authentication middleware to all routes
 router.use(authenticatePortfolio);
 
+// Add CORS headers for portfolio routes
+router.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    next();
+});
+
 // Get portfolio profile
 router.get('/profile', async (req, res) => {
     try {
@@ -160,21 +167,338 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-// Update portfolio profile
+// SESSION DEBUG ENDPOINT - CHECK SESSION STATE
+router.get('/session-debug', (req, res) => {
+    console.log('🔍 SESSION DEBUG ENDPOINT HIT');
+    console.log('👤 Full session object:', req.session);
+    console.log('👤 Session ID:', req.sessionID);
+    console.log('👤 Session keys:', Object.keys(req.session || {}));
+    console.log('👤 Portfolio user ID:', req.session?.portfolioUserId);
+    console.log('👤 Portfolio user:', req.session?.portfolioUser);
+    console.log('🍪 Request cookies:', req.headers.cookie);
+    console.log('🌐 Request headers:', {
+        'user-agent': req.headers['user-agent'],
+        'origin': req.headers.origin,
+        'referer': req.headers.referer
+    });
+    
+    res.json({
+        success: true,
+        message: 'Session debug information',
+        session: {
+            hasSession: !!req.session,
+            sessionId: req.sessionID,
+            sessionKeys: Object.keys(req.session || {}),
+            portfolioUserId: req.session?.portfolioUserId,
+            portfolioUser: req.session?.portfolioUser,
+            sessionData: req.session
+        },
+        request: {
+            cookies: req.headers.cookie,
+            userAgent: req.headers['user-agent'],
+            origin: req.headers.origin,
+            referer: req.headers.referer
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
+// TEST ENDPOINT - BYPASS AUTHENTICATION TO TEST DATABASE
+router.post('/profile-test-bypass', async (req, res) => {
+    try {
+        console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
+        console.log('📋 Request body:', req.body);
+        
+        // First, check what users exist in portfolio_users table
+        console.log('🔍 Checking existing users in portfolio_users...');
+        const [users] = await pool.execute(`
+            SELECT id, name, email, username FROM portfolio_users LIMIT 5
+        `);
+        console.log('📊 Found users:', users);
+        
+        if (users.length === 0) {
+            console.error('❌ No users found in portfolio_users table');
+            return res.status(400).json({
+                success: false,
+                error: 'No users found in database. Please create a portfolio user first.',
+                debug: 'portfolio_users table is empty'
+            });
+        }
+        
+        // Use first existing user ID for testing
+        const testUserId = users[0].id;
+        console.log('🔍 Using test user ID:', testUserId, '(', users[0].name, ')');
+        
+        const { name, title, bio, phone, location, website, category } = req.body;
+        console.log('📊 Received data:', { name, title, bio, phone, location, website, category });
+        
+        // Validate name only
+        if (!name || name.trim() === '') {
+            console.error('❌ Name is required');
+            return res.status(400).json({
+                success: false,
+                error: 'Name is required'
+            });
+        }
+        
+        // Test database operation
+        console.log('🔧 Testing database operation...');
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name.trim(), testUserId]);
+        
+        console.log('✅ Database test result:', result);
+        console.log('✅ Affected rows:', result.affectedRows);
+        
+        if (result.affectedRows === 0) {
+            console.log('🔧 No existing profile found, creating new one...');
+            const insertResult = await pool.execute(`
+                INSERT INTO portfolio_profile (user_id, name, created_at, updated_at)
+                VALUES (?, ?, NOW(), NOW())
+            `, [testUserId, name.trim()]);
+            
+            console.log('✅ Insert result:', insertResult);
+            console.log('✅ Insert ID:', insertResult.insertId);
+        }
+        
+        console.log('🎉 DATABASE TEST SUCCESSFUL');
+        res.json({
+            success: true,
+            message: 'Database test successful (AUTHENTICATION BYPASSED)',
+            affectedRows: result.affectedRows,
+            testUserId: testUserId,
+            testUserName: users[0].name,
+            allUsers: users
+        });
+        
+    } catch (error) {
+        console.error('❌ DATABASE TEST ERROR:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Database test failed'
+        });
+    }
+});
+
+// MINIMAL PROFILE UPDATE - COMPLETELY NEW APPROACH
+router.post('/profile-minimal', async (req, res) => {
+    try {
+        console.log('🚀 MINIMAL PROFILE UPDATE STARTED');
+        console.log('📋 Request body:', req.body);
+        console.log('👤 Full session object:', req.session);
+        console.log('👤 Session ID:', req.sessionID);
+        console.log('👤 Session keys:', Object.keys(req.session || {}));
+        console.log('👤 Portfolio user ID from session:', req.session?.portfolioUserId);
+        console.log('👤 Portfolio user from session:', req.session?.portfolioUser);
+        
+        // Get user ID from session
+        const userId = req.session?.portfolioUserId;
+        console.log('🔍 Final user ID:', userId);
+        
+        if (!userId) {
+            console.error('❌ No user ID in session');
+            console.error('❌ Session details:', {
+                hasSession: !!req.session,
+                sessionId: req.sessionID,
+                sessionKeys: Object.keys(req.session || {}),
+                portfolioUserId: req.session?.portfolioUserId,
+                portfolioUser: req.session?.portfolioUser
+            });
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required - Please login first',
+                debug: {
+                    hasSession: !!req.session,
+                    sessionId: req.sessionID,
+                    portfolioUserId: req.session?.portfolioUserId
+                }
+            });
+        }
+        
+        // Get data from request
+        const { name, title, bio, phone, location, website, category } = req.body;
+        console.log('📊 Received data:', { name, title, bio, phone, location, website, category });
+        
+        // Validate name only (minimal validation)
+        if (!name || name.trim() === '') {
+            console.error('❌ Name is required');
+            return res.status(400).json({
+                success: false,
+                error: 'Name is required'
+            });
+        }
+        
+        // Simple database operation - just update name field first
+        console.log('🔧 Updating profile name only...');
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name.trim(), userId]);
+        
+        console.log('✅ Update result:', result);
+        console.log('✅ Affected rows:', result.affectedRows);
+        
+        if (result.affectedRows === 0) {
+            console.log('🔧 No existing profile found, creating new one...');
+            const insertResult = await pool.execute(`
+                INSERT INTO portfolio_profile (user_id, name, created_at, updated_at)
+                VALUES (?, ?, NOW(), NOW())
+            `, [userId, name.trim()]);
+            
+            console.log('✅ Insert result:', insertResult);
+            console.log('✅ Insert ID:', insertResult.insertId);
+        }
+        
+        console.log('🎉 MINIMAL PROFILE UPDATE SUCCESSFUL');
+        res.json({
+            success: true,
+            message: 'Profile updated successfully (MINIMAL)',
+            affectedRows: result.affectedRows
+        });
+        
+    } catch (error) {
+        console.error('❌ MINIMAL PROFILE UPDATE ERROR:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Profile update failed'
+        });
+    }
+});
+
+// Simple test endpoint without database
+router.post('/test-no-db', (req, res) => {
+    console.log('🧪 Test no database endpoint hit');
+    console.log('📋 Request body:', req.body);
+    console.log('👤 Session data:', req.session);
+    
+    res.json({
+        success: true,
+        message: 'Test endpoint working without database',
+        receivedData: req.body,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Basic test endpoint to check if routing works
+router.get('/test-basic', (req, res) => {
+    console.log('🧪 Basic test endpoint hit');
+    res.json({
+        success: true,
+        message: 'Basic test endpoint working',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Simple test endpoint to bypass middleware and test profile update directly
+router.put('/profile-simple', async (req, res) => {
+    try {
+        console.log('🧪 Simple profile update test');
+        console.log('📋 Request body:', req.body);
+        console.log('👤 Session data:', req.session);
+        
+        // Get user ID from session directly
+        const userId = req.session?.portfolioUserId;
+        console.log('🔍 User ID from session:', userId);
+        
+        if (!userId) {
+            console.error('❌ No user ID found in session');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+        
+        const { name, title, bio, phone, location, website, category } = req.body;
+        
+        console.log('📊 Simple test data:', { name, title, bio, phone, location, website, category });
+        
+        // Simple test - just update name field
+        const result = await pool.execute(`
+            UPDATE portfolio_profile 
+            SET name = ?, updated_at = NOW()
+            WHERE user_id = ?
+        `, [name, userId]);
+        
+        console.log('✅ Simple update result:', result);
+        console.log('✅ Simple affected rows:', result.affectedRows);
+        
+        res.json({
+            success: true,
+            message: 'Simple profile update successful',
+            affectedRows: result.affectedRows
+        });
+        
+    } catch (error) {
+        console.error('❌ Simple profile update error:', error);
+        console.error('❌ Simple error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Update portfolio profile (TEMPORARILY WITHOUT MIDDLEWARE FOR TESTING)
 router.put('/profile', async (req, res) => {
     try {
-        console.log('🔍 Profile update request received');
+        console.log('🔍 Profile update request received (NO MIDDLEWARE)');
         console.log('📋 Request body:', req.body);
-        console.log('👤 Portfolio user ID:', req.portfolioUserId);
+        console.log('👤 Session data:', req.session);
+        console.log('👤 Portfolio user ID from session:', req.session?.portfolioUserId);
+        
+        // TEMPORARY: Get user ID directly from session for testing
+        const userId = req.session?.portfolioUserId;
+        if (!userId) {
+            console.error('❌ No user ID found in session');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required - No user ID in session'
+            });
+        }
+        
+        console.log('🔍 Using user ID:', userId);
         
         const { name, title, bio, phone, location, website, category } = req.body;
         
         console.log('📊 Extracted fields:', { name, title, bio, phone, location, website, category });
         
+        // Validate required fields
+        if (!name || !title || !bio || !phone || !location || !website || !category) {
+            console.error('❌ Missing required fields:', { name, title, bio, phone, location, website, category });
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields'
+            });
+        }
+        
         // Check if profile exists
+        console.log('🔍 Checking if profile exists for user:', userId);
         const [existing] = await pool.execute(`
             SELECT id FROM portfolio_profile WHERE user_id = ?
-        `, [req.portfolioUserId]);
+        `, [userId]);
         
         console.log('📋 Existing profile check:', existing.length > 0 ? 'Found' : 'Not found');
         
@@ -183,36 +507,43 @@ router.put('/profile', async (req, res) => {
             // Update existing profile
             const result = await pool.execute(`
                 UPDATE portfolio_profile 
-                SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?
+                SET name = ?, title = ?, bio = ?, phone = ?, location = ?, website = ?, category = ?, updated_at = NOW()
                 WHERE user_id = ?
-            `, [name, title, bio, phone, location, website, category, req.portfolioUserId]);
+            `, [name, title, bio, phone, location, website, category, userId]);
             
             console.log('✅ Profile update result:', result);
+            console.log('✅ Affected rows:', result.affectedRows);
         } else {
             console.log('🔧 Creating new profile...');
             // Create new profile
             const result = await pool.execute(`
                 INSERT INTO portfolio_profile (user_id, name, title, bio, phone, location, website, category)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            `, [req.portfolioUserId, name, title, bio, phone, location, website, category]);
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [userId, name, title, bio, phone, location, website, category]);
             
             console.log('✅ Profile insert result:', result);
+            console.log('✅ Insert ID:', result.insertId);
         }
         
+        console.log('🔍 Sending success response');
         res.json({
             success: true,
-            message: 'Profile updated successfully'
+            message: 'Profile updated successfully (NO MIDDLEWARE)'
         });
     } catch (error) {
-        console.error('❌ Error updating profile:', error);
+        console.error('❌ Error updating profile (NO MIDDLEWARE):', error);
         console.error('❌ Error details:', {
             message: error.message,
             code: error.code,
-            stack: error.stack
+            stack: error.stack,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
         });
+        console.error('❌ Full error object:', error);
         res.status(500).json({ 
             success: false, 
-            error: 'Failed to update profile: ' + error.message 
+            error: error.message || 'Failed to update profile'
         });
     }
 });
