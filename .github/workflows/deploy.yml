@@ -18,19 +18,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        
-    - name: Setup Yarn
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+        cache: 'npm'
         
     - name: Install dependencies
       run: |
+        set -e
         echo "Node version: $(node --version)"
         echo "NPM version: $(npm --version)"
-        echo "Yarn version: $(yarn --version)"
-        echo "Installing dependencies with yarn..."
-        yarn install --frozen-lockfile || npm install --force
+        echo "Installing dependencies..."
+        npm install --no-audit --no-fund --prefer-offline
         echo "Dependencies installed successfully"
       
     - name: Run tests (if available)
