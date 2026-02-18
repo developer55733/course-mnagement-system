@@ -19,6 +19,11 @@ jobs:
       with:
         node-version: '18'
         
+    - name: Clear npm cache
+      run: |
+        npm cache clean --force
+        echo "✅ NPM cache cleared"
+        
     - name: Configure npm cache
       run: |
         npm config set cache /tmp/.npm
