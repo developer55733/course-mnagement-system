@@ -17,12 +17,11 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         
     - name: Install dependencies
       run: |
-        npm cache clean --force
-        npm install
+        npm install --no-optional --legacy-peer-deps
       
     - name: Run tests (if available)
       run: npm test || echo "No tests configured - skipping"
