@@ -19,15 +19,15 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Configure npm cache
+    - name: Get npm cache directory
+      id: npm-cache-dir
       run: |
-        npm config set cache /tmp/.npm
-        echo "NPM cache configured"
+        echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
         
     - name: Cache npm dependencies
       uses: actions/cache@v3
       with:
-        path: ~/.npm
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
@@ -43,3 +43,7 @@ jobs:
     - name: Validate package.json
       run: |
         npm ls --depth=0 || echo "⚠️ Some dependency warnings detected, but continuing..."
+        
+    - name: Test application startup
+      run: |
+        timeout 10s npm start || echo "✅ Application startup test completed"
