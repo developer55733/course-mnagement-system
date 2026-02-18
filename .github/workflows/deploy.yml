@@ -102,6 +102,8 @@ jobs:
         railway_api_token: ${{ secrets.RAILWAY_API_TOKEN }}
         project_id: ${{ secrets.RAILWAY_PROJECT_ID }}
         environment_name: 'production'
+        preview_environment_name: 'production-deploy'
+        branch_name: 'main'
         cleanup: 'false'
         
     - name: Verify deployment
