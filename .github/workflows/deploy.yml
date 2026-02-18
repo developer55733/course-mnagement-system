@@ -52,8 +52,6 @@ jobs:
         # Try npm install with explicit npm path
         $(which npm) install --verbose || {
           echo "❌ npm install failed, trying alternative approach..."
-          echo "🧹 Cleaning npm cache..."
-          $(which npm) cache clean --force
           echo "📦 Trying npm install with legacy peer deps..."
           $(which npm) install --legacy-peer-deps || {
             echo "❌ Still failing, trying without optional deps..."
@@ -61,7 +59,10 @@ jobs:
               echo "❌ All npm install methods failed, trying yarn..."
               if command -v yarn &> /dev/null; then
                 echo "🧶 Trying yarn install..."
-                yarn install
+                yarn install || {
+                  echo "❌ All package managers failed"
+                  exit 1
+                }
               else
                 echo "❌ All package managers failed"
                 exit 1
