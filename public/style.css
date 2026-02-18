@@ -1340,7 +1340,17 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Enhanced News & Information Styles */
+        /* Hide floating buttons with specific characteristics */
+button[style*="position: fixed"][style*="top: 20px"][style*="right: 20px"],
+button[style*="z-index: 10000"],
+*[style*="position: fixed"][style*="rgb(102, 126, 234)"][style*="rgb(118, 75, 162)"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Enhanced News & Information Styles */
 .news-container {
     padding: 30px;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
