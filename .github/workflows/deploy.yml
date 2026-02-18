@@ -36,6 +36,12 @@ jobs:
         echo "📋 Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')"
         echo "📋 Package-lock.json exists: $(test -f package-lock.json && echo 'YES' || echo 'NO')"
         
+        # Remove package-lock.json if it exists to regenerate it
+        if [ -f package-lock.json ]; then
+          echo "🗑️ Removing existing package-lock.json to regenerate..."
+          rm package-lock.json
+        fi
+        
         npm install --verbose || {
           echo "❌ npm install failed, trying alternative approach..."
           echo "🧹 Cleaning npm cache..."
