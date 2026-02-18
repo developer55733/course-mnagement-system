@@ -23,10 +23,12 @@ jobs:
       run: |
         echo "Node version: $(node --version)"
         echo "NPM version: $(npm --version)"
-        echo "Cleaning npm cache..."
-        npm cache clean --force
+        echo "Removing node_modules and package-lock.json..."
+        rm -rf node_modules package-lock.json
+        echo "Generating fresh package-lock.json..."
+        npm install --package-lock-only
         echo "Installing dependencies..."
-        npm install --force
+        npm ci
         echo "Dependencies installed successfully"
       
     - name: Run tests (if available)
