@@ -36,3 +36,18 @@ jobs:
     - name: Test application startup
       run: |
         timeout 10s npm start || echo "✅ Application startup test completed"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to Railway
+      uses: railway/railway-action@v1
+      with:
+        api-token: ${{ secrets.RAILWAY_TOKEN }}
+        service-id: ${{ secrets.RAILWAY_SERVICE_ID }}
