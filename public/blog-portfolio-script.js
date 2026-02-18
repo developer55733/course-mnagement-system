@@ -1062,14 +1062,32 @@ async function loadPortfolioData() {
 // Load profile data for authenticated user
 async function loadProfile() {
     try {
+        console.log('🔄 Loading profile data...');
+        
+        // Use the working profile endpoint
         const response = await fetch(`${API_BASE}/portfolio/profile`);
         if (!response.ok) {
             throw new Error('Failed to fetch profile');
         }
         
         const profile = await response.json();
+        console.log('📊 Profile data loaded:', profile);
         
-        // Update profile display
+        // Show profile display and hide form
+        const profileDisplay = document.getElementById('profile-display');
+        const formContainer = document.getElementById('profile-form-container');
+        
+        if (profileDisplay) {
+            profileDisplay.style.display = 'block';
+            console.log('✅ Profile display shown');
+        }
+        
+        if (formContainer) {
+            formContainer.style.display = 'none';
+            console.log('✅ Profile form hidden');
+        }
+        
+        // Update profile display elements
         const nameEl = document.getElementById('profile-name-display');
         const titleEl = document.getElementById('profile-title-display');
         const bioEl = document.getElementById('profile-bio-display');
@@ -1079,21 +1097,43 @@ async function loadProfile() {
         const websiteEl = document.getElementById('profile-website-display');
         const avatarEl = document.getElementById('profile-avatar-img');
         
-        if (nameEl) nameEl.textContent = profile.name || 'Your Name';
-        if (titleEl) titleEl.textContent = profile.title || 'Professional Title';
-        if (bioEl) bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
-        if (emailEl) emailEl.textContent = profile.email || 'email@example.com';
-        if (phoneEl) phoneEl.textContent = profile.phone || '+1234567890';
-        if (locationEl) locationEl.textContent = profile.location || 'City, Country';
+        // Update display with actual data
+        if (nameEl) {
+            nameEl.textContent = profile.name || 'Your Name';
+            console.log('✅ Name updated:', profile.name);
+        }
+        if (titleEl) {
+            titleEl.textContent = profile.title || 'Professional Title';
+            console.log('✅ Title updated:', profile.title);
+        }
+        if (bioEl) {
+            bioEl.textContent = profile.bio || 'Your professional bio and description goes here...';
+            console.log('✅ Bio updated:', profile.bio);
+        }
+        if (emailEl) {
+            emailEl.textContent = profile.email || 'email@example.com';
+            console.log('✅ Email updated:', profile.email);
+        }
+        if (phoneEl) {
+            phoneEl.textContent = profile.phone || '+1234567890';
+            console.log('✅ Phone updated:', profile.phone);
+        }
+        if (locationEl) {
+            locationEl.textContent = profile.location || 'City, Country';
+            console.log('✅ Location updated:', profile.location);
+        }
         if (websiteEl) {
-            websiteEl.textContent = profile.website || 'Website';
+            const websiteText = profile.website || 'Website';
+            websiteEl.textContent = websiteText;
             websiteEl.href = profile.website || '#';
+            console.log('✅ Website updated:', profile.website);
         }
         if (avatarEl && profile.avatar) {
             avatarEl.src = profile.avatar;
+            console.log('✅ Avatar updated:', profile.avatar);
         }
         
-        // Update form fields
+        // Update form fields for editing
         const nameInput = document.getElementById('profile-name');
         const titleInput = document.getElementById('profile-title');
         const bioInput = document.getElementById('profile-bio');
@@ -1112,8 +1152,15 @@ async function loadProfile() {
         if (websiteInput) websiteInput.value = profile.website || '';
         if (categoryInput) categoryInput.value = profile.category || '';
         
+        console.log('✅ Profile loaded and display updated successfully');
+        
     } catch (error) {
         console.error('❌ Error loading profile:', error);
+        // Show default values if profile fails to load
+        const profileDisplay = document.getElementById('profile-display');
+        if (profileDisplay) {
+            profileDisplay.style.display = 'block';
+        }
     }
 }
 
@@ -1689,8 +1736,13 @@ async function addTestProject() {
     }
 }
 
-// Direct save function that bypasses form submission entirely
-async function saveProfileDirect() {
+// Direct save function that uses the new minimal profile update system
+async function saveProfileDirect(event) {
+    // Prevent default form submission if called from onsubmit
+    if (event) {
+        event.preventDefault();
+    }
+    
     alert('Direct save button clicked!'); // Test alert
     console.log('🔍 Direct save button clicked!');
     
@@ -1703,26 +1755,6 @@ async function saveProfileDirect() {
         }
         
         console.log('🔍 Form element found:', form);
-        console.log('🔍 Form elements:', {
-            profileName: document.getElementById('profile-name'),
-            profileTitle: document.getElementById('profile-title'),
-            profileBio: document.getElementById('profile-bio'),
-            profileEmail: document.getElementById('profile-email'),
-            profilePhone: document.getElementById('profile-phone'),
-            profileLocation: document.getElementById('profile-location'),
-            profileWebsite: document.getElementById('profile-website'),
-            profileCategory: document.getElementById('profile-category')
-        });
-        
-        // Check if all required elements exist
-        const requiredElements = ['profile-name', 'profile-title', 'profile-bio', 'profile-email', 'profile-phone', 'profile-location', 'profile-website', 'profile-category'];
-        const missingElements = requiredElements.filter(id => !document.getElementById(id));
-        
-        if (missingElements.length > 0) {
-            console.error('❌ Missing form elements:', missingElements);
-            alert('Missing required form elements: ' + missingElements.join(', '));
-            return;
-        }
         
         // Get form values
         const formData = new FormData(form);
@@ -1749,14 +1781,11 @@ async function saveProfileDirect() {
             return;
         }
         
-        console.log('🔍 Sending API request to:', `${API_BASE}/portfolio/profile`);
-        
-        // Transform form data to match backend expectations
+        // Transform form data to match minimal API expectations
         const apiData = {
             name: profileData['profile-name'],
             title: profileData['profile-title'],
             bio: profileData['profile-bio'],
-            email: profileData['profile-email'],
             phone: profileData['profile-phone'],
             location: profileData['profile-location'],
             website: profileData['profile-website'],
@@ -1764,25 +1793,31 @@ async function saveProfileDirect() {
         };
         
         console.log('📊 API data to send:', apiData);
+        console.log('🔍 Using NEW minimal profile update system');
         
-        const response = await fetch(`${API_BASE}/portfolio/profile`, {
-            method: 'PUT',
+        // Use the new minimal profile update system
+        const response = await fetch(`${API_BASE}/portfolio/profile-minimal`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include', // Include cookies for session
             body: JSON.stringify(apiData)
         });
         
-        console.log('📡 Profile update response (direct):', response);
+        console.log('📡 Profile update response (MINIMAL):', response);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
         
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('❌ Profile update failed (direct):', errorData);
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Profile update failed (MINIMAL):', errorData);
             throw new Error(errorData.error || 'Failed to update profile');
         }
         
-        const result = await response.json();
-        console.log('✅ Profile update result (direct):', result);
+        const result = JSON.parse(responseText);
+        console.log('✅ Profile update result (MINIMAL):', result);
         
         // Hide form and reload profile
         const formContainer = document.getElementById('profile-form-container');
@@ -1795,9 +1830,446 @@ async function saveProfileDirect() {
         }
         
     } catch (error) {
-        console.error('❌ Error updating profile (direct):', error);
+        console.error('❌ Error updating profile (MINIMAL):', error);
         if (window.notifications) {
             window.notifications.error('Failed to update profile: ' + error.message);
+        }
+    }
+}
+
+// Test function to verify profile API works with hardcoded data
+async function testProfileAPI() {
+    console.log('🧪 Testing profile API with hardcoded data...');
+    
+    const testData = {
+        name: 'Test User',
+        title: 'Test Developer',
+        bio: 'Test bio for profile',
+        email: 'test@example.com',
+        phone: '+1234567890',
+        location: 'Test City',
+        website: 'https://test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Test API response:', response);
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', response.headers);
+        
+        // Clone response to avoid stream conflicts
+        const responseClone = response.clone();
+        let errorData;
+        let responseText;
+        
+        try {
+            errorData = await responseClone.json();
+            responseText = JSON.stringify(errorData);
+        } catch (e) {
+            responseText = await responseClone.text();
+            try {
+                errorData = JSON.parse(responseText);
+            } catch (e2) {
+                errorData = { error: responseText };
+            }
+        }
+        
+        if (!response.ok) {
+            console.error('❌ Test API failed:', errorData);
+            console.error('❌ Response text:', responseText);
+            throw new Error(errorData.error || 'Test API failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Test API result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Test API call successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing profile API:', error);
+        if (window.notifications) {
+            window.notifications.error('Test API failed: ' + error.message);
+        }
+    }
+}
+
+// Session debug function to check session state
+async function debugSession() {
+    console.log('🔍 DEBUGGING SESSION STATE...');
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/session-debug`, {
+            credentials: 'include' // Include cookies for session
+        });
+        console.log('📡 Session debug response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Session debug failed:', errorData);
+            
+            if (window.notifications) {
+                window.notifications.error('Session debug failed: ' + errorData.error);
+            }
+            
+            return {
+                success: false,
+                error: errorData.error
+            };
+        }
+        
+        const result = await response.json();
+        console.log('✅ Session debug result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Session debug completed - check console for details');
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Error debugging session:', error);
+        if (window.notifications) {
+            window.notifications.error('Session debug error: ' + error.message);
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// Test function to bypass authentication and test database directly
+async function testProfileBypass() {
+    console.log('🧪 TESTING PROFILE UPDATE - AUTHENTICATION BYPASSED');
+    
+    const testData = {
+        name: 'Bypass Test User',
+        title: 'Bypass Test Title',
+        bio: 'Bypass Test Bio',
+        phone: '+1234567890',
+        location: 'Bypass Test Location',
+        website: 'https://bypass-test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending bypass test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-test-bypass`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Bypass test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Bypass test failed:', errorData);
+            throw new Error(errorData.error || 'Bypass test failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Bypass test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Bypass test successful!');
+        }
+        
+        // Reload profile to see changes
+        await loadProfile();
+        
+    } catch (error) {
+        console.error('❌ Error in bypass test:', error);
+        if (window.notifications) {
+            window.notifications.error('Bypass test failed: ' + error.message);
+        }
+    }
+}
+
+// Session check function to debug authentication issues
+async function checkSession() {
+    console.log('🔍 Checking session status...');
+    
+    try {
+        // Test session by checking portfolio profile endpoint
+        const response = await fetch(`${API_BASE}/portfolio/profile`);
+        console.log('📡 Session check response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Session check failed:', errorData);
+            
+            if (window.notifications) {
+                window.notifications.error('Session check failed: ' + errorData.error);
+            }
+            
+            return {
+                success: false,
+                error: errorData.error,
+                status: response.status
+            };
+        }
+        
+        const profile = await response.json();
+        console.log('✅ Session check successful:', profile);
+        
+        if (window.notifications) {
+            window.notifications.success('Session is valid and authenticated!');
+        }
+        
+        return {
+            success: true,
+            profile: profile,
+            status: response.status
+        };
+        
+    } catch (error) {
+        console.error('❌ Error checking session:', error);
+        if (window.notifications) {
+            window.notifications.error('Session check error: ' + error.message);
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// MINIMAL PROFILE UPDATE TEST - COMPLETELY NEW APPROACH
+async function testMinimalProfileUpdate() {
+    console.log('🚀 TESTING MINIMAL PROFILE UPDATE');
+    
+    const minimalData = {
+        name: 'Minimal Test User',
+        title: 'Test Title',
+        bio: 'Test Bio',
+        phone: '+1234567890',
+        location: 'Test Location',
+        website: 'https://test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending minimal data:', minimalData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-minimal`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(minimalData)
+        });
+        
+        console.log('📡 Minimal update response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Minimal update failed:', errorData);
+            throw new Error(errorData.error || 'Minimal update failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Minimal update result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Minimal profile update successful!');
+        }
+        
+        // Reload profile to see changes
+        await loadProfile();
+        
+    } catch (error) {
+        console.error('❌ Error in minimal profile update:', error);
+        if (window.notifications) {
+            window.notifications.error('Minimal profile update failed: ' + error.message);
+        }
+    }
+}
+
+// Test function to check server health
+async function testServerHealth() {
+    console.log('🧪 Testing server health...');
+    
+    try {
+        // Test both possible URLs
+        const urls = [
+            window.location.origin + '/health',
+            'https://course-management-system.up.railway.app/health'
+        ];
+        
+        for (const url of urls) {
+            console.log('🔍 Testing URL:', url);
+            try {
+                const response = await fetch(url);
+                console.log('📡 Health check response for', url, ':', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Health check successful for', url, ':', result);
+                    if (window.notifications) {
+                        window.notifications.success(`Server health check successful for: ${url}`);
+                    }
+                } else {
+                    console.error('❌ Health check failed for', url, ':', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Health check error for', url, ':', error.message);
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing server health:', error);
+        if (window.notifications) {
+            window.notifications.error('Server health test failed: ' + error.message);
+        }
+    }
+}
+
+// Test function to check API without database
+async function testNoDatabase() {
+    console.log('🧪 Testing API without database...');
+    
+    const testData = {
+        name: 'Test User No DB',
+        test: true
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/test-no-db`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 No database test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('❌ No database test failed:', response.status);
+            throw new Error('No database test failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ No database test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('No database test successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing no database API:', error);
+        if (window.notifications) {
+            window.notifications.error('No database test failed: ' + error.message);
+        }
+    }
+}
+
+// Basic test function to check if routing works
+async function testBasicRouting() {
+    console.log('🧪 Testing basic routing...');
+    
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/test-basic`);
+        console.log('📡 Basic test response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('❌ Basic test failed:', response.status);
+            throw new Error('Basic test failed');
+        }
+        
+        const result = await response.json();
+        console.log('✅ Basic test result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Basic routing test successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing basic routing:', error);
+        if (window.notifications) {
+            window.notifications.error('Basic routing test failed: ' + error.message);
+        }
+    }
+}
+
+// Simple test function to use profile-simple endpoint
+async function testProfileSimple() {
+    console.log('🧪 Testing simple profile update...');
+    
+    const testData = {
+        name: 'Simple Test User',
+        title: 'Simple Test Developer',
+        bio: 'Simple test bio for profile',
+        phone: '+1234567890',
+        location: 'Simple Test City',
+        website: 'https://simple-test.com',
+        category: 'professional'
+    };
+    
+    try {
+        console.log('📊 Sending simple test data:', testData);
+        
+        const response = await fetch(`${API_BASE}/portfolio/profile-simple`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Simple test API response:', response);
+        console.log('📡 Response status:', response.status);
+        
+        const responseText = await response.text();
+        
+        if (!response.ok) {
+            const errorData = JSON.parse(responseText);
+            console.error('❌ Simple test API failed:', errorData);
+            console.error('❌ Response text:', responseText);
+            throw new Error(errorData.error || 'Simple test API failed');
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('✅ Simple test API result:', result);
+        
+        if (window.notifications) {
+            window.notifications.success('Simple test API call successful!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error testing simple profile API:', error);
+        if (window.notifications) {
+            window.notifications.error('Simple test API failed: ' + error.message);
         }
     }
 }
@@ -2318,7 +2790,9 @@ async function createBlogPost(e) {
         console.log('🔍 API response ok:', response.ok);
         
         if (!response.ok) {
-            const errorText = await response.text();
+            // Clone response to avoid stream conflicts
+            const responseClone = response.clone();
+            const errorText = await responseClone.text();
             console.error('❌ API Error Response:', errorText);
             throw new Error(`Failed to publish blog post: ${response.status} ${errorText}`);
         }
@@ -3949,6 +4423,15 @@ window.testProfileSave = testProfileSave;
 window.addTestExperience = addTestExperience;
 window.addTestProject = addTestProject;
 window.saveProfileDirect = saveProfileDirect;
+window.testProfileAPI = testProfileAPI;
+window.testProfileSimple = testProfileSimple;
+window.testBasicRouting = testBasicRouting;
+window.testNoDatabase = testNoDatabase;
+window.testServerHealth = testServerHealth;
+window.testMinimalProfileUpdate = testMinimalProfileUpdate;
+window.checkSession = checkSession;
+window.testProfileBypass = testProfileBypass;
+window.debugSession = debugSession;
 window.uploadProfilePicture = uploadProfilePicture;
 window.showCVBuilder = showCVBuilder;
 window.hideCVBuilder = hideCVBuilder;

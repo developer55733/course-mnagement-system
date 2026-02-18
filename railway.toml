@@ -1,5 +1,4 @@
 # Railway Configuration for Course Management System
-# This configuration will automatically set up MySQL database with news and ads tables
 
 [build]
 builder = "NIXPACKS"
@@ -11,19 +10,9 @@ restartPolicyMaxRetries = 10
 
 [env]
 NODE_ENV = "production"
-PORT = "4000"
+PORT = "8080"
 
-# Database Configuration
-[variables]
-# These will be automatically set by Railway
-DATABASE_URL = "${{RAILWAY_PRIVATE_DOMAIN}}"
-MYSQL_HOST = "${{RAILWAY_PRIVATE_DOMAIN}}"
-MYSQL_PORT = "3306"
-MYSQL_DATABASE = "railway"
-MYSQL_USERNAME = "${{RAILWAY_ENVIRONMENT}}"
-MYSQL_PASSWORD = "${{RAILWAY_ENVIRONMENT}}"
-
-# Service Configuration
+# Health check configuration
 [services]
 [services.web]
 sourceDir = "/"
@@ -35,8 +24,3 @@ healthcheckInterval = 15
 [plugins]
 [plugins.mysql]
 version = "8.0"
-
-# Automatic Database Setup
-[scripts]
-setup = "chmod +x railway-deploy.sh && ./railway-deploy.sh"
-migrate = "mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USERNAME -p$MYSQL_PASSWORD $MYSQL_DATABASE < railway-database-setup.sql"

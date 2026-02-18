@@ -16,6 +16,8 @@ const cors = (req, res, next) => {
   const allowedOrigins = [
     'https://course-management-system.up.railway.app',
     'https://course-management-system-production.up.railway.app',
+    'https://cict.up.railway.app', // Add this domain
+    'https://course-mnagement-system.up.railway.app', // Add this domain
     'http://localhost:3000',
     'http://localhost:8080'
   ];
