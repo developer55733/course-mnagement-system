@@ -5170,17 +5170,6 @@
             }
          });
          
-         // Remove elements with position fixed and specific styling
-         const fixedElements = document.querySelectorAll('[style*="position: fixed"]');
-         fixedElements.forEach(element => {
-            const style = window.getComputedStyle(element);
-            if (style.position === 'fixed' && 
-                (style.top === '20px' || style.top === '20px') && 
-                (style.right === '20px' || style.right === '20px')) {
-               element.remove();
-            }
-         });
-         
          // Remove elements with z-index 10000
          const highZElements = document.querySelectorAll('[style*="z-index: 10000"]');
          highZElements.forEach(element => {
@@ -5193,13 +5182,6 @@
       
       // Run periodically to catch dynamically added buttons
       setInterval(removeFloatingButtons, 1000);
-      
-      // Also run when DOM changes
-      const observer = new MutationObserver(removeFloatingButtons);
-      observer.observe(document.body, {
-         childList: true,
-         subtree: true
-      });
    </script>
 
 </body>
