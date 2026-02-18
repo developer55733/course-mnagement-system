@@ -21,8 +21,12 @@ jobs:
         
     - name: Install dependencies
       run: |
-        echo "Installing dependencies with legacy-peer-deps..."
-        npm install --no-optional --legacy-peer-deps --verbose
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo "Cleaning npm cache..."
+        npm cache clean --force
+        echo "Installing dependencies..."
+        npm install --force
         echo "Dependencies installed successfully"
       
     - name: Run tests (if available)
