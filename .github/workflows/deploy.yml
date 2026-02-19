@@ -30,7 +30,7 @@ jobs:
       run: npm run build || echo "No build script - skipping"
       
     - name: Deploy to Railway
-      uses: railway-app/railway-action@v1
+      uses: railway/railway-action@v1
       with:
         api-token: ${{ secrets.RAILWAY_TOKEN }}
         service: ${{ secrets.RAILWAY_SERVICE_ID }}
